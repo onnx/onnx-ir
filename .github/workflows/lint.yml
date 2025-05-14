@@ -1,0 +1,87 @@
+# Copyright (c) ONNX Project Contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: Lint
+
+on:
+  push:
+    branches:
+      - main
+      - 'gh/**/base' # ghstack base branches
+  pull_request:
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}-${{ github.event_name == 'workflow_dispatch' }}
+  cancel-in-progress: true
+
+jobs:
+  optional-lint:
+    name: Optional Lint
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: misspell # Check spelling
+        uses: reviewdog/action-misspell@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          locale: "US"
+          reporter: github-pr-check
+          level: info
+          filter_mode: diff_context
+      - name: shellcheck # Static check shell scripts
+        uses: reviewdog/action-shellcheck@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-check
+          level: info
+          filter_mode: diff_context
+
+  enforce-style:
+    name: Enforce style
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install onnx-ir
+        run: |
+          # Install dependencies
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade setuptools
+          python -m pip install --upgrade lintrunner lintrunner-adapters
+          # Install packages
+          python -m pip install -e .
+          lintrunner init
+      - name: Run lintrunner on all files
+        run: |
+          set +e
+          if ! lintrunner --force-color --all-files --tee-json=lint.json -v; then
+              echo ""
+              echo -e "\e[1m\e[36mYou can reproduce these results locally by using \`lintrunner\`.\e[0m"
+              echo -e "\e[1m\e[36mSee https://github.com/microsoft/onnxscript#coding-style for setup instructions.\e[0m"
+              exit 1
+          fi
+      - name: Produce SARIF
+        if: always()
+        run: |
+          python -m lintrunner_adapters to-sarif lint.json lintrunner.sarif
+      - name: Upload SARIF file
+        # Use always() to always upload SARIF even if lintrunner returns with error code
+        # To toggle linter comments in the files page, press `i` on the keyboard
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          # Path to SARIF file relative to the root of the repository
+          sarif_file: lintrunner.sarif
+          category: lintrunner
+          checkout_path: ${{ github.workspace }}
