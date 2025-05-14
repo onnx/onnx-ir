@@ -4,7 +4,13 @@
 
 name: REUSE Compliance Check
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+      - 'gh/**/base' # ghstack base branches
+  pull_request:
+  merge_group:
 
 permissions:  # set top-level default permissions as security best practice
   contents: read
