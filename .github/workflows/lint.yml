@@ -57,6 +57,7 @@ jobs:
           # Install dependencies
           python -m pip install --upgrade pip
           python -m pip install --upgrade setuptools
+          python -m pip install --upgrade lintrunner
           # Install packages
           python -m pip install -e .
           lintrunner init
