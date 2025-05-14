@@ -8,19 +8,14 @@ SPDX-PackageSupplier = "onnx-technical-discuss@lists.lfaidata.foundation"
 SPDX-PackageDownloadLocation = "onnx.ai"
 
 [[annotations]]
-path = "codecov.yml"
-precedence = "aggregate"
-SPDX-FileCopyrightText = "Copyright (c) ONNX Project Contributors"
-SPDX-License-Identifier = "Apache-2.0"
-
-[[annotations]]
-path = [".github/**/**.md", ".github/pull_request_template.md"]
-precedence = "aggregate"
-SPDX-FileCopyrightText = "Copyright (c) ONNX Project Contributors"
-SPDX-License-Identifier = "Apache-2.0"
-
-[[annotations]]
-path = ".github/**/**.yml"
+path = [
+    "**/*.yml",
+    "**/*.md",
+    "**/*.toml",
+    "requirements/**/*.txt",
+    ".editorconfig",
+    ".gitignore"
+]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Copyright (c) ONNX Project Contributors"
 SPDX-License-Identifier = "Apache-2.0"
