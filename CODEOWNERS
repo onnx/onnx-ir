@@ -1,1 +1,3 @@
-* @onnx/sig-archinfra-approvers titaiwangms
+# onnx-ir is owned by archinfra SIG.
+# This file contains additional project specific contributors
+* @onnx/sig-archinfra-approvers, titaiwangms
