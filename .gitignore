@@ -171,3 +171,8 @@ cython_debug/
 .pypirc
 
 .DS_Store
+
+# Generated files
+*.onnx
+!testdata/**/*.onnx
+docs/**/generated/*
