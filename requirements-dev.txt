@@ -17,6 +17,7 @@ chardet
 # Testing
 expecttest==0.1.6
 hypothesis
+packaging
 parameterized
 pytest-cov
 pytest-randomly
