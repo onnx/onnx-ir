@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Compatible adapters implementing the TensorProtocol interface for various framework tensor types.
 
 This module provides public classes that implement the :class:`onnxscript.ir.TensorProtocol`

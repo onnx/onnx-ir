@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Convenience methods for constructing and manipulating the IR.
 
 This is an internal only module. We should choose to expose some of the methods

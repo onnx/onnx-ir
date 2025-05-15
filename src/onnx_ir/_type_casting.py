@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Numpy utilities for non-native type operation."""
 # TODO(justinchuby): Upstream the logic to onnx
 
