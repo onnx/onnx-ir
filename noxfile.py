@@ -48,6 +48,7 @@ def test(session):
     session.install(
         *COMMON_TEST_DEPENDENCIES,
         ONNX,
+        PYTORCH,
     )
     session.install(".", "--no-deps")
     session.run("pip", "list")
@@ -60,6 +61,21 @@ def test_onnx_weekly(session):
     """Test with ONNX weekly (preview) build."""
     session.install(*COMMON_TEST_DEPENDENCIES)
     session.install("-r", "requirements/ci/requirements-onnx-weekly.txt")
+    session.install(".", "--no-deps")
+    session.run("pip", "list")
+    session.run("pytest", "src", "--doctest-modules", *session.posargs)
+    session.run("pytest", "tests", *session.posargs)
+
+
+@nox.session(tags=["test-torch-nightly"])
+def test_torch_nightly(session):
+    """Test with PyTorch nightly (preview) build."""
+    session.install(
+        *COMMON_TEST_DEPENDENCIES,
+        ONNX_RUNTIME,
+    )
+    session.install("-r", "requirements/ci/requirements-onnx-weekly.txt")
+    session.install("-r", "requirements/ci/requirements-pytorch-nightly.txt")
     session.install(".", "--no-deps")
     session.run("pip", "list")
     session.run("pytest", "src", "--doctest-modules", *session.posargs)
