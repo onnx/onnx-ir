@@ -5,7 +5,7 @@
 import unittest
 
 import onnx_ir as ir
-from onnxscript.ir.passes.common import topological_sort
+from onnx_ir.passes.common import topological_sort
 
 
 class TopologicalSortPassTest(unittest.TestCase):

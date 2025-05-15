@@ -12,7 +12,7 @@ import onnx
 
 from onnx_ir import _core, serde
 from onnx_ir import external_data as _external_data
-from onnxscript.ir._polyfill import zip
+from onnx_ir._polyfill import zip
 
 
 def load(path: str | os.PathLike, format: str | None = None) -> _core.Model:

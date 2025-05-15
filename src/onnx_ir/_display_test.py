@@ -7,7 +7,7 @@ import unittest
 
 import numpy as np
 
-import onnxscript.ir as ir
+import onnx_ir as ir
 
 
 class DisplayTest(unittest.TestCase):

@@ -1,6 +1,6 @@
 # Copyright (c) ONNX Project Contributors
 # SPDX-License-Identifier: Apache-2.0
-"""Implementation of an inliner for onnxscript.ir"""
+"""Implementation of an inliner for onnx_ir"""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ __all__ = ["InlinePass", "InlinePassResult"]
 from collections import defaultdict
 from typing import Iterable, List, Sequence, Tuple
 
-import onnxscript.ir.convenience as _ir_convenience
+import onnx_ir.convenience as _ir_convenience
 import onnx_ir as ir
 
 # A replacement for a node specifies a list of nodes that replaces the original node,

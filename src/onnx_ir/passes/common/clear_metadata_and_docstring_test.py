@@ -7,7 +7,7 @@ import unittest
 import numpy as np
 
 import onnx_ir as ir
-from onnxscript.ir.passes.common import clear_metadata_and_docstring
+from onnx_ir.passes.common import clear_metadata_and_docstring
 
 
 class TestClearMetadataAndDocStringPass(unittest.TestCase):

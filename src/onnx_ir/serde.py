@@ -77,7 +77,7 @@ if typing.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _PLEASE_CONTRIBUTE = (
-    "Please contribute by creating a PR at https://github.com/microsoft/onnxscript."
+    "Please contribute by creating a PR at https://github.com/onnx/onnx-ir."
 )
 _FUNCTION_VALUE_INFO_SUPPORTED_VERSION = (
     10  # ONNX IR version where value info in functions was introduced
@@ -321,7 +321,7 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
         specification.
 
         External tensors are not supported by this class. Use
-        :class:`onnxscript.ir.ExternalTensor` instead.
+        :class:`onnx_ir.ExternalTensor` instead.
 
         Raises:
             ValueError: If the data type is UNDEFINED.

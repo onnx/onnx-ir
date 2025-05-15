@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Compatible adapters implementing the TensorProtocol interface for various framework tensor types.
 
-This module provides public classes that implement the :class:`onnxscript.ir.TensorProtocol`
+This module provides public classes that implement the :class:`onnx_ir.TensorProtocol`
 interface for various tensor types from popular deep learning frameworks.
 
 You can use these classes to create tensors and use them in the IR graph like any other tensor.

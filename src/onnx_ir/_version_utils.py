@@ -4,9 +4,6 @@
 
 from __future__ import annotations
 
-import warnings
-from typing import Callable, Sequence
-
 import packaging.version
 
 
@@ -92,27 +89,3 @@ def has_transformers():
         return True  # noqa
     except ImportError:
         return False
-
-
-def ignore_warnings(warns: Warning | Sequence[Warning]) -> Callable:  # type: ignore[arg-type]
-    """Catches warnings.
-
-    Args:
-        warns: warnings to ignore
-
-    Returns:
-        decorated function
-    """
-
-    def wrapper(fct):
-        if warns is None:
-            raise AssertionError(f"warns cannot be None for '{fct}'.")
-
-        def call_f(self):
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", warns)  # type: ignore[arg-type]
-                return fct(self)
-
-        return call_f
-
-    return wrapper

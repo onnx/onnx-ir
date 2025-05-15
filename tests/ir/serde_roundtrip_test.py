@@ -10,7 +10,7 @@ import onnx
 import onnx.backend.test
 import parameterized
 
-import onnxscript.testing
+import onnx_ir.testing
 import onnx_ir as ir
 
 model_folder_path = pathlib.Path(__file__).resolve().parent.parent.parent / "testdata"
@@ -38,7 +38,7 @@ class SerdeTest(unittest.TestCase):
         ir_model = ir.serde.deserialize_model(model)
         serialized = ir.serde.serialize_model(ir_model)
 
-        onnxscript.testing.assert_onnx_proto_equal(serialized, model)
+        onnx_ir.testing.assert_onnx_proto_equal(serialized, model)
         onnx.checker.check_model(serialized)
 
 

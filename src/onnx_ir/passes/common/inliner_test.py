@@ -10,7 +10,7 @@ from typing import Callable, Sequence
 import onnx
 
 import onnx_ir as ir
-from onnxscript.ir.passes.common import inliner
+from onnx_ir.passes.common import inliner
 
 
 def _name_checker(renameable: Sequence[str] | None) -> Callable[[str, str], bool]:

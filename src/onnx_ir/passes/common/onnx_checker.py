@@ -13,7 +13,7 @@ from typing import Literal
 import onnx
 
 import onnx_ir as ir
-from onnxscript.ir.passes.common import _c_api_utils
+from onnx_ir.passes.common import _c_api_utils
 
 
 class CheckerPass(ir.passes.PassBase):

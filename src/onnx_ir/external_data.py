@@ -19,7 +19,7 @@ from typing import Iterator, Sequence
 
 from onnx_ir import _core, _enums, _protocols
 from onnx_ir import traversal as _traversal
-from onnxscript.ir._polyfill import zip
+from onnx_ir._polyfill import zip
 
 # Note: If needed in future, add these as parameters to the function calls
 # align_offset: Offset will always be page aligned and alloction granularity aligned for mmap support. This is done by padding previous tensor data with zeros keeping same length. Tensor data will be aligned if > align_threshold

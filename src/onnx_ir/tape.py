@@ -10,6 +10,6 @@ __all__ = [
     "Tape",
 ]
 
-from onnxscript.ir._tape import Tape
+from onnx_ir._tape import Tape
 
 Tape.__module__ = __name__

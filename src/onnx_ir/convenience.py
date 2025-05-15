@@ -12,7 +12,7 @@ __all__ = [
     "create_value_mapping",
 ]
 
-from onnxscript.ir._convenience import (
+from onnx_ir._convenience import (
     convert_attribute,
     convert_attributes,
     create_value_mapping,

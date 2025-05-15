@@ -8,7 +8,7 @@ import numpy as np
 import parameterized
 
 import onnx_ir as ir
-from onnxscript.ir.passes.common import constant_manipulation
+from onnx_ir.passes.common import constant_manipulation
 
 
 class TestLiftConstantsToInitializersPass(unittest.TestCase):

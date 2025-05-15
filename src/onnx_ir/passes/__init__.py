@@ -15,7 +15,7 @@ __all__ = [
     "PassError",
 ]
 
-from onnxscript.ir.passes._pass_infra import (
+from onnx_ir.passes._pass_infra import (
     FunctionalPass,
     InPlacePass,
     InvariantError,

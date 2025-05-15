@@ -6,7 +6,7 @@ from __future__ import annotations
 import unittest
 
 import onnx_ir as ir
-from onnxscript.ir.passes import _pass_infra
+from onnx_ir.passes import _pass_infra
 
 
 class PassBaseTest(unittest.TestCase):

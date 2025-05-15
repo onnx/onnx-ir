@@ -84,8 +84,8 @@ __all__ = [
 ]
 
 from onnx_ir import convenience, external_data, passes, serde, tape, traversal
-from onnxscript.ir._convenience._constructors import node, tensor
-from onnxscript.ir._core import (
+from onnx_ir._convenience._constructors import node, tensor
+from onnx_ir._core import (
     Attr,
     AttrFloat32,
     AttrFloat32s,
@@ -121,12 +121,12 @@ from onnxscript.ir._core import (
     TypeAndShape,
     Value,
 )
-from onnxscript.ir._enums import (
+from onnx_ir._enums import (
     AttributeType,
     DataType,
 )
-from onnxscript.ir._io import load, save
-from onnxscript.ir._protocols import (
+from onnx_ir._io import load, save
+from onnx_ir._protocols import (
     ArrayCompatible,
     AttributeProtocol,
     DLPackCompatible,
@@ -145,7 +145,7 @@ from onnxscript.ir._protocols import (
     TypeProtocol,
     ValueProtocol,
 )
-from onnxscript.ir.serde import TensorProtoTensor, from_onnx_text, from_proto, to_proto
+from onnx_ir.serde import TensorProtoTensor, from_onnx_text, from_proto, to_proto
 
 
 def __set_module() -> None:

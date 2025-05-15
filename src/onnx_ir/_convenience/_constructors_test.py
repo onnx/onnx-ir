@@ -7,7 +7,7 @@ import unittest
 import numpy as np
 
 import onnx_ir as ir
-from onnxscript.ir._convenience import _constructors
+from onnx_ir._convenience import _constructors
 
 
 class ConstructorsTest(unittest.TestCase):

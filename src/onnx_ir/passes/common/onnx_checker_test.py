@@ -5,7 +5,7 @@ from __future__ import annotations
 import unittest
 
 import onnx_ir as ir
-from onnxscript.ir.passes.common import onnx_checker
+from onnx_ir.passes.common import onnx_checker
 
 
 class TestCheckerPass(unittest.TestCase):
