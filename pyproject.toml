@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "onnx-ir"
-version = "0.0.1"
+dynamic = ["version"]
 authors = [
     {name = "ONNX Contributors", email = "onnx-technical-discuss@lists.lfaidata.foundation"},
 ]
@@ -20,7 +20,11 @@ dependencies = ["numpy", "onnx>=1.16", "typing_extensions>=4.10", "ml_dtypes"]
 
 [project.urls]
 Homepage = "https://onnx.ai/onnx-ir"
+Issues = "https://github.com/onnx/onnx-ir/issues"
 Repository = "https://github.com/onnx/onnx-ir"
+
+[tool.setuptools.dynamic]
+version = {attr = "onnx_ir.__version__"}
 
 [tool.pytest.ini_options]
 addopts = "--tb=short --color=yes"

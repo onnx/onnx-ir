@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
 import unittest
@@ -7,8 +7,8 @@ import unittest
 import numpy as np
 import parameterized
 
-from onnxscript import ir
-from onnxscript.ir.passes.common import constant_manipulation
+import onnx_ir as ir
+from onnx_ir.passes.common import constant_manipulation
 
 
 class TestLiftConstantsToInitializersPass(unittest.TestCase):

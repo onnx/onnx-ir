@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """External data related utilities."""
 
 from __future__ import annotations
@@ -17,9 +17,9 @@ import logging
 import os
 from typing import Iterator, Sequence
 
-from onnxscript.ir import _core, _enums, _protocols
-from onnxscript.ir import traversal as _traversal
-from onnxscript.ir._polyfill import zip
+from onnx_ir import _core, _enums, _protocols
+from onnx_ir import traversal as _traversal
+from onnx_ir._polyfill import zip
 
 # Note: If needed in future, add these as parameters to the function calls
 # align_offset: Offset will always be page aligned and alloction granularity aligned for mmap support. This is done by padding previous tensor data with zeros keeping same length. Tensor data will be aligned if > align_threshold
@@ -35,8 +35,7 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class _ExternalDataInfo:
-    """
-    A class that stores information about a tensor that is to be stored as external data.
+    """A class that stores information about a tensor that is to be stored as external data.
 
     Attributes:
         name: The name of the tensor that is to be stored as external data.

@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Pass for topologically sorting the graphs."""
 
 from __future__ import annotations
@@ -9,7 +9,7 @@ __all__ = [
 ]
 
 
-from onnxscript import ir
+import onnx_ir as ir
 
 
 class TopologicalSortPass(ir.passes.InPlacePass):

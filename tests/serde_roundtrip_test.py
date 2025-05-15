@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 # pylint: disable=import-outside-toplevel
 from __future__ import annotations
 
@@ -10,8 +10,8 @@ import onnx
 import onnx.backend.test
 import parameterized
 
-import onnxscript.testing
-from onnxscript import ir
+import onnx_ir as ir
+import onnx_ir.testing
 
 model_folder_path = pathlib.Path(__file__).resolve().parent.parent.parent / "testdata"
 onnx_backend_test_path = pathlib.Path(onnx.backend.test.__file__).parent / "data"
@@ -38,7 +38,7 @@ class SerdeTest(unittest.TestCase):
         ir_model = ir.serde.deserialize_model(model)
         serialized = ir.serde.serialize_model(ir_model)
 
-        onnxscript.testing.assert_onnx_proto_equal(serialized, model)
+        onnx_ir.testing.assert_onnx_proto_equal(serialized, model)
         onnx.checker.check_model(serialized)
 
 

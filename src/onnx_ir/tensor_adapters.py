@@ -1,15 +1,15 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Compatible adapters implementing the TensorProtocol interface for various framework tensor types.
 
-This module provides public classes that implement the :class:`onnxscript.ir.TensorProtocol`
+This module provides public classes that implement the :class:`onnx_ir.TensorProtocol`
 interface for various tensor types from popular deep learning frameworks.
 
 You can use these classes to create tensors and use them in the IR graph like any other tensor.
 
 Example::
     import torch
-    from onnxscript import ir
+    import onnx_ir as ir
 
     # Create a PyTorch tensor
     torch_tensor = torch.tensor([1, 2, 3])
@@ -37,8 +37,8 @@ from typing import TYPE_CHECKING, Any
 
 import numpy.typing as npt
 
-from onnxscript import ir
-from onnxscript.ir import _core
+import onnx_ir as ir
+from onnx_ir import _core
 
 if TYPE_CHECKING:
     import torch

@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Unit tests for the tensor_adapters module."""
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import numpy as np
 import parameterized
 import torch
 
-from onnxscript.ir import tensor_adapters
+from onnx_ir import tensor_adapters
 
 
 def skip_if_no(module_name: str):

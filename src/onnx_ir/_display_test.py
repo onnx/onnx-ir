@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Test display() methods in various classes."""
 
 import contextlib
@@ -7,7 +7,7 @@ import unittest
 
 import numpy as np
 
-import onnxscript.ir as ir
+import onnx_ir as ir
 
 
 class DisplayTest(unittest.TestCase):

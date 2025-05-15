@@ -1,13 +1,13 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Unit tests for the _constructors module."""
 
 import unittest
 
 import numpy as np
 
-from onnxscript import ir
-from onnxscript.ir._convenience import _constructors
+import onnx_ir as ir
+from onnx_ir._convenience import _constructors
 
 
 class ConstructorsTest(unittest.TestCase):

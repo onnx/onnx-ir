@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Passes for debugging purposes."""
 
 from __future__ import annotations
@@ -12,8 +12,8 @@ from typing import Literal
 
 import onnx
 
-from onnxscript import ir
-from onnxscript.ir.passes.common import _c_api_utils
+import onnx_ir as ir
+from onnx_ir.passes.common import _c_api_utils
 
 
 class CheckerPass(ir.passes.PassBase):

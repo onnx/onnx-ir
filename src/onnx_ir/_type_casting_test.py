@@ -1,11 +1,11 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 import unittest
 
 import numpy as np
 import parameterized
 
-from onnxscript.ir import _type_casting
+from onnx_ir import _type_casting
 
 
 class TypeCastingTest(unittest.TestCase):

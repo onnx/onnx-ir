@@ -1,7 +1,3 @@
-# Copyright (c) ONNX Project Contributors
-#
-# SPDX-License-Identifier: Apache-2.0
-
 name: Lint
 
 on:
@@ -57,7 +53,7 @@ jobs:
           # Install dependencies
           python -m pip install --upgrade pip
           python -m pip install --upgrade setuptools
-          python -m pip install --upgrade lintrunner lintrunner-adapters
+          python -m pip install -r requirements-dev.txt
           # Install packages
           python -m pip install -e .
           lintrunner init
@@ -67,7 +63,7 @@ jobs:
           if ! lintrunner --force-color --all-files --tee-json=lint.json -v; then
               echo ""
               echo -e "\e[1m\e[36mYou can reproduce these results locally by using \`lintrunner\`.\e[0m"
-              echo -e "\e[1m\e[36mSee https://github.com/microsoft/onnxscript#coding-style for setup instructions.\e[0m"
+              echo -e "\e[1m\e[36mSee https://github.com/onnx/onnx_ir/blob/main/CONTRIBUTING.md for setup instructions.\e[0m"
               exit 1
           fi
       - name: Produce SARIF

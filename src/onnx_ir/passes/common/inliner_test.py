@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Tests for the inliner pass."""
 
 from __future__ import annotations
@@ -9,8 +9,8 @@ from typing import Callable, Sequence
 
 import onnx
 
-from onnxscript import ir
-from onnxscript.ir.passes.common import inliner
+import onnx_ir as ir
+from onnx_ir.passes.common import inliner
 
 
 def _name_checker(renameable: Sequence[str] | None) -> Callable[[str, str], bool]:

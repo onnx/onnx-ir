@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Utilities for traversing the IR graph."""
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ from typing import Callable, Iterator, Reversible, Union
 
 from typing_extensions import Self
 
-from onnxscript.ir import _core, _enums
+from onnx_ir import _core, _enums
 
 GraphLike = Union[_core.Graph, _core.Function, _core.GraphView]
 

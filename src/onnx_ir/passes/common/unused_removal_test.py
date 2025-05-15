@@ -1,25 +1,18 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 import unittest
 
 import onnx
-import parameterized
 
-import onnxscript.optimizer
-from onnxscript import ir
+import onnx_ir as ir
+import onnx_ir.passes.common
 
 
-@parameterized.parameterized_class(("using_ir",), [(False,), (True,)])
 class RemoveUnusedTest(unittest.TestCase):
-    using_ir: bool
-
     def remove_unused_nodes(self, model: onnx.ModelProto):
-        if self.using_ir:
-            model_ir = ir.serde.deserialize_model(model)
-            onnxscript.optimizer.remove_unused_nodes(model_ir)
-            model = ir.serde.serialize_model(model_ir)
-            return model
-        onnxscript.optimizer.remove_unused_nodes(model)
+        model_ir = ir.serde.deserialize_model(model)
+        onnx_ir.passes.common.RemoveUnusedNodesPass()(model_ir)
+        model = ir.serde.serialize_model(model_ir)
         return model
 
     def test_remove_unused_nodes(self):

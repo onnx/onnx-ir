@@ -24,7 +24,6 @@ extensions = [
     "myst_nb",
     "sphinx_copybutton",
     "sphinx_exec_code",
-    "sphinx_gallery.gen_gallery",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.doctest",

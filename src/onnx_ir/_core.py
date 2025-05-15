@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """data structures for the intermediate representation."""
 
 # NOTES for developers:
@@ -44,8 +44,8 @@ import ml_dtypes
 import numpy as np
 from typing_extensions import TypeIs
 
-import onnxscript
-from onnxscript.ir import (
+import onnx_ir
+from onnx_ir import (
     _display,
     _enums,
     _graph_containers,
@@ -186,7 +186,7 @@ class TensorBase(abc.ABC, _protocols.TensorProtocol, _display.PrettyPrintable):
 
             status_manager = rich.status.Status(f"Computing tensor stats for {self!r}")
 
-        from onnxscript._thirdparty import (  # pylint: disable=import-outside-toplevel
+        from onnx_ir._thirdparty import (  # pylint: disable=import-outside-toplevel
             asciichartpy,
         )
 
@@ -582,7 +582,7 @@ class ExternalTensor(TensorBase, _protocols.TensorProtocol):  # pylint: disable=
         # NOTE: Do not verify the location by default. This is because the location field
         # in the tensor proto can be anything and we would like deserialization from
         # proto to IR to not fail.
-        if onnxscript.DEBUG:
+        if onnx_ir.DEBUG:
             if os.path.isabs(location):
                 raise ValueError(
                     "The location must be a relative path. Please specify base_dir as well."
@@ -852,7 +852,7 @@ class LazyTensor(TensorBase, _protocols.TensorProtocol):  # pylint: disable=too-
     Example::
 
         >>> import numpy as np
-        >>> from onnxscript import ir
+        >>> import onnx_ir as ir
         >>> weights = np.array([[1, 2, 3]])
         >>> def create_tensor():  # Delay applying transformations to the weights
         ...     weights_t = weights.transpose()
@@ -1039,7 +1039,7 @@ class Shape(_protocols.ShapeProtocol, _display.PrettyPrintable):
 
     Example::
 
-        >>> from onnxscript import ir
+        >>> import onnx_ir as ir
         >>> shape = ir.Shape(["B", None, 3])
         >>> shape.rank()
         3
@@ -1279,7 +1279,7 @@ def _short_tensor_str_for_node(x: Value) -> str:
 
 
 def _normalize_domain(domain: str) -> str:
-    """Normalize 'ai.onnx' to ''"""
+    """Normalize 'ai.onnx' to ''."""
     return "" if domain == "ai.onnx" else domain
 
 
@@ -1709,7 +1709,7 @@ class _TensorTypeBase(_protocols.TypeProtocol, _display.PrettyPrintable, Hashabl
 
     @property
     def elem_type(self) -> _enums.DataType:
-        """Return the element type of the tensor type"""
+        """Return the element type of the tensor type."""
         return self.dtype
 
     def __hash__(self) -> int:
@@ -2052,7 +2052,7 @@ class Value(_protocols.ValueProtocol, _display.PrettyPrintable):
         self,
         value: _protocols.TensorProtocol | None,
     ) -> None:
-        if onnxscript.DEBUG:
+        if onnx_ir.DEBUG:
             if value is not None and not isinstance(value, _protocols.TensorProtocol):
                 raise TypeError(
                     f"Expected value to be a TensorProtocol or None, got '{type(value)}'"
@@ -2099,7 +2099,6 @@ def Input(
 
     This is equivalent to calling ``Value(name=name, shape=shape, type=type, doc_string=doc_string)``.
     """
-
     # NOTE: The function name is capitalized to maintain API backward compatibility.
 
     return Value(name=name, shape=shape, type=type, doc_string=doc_string)
@@ -2469,7 +2468,7 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
             ValueError: If the graph contains a cycle, making topological sorting impossible.
         """
         # Obtain all nodes from the graph and its subgraphs for sorting
-        nodes = list(onnxscript.ir.traversal.RecursiveGraphIterator(self))
+        nodes = list(onnx_ir.traversal.RecursiveGraphIterator(self))
         # Store the sorted nodes of each subgraph
         sorted_nodes_by_graph: dict[Graph, list[Node]] = {
             graph: [] for graph in {node.graph for node in nodes if node.graph is not None}
@@ -2858,7 +2857,7 @@ Model(
         """Get all graphs and subgraphs in the model.
 
         This is a convenience method to traverse the model. Consider using
-        `onnxscript.ir.traversal.RecursiveGraphIterator` for more advanced
+        `onnx_ir.traversal.RecursiveGraphIterator` for more advanced
         traversals on nodes.
         """
         # NOTE(justinchuby): Given
@@ -2868,7 +2867,7 @@ Model(
         # I created this method as a core method instead of an iterator in
         # `traversal.py`.
         seen_graphs: set[Graph] = set()
-        for node in onnxscript.ir.traversal.RecursiveGraphIterator(self.graph):
+        for node in onnx_ir.traversal.RecursiveGraphIterator(self.graph):
             if node.graph is not None and node.graph not in seen_graphs:
                 seen_graphs.add(node.graph)
                 yield node.graph
@@ -3226,7 +3225,7 @@ class Attr(_protocols.AttributeProtocol, _display.PrettyPrintable):
         """Get the attribute value as a sequence of strings."""
         if not isinstance(self.value, Sequence):
             raise TypeError(f"Value of attribute '{self!r}' is not a Sequence.")
-        if onnxscript.DEBUG:
+        if onnx_ir.DEBUG:
             if not all(isinstance(x, str) for x in self.value):
                 raise TypeError(f"Value of attribute '{self!r}' is not a Sequence of strings.")
         # Create a copy of the list to prevent mutation
@@ -3236,7 +3235,7 @@ class Attr(_protocols.AttributeProtocol, _display.PrettyPrintable):
         """Get the attribute value as a sequence of tensors."""
         if not isinstance(self.value, Sequence):
             raise TypeError(f"Value of attribute '{self!r}' is not a Sequence.")
-        if onnxscript.DEBUG:
+        if onnx_ir.DEBUG:
             if not all(isinstance(x, _protocols.TensorProtocol) for x in self.value):
                 raise TypeError(f"Value of attribute '{self!r}' is not a Sequence of tensors.")
         # Create a copy of the list to prevent mutation
@@ -3246,7 +3245,7 @@ class Attr(_protocols.AttributeProtocol, _display.PrettyPrintable):
         """Get the attribute value as a sequence of graphs."""
         if not isinstance(self.value, Sequence):
             raise TypeError(f"Value of attribute '{self!r}' is not a Sequence.")
-        if onnxscript.DEBUG:
+        if onnx_ir.DEBUG:
             if not all(isinstance(x, Graph) for x in self.value):
                 raise TypeError(f"Value of attribute '{self!r}' is not a Sequence of graphs.")
         # Create a copy of the list to prevent mutation

@@ -1,10 +1,10 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Utilities for comparing IR graphs."""
 
 from __future__ import annotations
 
-from onnxscript.ir import _core
+from onnx_ir import _core
 
 # NOTE(justinchuby): We need to ensure a graph has valid inputs and outputs
 # NOTE(justinchuby): A graph may be specified with a set of inputs and outputs

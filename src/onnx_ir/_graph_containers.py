@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Tracked containers for graph."""
 
 # pylint: disable=protected-access
@@ -14,10 +14,10 @@ __all__ = [
 import collections
 from typing import TYPE_CHECKING, Iterable, SupportsIndex
 
-import onnxscript
+import onnx_ir
 
 if TYPE_CHECKING:
-    from onnxscript.ir import _core
+    from onnx_ir import _core
 
 
 class _GraphIO(collections.UserList["_core.Value"]):
@@ -132,7 +132,7 @@ class GraphInputs(_GraphIO):
 
     def _check_invariance(self) -> None:
         """Check the invariance of the graph."""
-        if not onnxscript.DEBUG:
+        if not onnx_ir.DEBUG:
             return
         for value in self.data:
             if value._graph is self._graph:
@@ -170,7 +170,7 @@ class GraphOutputs(_GraphIO):
 
     def _check_invariance(self) -> None:
         """Check the invariance of the graph."""
-        if not onnxscript.DEBUG:
+        if not onnx_ir.DEBUG:
             return
         for value in self.data:
             if value._graph is self._graph:

@@ -1,11 +1,11 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Unit tests for the TopologicalSortPass."""
 
 import unittest
 
-from onnxscript import ir
-from onnxscript.ir.passes.common import topological_sort
+import onnx_ir as ir
+from onnx_ir.passes.common import topological_sort
 
 
 class TopologicalSortPassTest(unittest.TestCase):

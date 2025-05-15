@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Unit tests for the _linked_list module."""
 
 from __future__ import annotations
@@ -8,7 +8,7 @@ import unittest
 
 import parameterized
 
-from onnxscript.ir import _linked_list
+from onnx_ir import _linked_list
 
 
 class _TestElement:

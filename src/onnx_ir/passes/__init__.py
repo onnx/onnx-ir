@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 
 __all__ = [
     "PassBase",
@@ -15,7 +15,7 @@ __all__ = [
     "PassError",
 ]
 
-from onnxscript.ir.passes._pass_infra import (
+from onnx_ir.passes._pass_infra import (
     FunctionalPass,
     InPlacePass,
     InvariantError,

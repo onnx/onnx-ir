@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 import os
 import sys
 import tempfile
@@ -10,8 +10,8 @@ import numpy as np
 import onnx
 import onnx.external_data_helper
 
-from onnxscript import ir
-from onnxscript.ir import external_data
+import onnx_ir as ir
+from onnx_ir import external_data
 
 
 class ExternalDataTest(unittest.TestCase):

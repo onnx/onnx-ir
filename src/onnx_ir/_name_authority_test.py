@@ -1,9 +1,9 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 import unittest
 
-from onnxscript import ir
-from onnxscript.ir import _name_authority
+import onnx_ir as ir
+from onnx_ir import _name_authority
 
 
 class NameAuthorityTest(unittest.TestCase):

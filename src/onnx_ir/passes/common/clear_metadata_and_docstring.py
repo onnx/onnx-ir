@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Clear all metadata and docstring from the model, graphs, nodes, and functions."""
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ __all__ = [
 
 import logging
 
-from onnxscript import ir
+import onnx_ir as ir
 
 logger = logging.getLogger(__name__)
 

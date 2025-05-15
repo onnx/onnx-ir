@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Serialize and deserialize the intermediate representation to/from ONNX protos."""
 
 # NOTES for developers:
@@ -68,7 +68,7 @@ import numpy as np
 import onnx
 import onnx.external_data_helper
 
-from onnxscript.ir import _core, _enums, _protocols, _type_casting
+from onnx_ir import _core, _enums, _protocols, _type_casting
 
 if typing.TYPE_CHECKING:
     import google.protobuf.internal.containers as proto_containers
@@ -76,9 +76,7 @@ if typing.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_PLEASE_CONTRIBUTE = (
-    "Please contribute by creating a PR at https://github.com/microsoft/onnxscript."
-)
+_PLEASE_CONTRIBUTE = "Please contribute by creating a PR at https://github.com/onnx/onnx-ir."
 _FUNCTION_VALUE_INFO_SUPPORTED_VERSION = (
     10  # ONNX IR version where value info in functions was introduced
 )
@@ -321,7 +319,7 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
         specification.
 
         External tensors are not supported by this class. Use
-        :class:`onnxscript.ir.ExternalTensor` instead.
+        :class:`onnx_ir.ExternalTensor` instead.
 
         Raises:
             ValueError: If the data type is UNDEFINED.

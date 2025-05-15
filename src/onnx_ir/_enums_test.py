@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 # pylint: disable=protected-access
 import unittest
 
@@ -9,7 +9,7 @@ import onnx
 import onnx._custom_element_types
 import parameterized
 
-from onnxscript.ir import _enums
+from onnx_ir import _enums
 
 
 class DataTypeTest(unittest.TestCase):

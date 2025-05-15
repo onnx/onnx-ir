@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Convenience methods for constructing and manipulating the IR."""
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ __all__ = [
     "create_value_mapping",
 ]
 
-from onnxscript.ir._convenience import (
+from onnx_ir._convenience import (
     convert_attribute,
     convert_attributes,
     create_value_mapping,

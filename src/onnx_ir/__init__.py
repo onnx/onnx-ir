@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """In-memory intermediate representation for ONNX graphs."""
 
 __all__ = [
@@ -81,11 +81,13 @@ __all__ = [
     # IO
     "load",
     "save",
+    # Flags
+    "DEBUG",
 ]
 
-from onnxscript.ir import convenience, external_data, passes, serde, tape, traversal
-from onnxscript.ir._convenience._constructors import node, tensor
-from onnxscript.ir._core import (
+from onnx_ir import convenience, external_data, passes, serde, tape, traversal
+from onnx_ir._convenience._constructors import node, tensor
+from onnx_ir._core import (
     Attr,
     AttrFloat32,
     AttrFloat32s,
@@ -121,12 +123,12 @@ from onnxscript.ir._core import (
     TypeAndShape,
     Value,
 )
-from onnxscript.ir._enums import (
+from onnx_ir._enums import (
     AttributeType,
     DataType,
 )
-from onnxscript.ir._io import load, save
-from onnxscript.ir._protocols import (
+from onnx_ir._io import load, save
+from onnx_ir._protocols import (
     ArrayCompatible,
     AttributeProtocol,
     DLPackCompatible,
@@ -145,14 +147,19 @@ from onnxscript.ir._protocols import (
     TypeProtocol,
     ValueProtocol,
 )
-from onnxscript.ir.serde import TensorProtoTensor, from_onnx_text, from_proto, to_proto
+from onnx_ir.serde import TensorProtoTensor, from_onnx_text, from_proto, to_proto
+
+__version__ = "0.1.0"
+DEBUG = False
 
 
 def __set_module() -> None:
     """Set the module of all functions in this module to this public module."""
     global_dict = globals()
     for name in __all__:
-        global_dict[name].__module__ = __name__
+        if hasattr(global_dict[name], "__module__"):
+            # Set the module of the function to this module
+            global_dict[name].__module__ = __name__
 
 
 __set_module()

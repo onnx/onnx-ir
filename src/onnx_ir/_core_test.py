@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
 import copy
@@ -15,8 +15,8 @@ import onnx.external_data_helper
 import parameterized
 import torch
 
-from onnxscript import ir
-from onnxscript.ir import _core
+import onnx_ir as ir
+from onnx_ir import _core
 
 
 class TensorTest(unittest.TestCase):

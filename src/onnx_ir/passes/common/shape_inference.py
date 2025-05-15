@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Shape inference pass using onnx.shape_inference."""
 
 from __future__ import annotations
@@ -13,8 +13,8 @@ import logging
 
 import onnx
 
-from onnxscript import ir
-from onnxscript.ir.passes.common import _c_api_utils
+import onnx_ir as ir
+from onnx_ir.passes.common import _c_api_utils
 
 logger = logging.getLogger(__name__)
 

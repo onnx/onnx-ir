@@ -1,5 +1,3 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
 # Adapted from
 # https://github.com/pytorch/pytorch/blob/b505e8647547f029d0f7df408ee5f2968f757f89/test/test_public_bindings.py#L523
 # Original code PyTorch license https://github.com/pytorch/pytorch/blob/main/LICENSE
@@ -14,13 +12,14 @@ import pkgutil
 import unittest
 from typing import Iterable
 
-import onnxscript.ir
+import onnx_ir
 
-IR_NAMESPACE = "onnxscript.ir"
+IR_NAMESPACE = "onnx_ir"
 
 
 def _find_all_importables(pkg):
     """Find all importables in the project.
+
     Return them in order.
     """
     return sorted(
@@ -34,6 +33,7 @@ def _find_all_importables(pkg):
 
 def _discover_path_importables(pkg_path: os.PathLike, pkg_name: str) -> Iterable[str]:
     """Yield all importables under a given path and package.
+
     This is like pkgutil.walk_packages, but does *not* skip over namespace
     packages. Taken from https://stackoverflow.com/questions/41203765/init-py-required-for-pkgutil-walk-packages-in-python3
     """
@@ -83,7 +83,7 @@ def _validate_module(modname: str, failure_list: list[str]) -> None:
         if not why_not_looks_public and not elem_modname_starts_with_mod:
             why_not_looks_public = (
                 f"because its `__module__` attribute (`{elem_module}`) is not within the "
-                f"onnxscript.ir library or does not start with the submodule where it is defined (`{modname}`)"
+                f"onnx_ir library or does not start with the submodule where it is defined (`{modname}`)"
             )
         # elem's name must NOT begin with an `_` and it's module name
         # SHOULD start with it's current module since it's a public API
@@ -152,11 +152,12 @@ def _validate_module(modname: str, failure_list: list[str]) -> None:
 
 
 class TestPublicApiNamespace(unittest.TestCase):
-    tested_modules = (IR_NAMESPACE, *(_find_all_importables(onnxscript.ir)))
+    tested_modules = (IR_NAMESPACE, *(_find_all_importables(onnx_ir)))
 
     def test_correct_module_names(self):
-        """
-        An API is considered public, if  its  `__module__` starts with `onnxscript.ir`
+        """Test module names are correct.
+
+        An API is considered public, if  its  `__module__` starts with `onnx_ir`
         and there is no name in `__module__` or the object itself that starts with "_".
         Each public package should either:
         - (preferred) Define `__all__` and all callables and classes in there must have their

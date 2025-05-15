@@ -1,10 +1,10 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
 import unittest
 
-from onnxscript import ir
+import onnx_ir as ir
 
 
 class TestTape(unittest.TestCase):

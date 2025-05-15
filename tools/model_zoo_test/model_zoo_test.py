@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Test IR roundtrip with ONNX model zoo.
 
 Usage:
@@ -22,8 +22,8 @@ import onnxruntime as ort
 import tqdm
 from onnx import hub
 
-import onnxscript.testing
-from onnxscript import ir
+import onnx_ir as ir
+import onnx_ir.testing
 
 
 def test_model(model_info: hub.ModelInfo) -> float:
@@ -43,7 +43,7 @@ def test_model(model_info: hub.ModelInfo) -> float:
     ir_model = ir.serde.deserialize_model(model)
     serialized = ir.serde.serialize_model(ir_model)
     end = time.time()
-    onnxscript.testing.assert_onnx_proto_equal(
+    onnx_ir.testing.assert_onnx_proto_equal(
         serialized, model, ignore_initializer_value_proto=True
     )
     onnx.checker.check_model(serialized)

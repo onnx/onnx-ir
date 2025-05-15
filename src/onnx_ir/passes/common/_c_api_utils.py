@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Utilities for interfacing with onnx C APIs."""
 
 from __future__ import annotations
@@ -7,7 +7,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Callable, TypeVar
 
-from onnxscript import ir
+import onnx_ir as ir
 
 if TYPE_CHECKING:
     import onnx
@@ -34,7 +34,6 @@ def call_onnx_api(func: Callable[[onnx.ModelProto], _R], model: ir.Model) -> _R:
     Returns:
         The resulting ModelProto that contains the result of the API call.
     """
-
     # Store the original initializer values so they can be restored
     initializer_values = tuple(model.graph.initializers.values())
     tensors = {v.name: v.const_value for v in initializer_values}

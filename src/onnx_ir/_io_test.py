@@ -1,5 +1,5 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Unit tests for the _io module."""
 
 import os
@@ -8,8 +8,8 @@ import unittest
 
 import numpy as np
 
-from onnxscript import ir
-from onnxscript.ir import _io
+import onnx_ir as ir
+from onnx_ir import _io
 
 
 def _create_initializer(tensor: ir.TensorProtocol) -> ir.Value:

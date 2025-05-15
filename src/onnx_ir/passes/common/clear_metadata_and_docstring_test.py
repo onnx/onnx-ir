@@ -1,13 +1,13 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
 import unittest
 
 import numpy as np
 
-from onnxscript import ir
-from onnxscript.ir.passes.common import clear_metadata_and_docstring
+import onnx_ir as ir
+from onnx_ir.passes.common import clear_metadata_and_docstring
 
 
 class TestClearMetadataAndDocStringPass(unittest.TestCase):

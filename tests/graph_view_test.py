@@ -1,11 +1,11 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 import pathlib
 import unittest
 
 import onnx
 
-from onnxscript import ir
+import onnx_ir as ir
 
 
 class GraphViewTest(unittest.TestCase):

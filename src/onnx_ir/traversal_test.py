@@ -1,13 +1,13 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
 import unittest
 
 import parameterized
 
-from onnxscript import ir
-from onnxscript.ir import traversal
+import onnx_ir as ir
+from onnx_ir import traversal
 
 
 class RecursiveGraphIteratorTest(unittest.TestCase):
