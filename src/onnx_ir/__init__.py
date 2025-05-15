@@ -149,7 +149,7 @@ from onnx_ir._protocols import (
 )
 from onnx_ir.serde import TensorProtoTensor, from_onnx_text, from_proto, to_proto
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 DEBUG = False
 
 

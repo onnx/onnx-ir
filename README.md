@@ -1,5 +1,8 @@
 # ONNX IR
 
+[![PyPI - Version](https://img.shields.io/pypi/v/onnx-ir.svg)](https://pypi.org/project/onnx-ir)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
 An in-memory IR that supports the full ONNX spec, designed for graph construction, analysis and transformation.
 
 ## Features ✨
@@ -14,9 +17,9 @@ An in-memory IR that supports the full ONNX spec, designed for graph constructio
 
 ## Code Organization 🗺️
 
-- [`_protocols.py`](_protocols.py): Interfaces defined for all entities in the IR.
-- [`_core.py`](_core.py): Implementation of the core entities in the IR, including `Model`, `Graph`, `Node`, `Value`, and others.
-- [`_enums.py`](_enums.py): Definition of the type enums that correspond to the `DataType` and `AttributeType` in `onnx.proto`.
-- [`_name_authority.py`](_name_authority.py): The authority for giving names to entities in the graph, used internally.
-- [`_linked_list.py`](_linked_list.py): The data structure as the node container in the graph that supports robust iteration and mutation. Internal.
-- [`_metadata.py`](_metadata.py): Metadata store for all entities in the IR.
+- [`_protocols.py`](src/onnx_ir/_protocols.py): Interfaces defined for all entities in the IR.
+- [`_core.py`](src/onnx_ir/_core.py): Implementation of the core entities in the IR, including `Model`, `Graph`, `Node`, `Value`, and others.
+- [`_enums.py`](src/onnx_ir/_enums.py): Definition of the type enums that correspond to the `DataType` and `AttributeType` in `onnx.proto`.
+- [`_name_authority.py`](src/onnx_ir/_name_authority.py): The authority for giving names to entities in the graph, used internally.
+- [`_linked_list.py`](src/onnx_ir/_linked_list.py): The data structure as the node container in the graph that supports robust iteration and mutation. Internal.
+- [`_metadata.py`](src/onnx_ir/_metadata.py): Metadata store for all entities in the IR.
