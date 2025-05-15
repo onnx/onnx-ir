@@ -20,5 +20,5 @@ An in-memory IR that supports the full ONNX spec, designed for graph constructio
 Overview <self>
 getting_started
 tensors
-ir_api/index
+api/index
 ```
