@@ -1,0 +1,33 @@
+setuptools>=70.0.0
+onnxruntime>=1.17.0
+rich>=13.7.1
+
+# Docs site
+furo
+jax[cpu]
+matplotlib
+myst-parser[linkify]
+sphinx-copybutton
+sphinx-exec-code
+sphinx-gallery
+sphinx>=6
+myst_nb
+chardet
+
+# Testing
+expecttest==0.1.6
+hypothesis
+parameterized
+pytest-cov
+pytest-randomly
+pytest-subtests
+pytest-xdist
+pytest!=7.1.0
+pyyaml
+torch>=2.3
+torchvision>=0.18.0
+transformers>=4.37.2
+
+# Lint
+lintrunner>=0.10.7
+lintrunner_adapters>=0.12.0
