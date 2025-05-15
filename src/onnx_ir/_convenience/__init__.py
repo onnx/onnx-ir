@@ -355,7 +355,6 @@ def replace_nodes_and_values(
         old_values: The values to replace.
         new_values: The values to replace with.
     """
-
     for old_value, new_value in zip(old_values, new_values):
         # Propagate relevant info from old value to new value
         # TODO(Rama): Perhaps this should be a separate utility function. Also, consider

@@ -9,8 +9,7 @@ import onnx
 import parameterized
 
 import onnx_ir as ir
-from onnx_ir import _version_utils
-from onnx_ir import serde
+from onnx_ir import _version_utils, serde
 
 
 class ConvenienceFunctionsTest(unittest.TestCase):

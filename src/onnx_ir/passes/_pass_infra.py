@@ -71,7 +71,6 @@ class PassResult:
 class PassBase(abc.ABC):
     """Base class for all passes.
 
-
     ``in_place`` and ``changes_input`` properties and what they mean:
 
     +------------+------------------+----------------------------+

@@ -34,7 +34,6 @@ def call_onnx_api(func: Callable[[onnx.ModelProto], _R], model: ir.Model) -> _R:
     Returns:
         The resulting ModelProto that contains the result of the API call.
     """
-
     # Store the original initializer values so they can be restored
     initializer_values = tuple(model.graph.initializers.values())
     tensors = {v.name: v.const_value for v in initializer_values}

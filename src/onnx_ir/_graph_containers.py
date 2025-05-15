@@ -14,6 +14,8 @@ __all__ = [
 import collections
 from typing import TYPE_CHECKING, Iterable, SupportsIndex
 
+import onnx_ir
+
 if TYPE_CHECKING:
     from onnx_ir import _core
 

@@ -22,8 +22,8 @@ import onnxruntime as ort
 import tqdm
 from onnx import hub
 
-import onnx_ir.testing
 import onnx_ir as ir
+import onnx_ir.testing
 
 
 def test_model(model_info: hub.ModelInfo) -> float:

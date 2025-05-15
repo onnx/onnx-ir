@@ -81,6 +81,8 @@ __all__ = [
     # IO
     "load",
     "save",
+    # Flags
+    "DEBUG",
 ]
 
 from onnx_ir import convenience, external_data, passes, serde, tape, traversal
@@ -147,12 +149,14 @@ from onnx_ir._protocols import (
 )
 from onnx_ir.serde import TensorProtoTensor, from_onnx_text, from_proto, to_proto
 
+DEBUG = False
 
 def __set_module() -> None:
     """Set the module of all functions in this module to this public module."""
     global_dict = globals()
     for name in __all__:
-        global_dict[name].__module__ = __name__
-
+        if hasattr(global_dict[name], "__module__"):
+            # Set the module of the function to this module
+            global_dict[name].__module__ = __name__
 
 __set_module()

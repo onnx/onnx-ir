@@ -1279,7 +1279,7 @@ def _short_tensor_str_for_node(x: Value) -> str:
 
 
 def _normalize_domain(domain: str) -> str:
-    """Normalize 'ai.onnx' to ''"""
+    """Normalize 'ai.onnx' to ''."""
     return "" if domain == "ai.onnx" else domain
 
 
@@ -1709,7 +1709,7 @@ class _TensorTypeBase(_protocols.TypeProtocol, _display.PrettyPrintable, Hashabl
 
     @property
     def elem_type(self) -> _enums.DataType:
-        """Return the element type of the tensor type"""
+        """Return the element type of the tensor type."""
         return self.dtype
 
     def __hash__(self) -> int:
@@ -2099,7 +2099,6 @@ def Input(
 
     This is equivalent to calling ``Value(name=name, shape=shape, type=type, doc_string=doc_string)``.
     """
-
     # NOTE: The function name is capitalized to maintain API backward compatibility.
 
     return Value(name=name, shape=shape, type=type, doc_string=doc_string)
