@@ -18,6 +18,7 @@ path = [
     "**/*.yml",
     "CODEOWNERS",
     "MANIFEST.in",
+    "requirements*.txt",
     "requirements/**/*.txt",
 ]
 precedence = "aggregate"
