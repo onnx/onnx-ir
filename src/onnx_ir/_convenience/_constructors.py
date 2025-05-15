@@ -15,12 +15,12 @@ from typing import Mapping, Sequence
 import numpy as np
 import onnx
 
-from onnxscript.ir import _convenience, _core, _enums, _protocols, serde, tensor_adapters
+from onnx_ir import _convenience, _core, _enums, _protocols, serde, tensor_adapters
 
 if typing.TYPE_CHECKING:
     import numpy.typing as npt
 
-    from onnxscript import ir
+    import onnx_ir as ir
 
 
 def tensor(
@@ -39,7 +39,7 @@ def tensor(
 
     Example::
 
-        >>> from onnxscript import ir
+        >>> import onnx_ir as ir
         >>> import numpy as np
         >>> import ml_dtypes
         >>> import onnx
@@ -162,7 +162,7 @@ def node(
 
     Example::
 
-        >>> from onnxscript import ir
+        >>> import onnx_ir as ir
         >>> input_a = ir.Input("A", shape=ir.Shape([1, 2]), type=ir.TensorType(ir.DataType.INT32))
         >>> input_b = ir.Input("B", shape=ir.Shape([1, 2]), type=ir.TensorType(ir.DataType.INT32))
         >>> node = ir.node(

@@ -9,7 +9,7 @@ You can use these classes to create tensors and use them in the IR graph like an
 
 Example::
     import torch
-    from onnxscript import ir
+    import onnx_ir as ir
 
     # Create a PyTorch tensor
     torch_tensor = torch.tensor([1, 2, 3])
@@ -37,8 +37,8 @@ from typing import TYPE_CHECKING, Any
 
 import numpy.typing as npt
 
-from onnxscript import ir
-from onnxscript.ir import _core
+import onnx_ir as ir
+from onnx_ir import _core
 
 if TYPE_CHECKING:
     import torch

@@ -8,7 +8,7 @@ import unittest
 
 import parameterized
 
-from onnxscript.ir import _linked_list
+from onnx_ir import _linked_list
 
 
 class _TestElement:

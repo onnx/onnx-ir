@@ -6,7 +6,7 @@ import onnx
 import parameterized
 
 import onnxscript.optimizer
-from onnxscript import ir
+import onnx_ir as ir
 
 
 @parameterized.parameterized_class(("using_ir",), [(False,), (True,)])

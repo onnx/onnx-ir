@@ -10,8 +10,8 @@ import os
 
 import onnx
 
-from onnxscript.ir import _core, serde
-from onnxscript.ir import external_data as _external_data
+from onnx_ir import _core, serde
+from onnx_ir import external_data as _external_data
 from onnxscript.ir._polyfill import zip
 
 

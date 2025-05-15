@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from onnxscript.ir import _core
+from onnx_ir import _core
 
 
 class NameAuthority:

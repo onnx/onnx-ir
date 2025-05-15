@@ -15,8 +15,8 @@ import onnx.external_data_helper
 import parameterized
 import torch
 
-from onnxscript import ir
-from onnxscript.ir import _core
+import onnx_ir as ir
+from onnx_ir import _core
 
 
 class TensorTest(unittest.TestCase):

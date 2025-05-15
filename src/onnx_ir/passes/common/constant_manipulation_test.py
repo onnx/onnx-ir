@@ -7,7 +7,7 @@ import unittest
 import numpy as np
 import parameterized
 
-from onnxscript import ir
+import onnx_ir as ir
 from onnxscript.ir.passes.common import constant_manipulation
 
 

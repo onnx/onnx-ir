@@ -8,8 +8,8 @@ import unittest
 
 import numpy as np
 
-from onnxscript import ir
-from onnxscript.ir import _io
+import onnx_ir as ir
+from onnx_ir import _io
 
 
 def _create_initializer(tensor: ir.TensorProtocol) -> ir.Value:

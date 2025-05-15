@@ -12,7 +12,7 @@ from collections import defaultdict
 from typing import Iterable, List, Sequence, Tuple
 
 import onnxscript.ir.convenience as _ir_convenience
-from onnxscript import ir
+import onnx_ir as ir
 
 # A replacement for a node specifies a list of nodes that replaces the original node,
 # and a list of values that replaces the original node's outputs.

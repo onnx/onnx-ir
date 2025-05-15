@@ -11,7 +11,7 @@ import onnx.backend.test
 import parameterized
 
 import onnxscript.testing
-from onnxscript import ir
+import onnx_ir as ir
 
 model_folder_path = pathlib.Path(__file__).resolve().parent.parent.parent / "testdata"
 onnx_backend_test_path = pathlib.Path(onnx.backend.test.__file__).parent / "data"

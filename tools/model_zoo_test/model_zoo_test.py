@@ -23,7 +23,7 @@ import tqdm
 from onnx import hub
 
 import onnxscript.testing
-from onnxscript import ir
+import onnx_ir as ir
 
 
 def test_model(model_info: hub.ModelInfo) -> float:

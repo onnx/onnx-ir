@@ -13,7 +13,7 @@ from typing import Any, Iterator, Mapping, Optional, Sequence, TypeVar, Union
 import onnx
 
 import onnxscript
-from onnxscript import ir
+import onnx_ir as ir
 
 logger = logging.getLogger(__name__)
 

@@ -45,7 +45,7 @@ from typing import (
     Tuple,
 )
 
-from onnxscript.ir import _enums
+from onnx_ir import _enums
 
 if typing.TYPE_CHECKING:
     import numpy as np

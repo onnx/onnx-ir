@@ -15,7 +15,7 @@ import logging
 
 import numpy as np
 
-from onnxscript import ir
+import onnx_ir as ir
 
 logger = logging.getLogger(__name__)
 

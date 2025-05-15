@@ -12,8 +12,8 @@ from typing import (
     Tuple,
 )
 
-from onnxscript import ir
-from onnxscript.ir import _convenience
+import onnx_ir as ir
+from onnx_ir import _convenience
 
 # A type representing the domains/versions used in creating nodes in IR.
 UsedOpsets = set[Tuple[str, Optional[int]]]
@@ -27,7 +27,7 @@ class Tape:
 
     Example::
 
-        from onnxscript import ir
+        import onnx_ir as ir
 
         tape = ir.tape.Tape()
         a = tape.initializer(ir.tensor([1, 2, 3], name="a"))

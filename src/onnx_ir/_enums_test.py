@@ -9,7 +9,7 @@ import onnx
 import onnx._custom_element_types
 import parameterized
 
-from onnxscript.ir import _enums
+from onnx_ir import _enums
 
 
 class DataTypeTest(unittest.TestCase):

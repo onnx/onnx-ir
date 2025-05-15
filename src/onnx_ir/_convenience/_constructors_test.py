@@ -6,7 +6,7 @@ import unittest
 
 import numpy as np
 
-from onnxscript import ir
+import onnx_ir as ir
 from onnxscript.ir._convenience import _constructors
 
 

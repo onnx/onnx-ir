@@ -8,9 +8,9 @@ import numpy as np
 import onnx
 import parameterized
 
-from onnxscript import ir
+import onnx_ir as ir
 from onnxscript._internal import version_utils
-from onnxscript.ir import serde
+from onnx_ir import serde
 
 
 class ConvenienceFunctionsTest(unittest.TestCase):

@@ -12,7 +12,7 @@ from typing import Callable, Iterator, Reversible, Union
 
 from typing_extensions import Self
 
-from onnxscript.ir import _core, _enums
+from onnx_ir import _core, _enums
 
 GraphLike = Union[_core.Graph, _core.Function, _core.GraphView]
 

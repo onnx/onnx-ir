@@ -12,7 +12,7 @@ import numpy as np
 import parameterized
 import torch
 
-from onnxscript.ir import tensor_adapters
+from onnx_ir import tensor_adapters
 
 
 def skip_if_no(module_name: str):

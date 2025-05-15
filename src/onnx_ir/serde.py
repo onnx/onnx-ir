@@ -68,7 +68,7 @@ import numpy as np
 import onnx
 import onnx.external_data_helper
 
-from onnxscript.ir import _core, _enums, _protocols, _type_casting
+from onnx_ir import _core, _enums, _protocols, _type_casting
 
 if typing.TYPE_CHECKING:
     import google.protobuf.internal.containers as proto_containers

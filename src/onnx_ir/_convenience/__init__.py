@@ -20,7 +20,7 @@ from typing import Mapping, Sequence, Union
 
 import onnx
 
-from onnxscript.ir import _core, _enums, _protocols, serde
+from onnx_ir import _core, _enums, _protocols, serde
 
 SupportedAttrTypes = Union[
     str,
@@ -188,7 +188,7 @@ def convert_attributes(
     types are: int, float, str, Sequence[int], Sequence[float], Sequence[str],
     :class:`_core.Tensor`, and :class:`_core.Attr`::
 
-        >>> from onnxscript import ir
+        >>> import onnx_ir as ir
         >>> import onnx
         >>> import numpy as np
         >>> attrs = {
@@ -269,7 +269,7 @@ def replace_all_uses_with(
 
     We want to replace the node A with a new node D::
 
-        >>> from onnxscript import ir
+        >>> import onnx_ir as ir
         >>> input = ir.Input("input")
         >>> node_a = ir.Node("", "A", [input])
         >>> node_b = ir.Node("", "B", node_a.outputs)

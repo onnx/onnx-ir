@@ -45,7 +45,7 @@ import numpy as np
 from typing_extensions import TypeIs
 
 import onnxscript
-from onnxscript.ir import (
+from onnx_ir import (
     _display,
     _enums,
     _graph_containers,
@@ -852,7 +852,7 @@ class LazyTensor(TensorBase, _protocols.TensorProtocol):  # pylint: disable=too-
     Example::
 
         >>> import numpy as np
-        >>> from onnxscript import ir
+        >>> import onnx_ir as ir
         >>> weights = np.array([[1, 2, 3]])
         >>> def create_tensor():  # Delay applying transformations to the weights
         ...     weights_t = weights.transpose()
@@ -1039,7 +1039,7 @@ class Shape(_protocols.ShapeProtocol, _display.PrettyPrintable):
 
     Example::
 
-        >>> from onnxscript import ir
+        >>> import onnx_ir as ir
         >>> shape = ir.Shape(["B", None, 3])
         >>> shape.rank()
         3

@@ -9,7 +9,7 @@ from typing import Callable, Sequence
 
 import onnx
 
-from onnxscript import ir
+import onnx_ir as ir
 from onnxscript.ir.passes.common import inliner
 
 

@@ -10,7 +10,7 @@ __all__ = [
 
 import logging
 
-from onnxscript import ir
+import onnx_ir as ir
 
 logger = logging.getLogger(__name__)
 

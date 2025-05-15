@@ -12,7 +12,7 @@ import logging
 
 import onnx
 
-from onnxscript import ir
+import onnx_ir as ir
 
 logger = logging.getLogger(__name__)
 

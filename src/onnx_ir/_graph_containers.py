@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Iterable, SupportsIndex
 import onnxscript
 
 if TYPE_CHECKING:
-    from onnxscript.ir import _core
+    from onnx_ir import _core
 
 
 class _GraphIO(collections.UserList["_core.Value"]):

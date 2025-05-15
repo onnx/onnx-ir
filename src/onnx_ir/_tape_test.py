@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import unittest
 
-from onnxscript import ir
+import onnx_ir as ir
 
 
 class TestTape(unittest.TestCase):

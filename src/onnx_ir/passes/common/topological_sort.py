@@ -9,7 +9,7 @@ __all__ = [
 ]
 
 
-from onnxscript import ir
+import onnx_ir as ir
 
 
 class TopologicalSortPass(ir.passes.InPlacePass):
