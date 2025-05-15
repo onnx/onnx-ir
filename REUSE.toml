@@ -9,13 +9,16 @@ SPDX-PackageDownloadLocation = "onnx.ai"
 
 [[annotations]]
 path = [
-    "**/*.yml",
-    "**/*.md",
-    "**/*.toml",
-    "requirements/**/*.txt",
     ".editorconfig",
     ".gitignore",
-    "CODEOWNERS"
+    "**/*.css",
+    "**/*.ipynb",
+    "**/*.md",
+    "**/*.rst",
+    "**/*.toml",
+    "**/*.yml",
+    "CODEOWNERS",
+    "requirements/**/*.txt",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Copyright (c) ONNX Project Contributors"
