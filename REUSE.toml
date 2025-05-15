@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 version = 1
-SPDX-PackageName = "onnx"
+SPDX-PackageName = "onnx-ir"
 SPDX-PackageSupplier = "onnx-technical-discuss@lists.lfaidata.foundation"
 SPDX-PackageDownloadLocation = "onnx.ai"
 
@@ -14,7 +14,8 @@ path = [
     "**/*.toml",
     "requirements/**/*.txt",
     ".editorconfig",
-    ".gitignore"
+    ".gitignore",
+    "CODEOWNERS"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Copyright (c) ONNX Project Contributors"
