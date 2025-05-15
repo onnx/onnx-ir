@@ -151,6 +151,7 @@ from onnx_ir.serde import TensorProtoTensor, from_onnx_text, from_proto, to_prot
 
 DEBUG = False
 
+
 def __set_module() -> None:
     """Set the module of all functions in this module to this public module."""
     global_dict = globals()
@@ -158,5 +159,6 @@ def __set_module() -> None:
         if hasattr(global_dict[name], "__module__"):
             # Set the module of the function to this module
             global_dict[name].__module__ = __name__
+
 
 __set_module()

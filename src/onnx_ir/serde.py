@@ -76,9 +76,7 @@ if typing.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_PLEASE_CONTRIBUTE = (
-    "Please contribute by creating a PR at https://github.com/onnx/onnx-ir."
-)
+_PLEASE_CONTRIBUTE = "Please contribute by creating a PR at https://github.com/onnx/onnx-ir."
 _FUNCTION_VALUE_INFO_SUPPORTED_VERSION = (
     10  # ONNX IR version where value info in functions was introduced
 )

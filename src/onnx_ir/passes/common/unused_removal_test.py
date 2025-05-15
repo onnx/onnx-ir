@@ -9,7 +9,6 @@ import onnx_ir.passes.common
 
 
 class RemoveUnusedTest(unittest.TestCase):
-
     def remove_unused_nodes(self, model: onnx.ModelProto):
         model_ir = ir.serde.deserialize_model(model)
         onnx_ir.passes.common.RemoveUnusedNodesPass()(model_ir)
