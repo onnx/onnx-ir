@@ -70,10 +70,7 @@ def test_onnx_weekly(session):
 @nox.session(tags=["test-torch-nightly"])
 def test_torch_nightly(session):
     """Test with PyTorch nightly (preview) build."""
-    session.install(
-        *COMMON_TEST_DEPENDENCIES,
-        ONNX_RUNTIME,
-    )
+    session.install(*COMMON_TEST_DEPENDENCIES)
     session.install("-r", "requirements/ci/requirements-onnx-weekly.txt")
     session.install("-r", "requirements/ci/requirements-pytorch-nightly.txt")
     session.install(".", "--no-deps")

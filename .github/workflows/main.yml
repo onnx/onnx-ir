@@ -26,23 +26,16 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         name:
-          - py312
-          - py311
-          - py311-onnx-weekly
-          - py310
+          - py313
+          - py312-onnx-weekly
           - py39
         include:
-          - name: py312
-            python-version: "3.12"
+          # Test the max and min supported versions of Python
+          - name: py313
+            python-version: "3.13"
             nox-tag: test build
-          - name: py311
-            python-version: "3.11"
-            nox-tag: test
-          - name: py310
-            python-version: "3.10"
-            nox-tag: test
-          - name: py311-onnx-weekly
-            python-version: "3.11"
+          - name: py312-onnx-weekly
+            python-version: "3.12"
             nox-tag: test-onnx-weekly
           - name: py39
             python-version: "3.9"
