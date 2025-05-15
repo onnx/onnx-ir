@@ -14,7 +14,8 @@ path = [
     "**/*.toml",
     "requirements/**/*.txt",
     ".editorconfig",
-    ".gitignore"
+    ".gitignore",
+    "CODEOWNERS"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Copyright (c) ONNX Project Contributors"
