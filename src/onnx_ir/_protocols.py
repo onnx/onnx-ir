@@ -31,18 +31,19 @@ tools.
 from __future__ import annotations
 
 import typing
-from typing import (
-    Any,
+from collections import OrderedDict
+from collections.abc import (
     Collection,
     Iterable,
     Iterator,
     Mapping,
     MutableMapping,
     MutableSequence,
-    OrderedDict,
-    Protocol,
     Sequence,
-    Tuple,
+)
+from typing import (
+    Any,
+    Protocol,
 )
 
 from onnx_ir import _enums
@@ -52,7 +53,7 @@ if typing.TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
 # An identifier that will uniquely identify an operator. E.g (domain, op_type, overload)
-OperatorIdentifier: TypeAlias = Tuple[str, str, str]
+OperatorIdentifier: TypeAlias = tuple[str, str, str]
 
 
 @typing.runtime_checkable
