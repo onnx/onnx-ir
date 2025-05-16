@@ -59,7 +59,7 @@ def test(session):
 @nox.session(tags=["test-onnx-weekly"])
 def test_onnx_weekly(session):
     """Test with ONNX weekly (preview) build."""
-    session.install(*COMMON_TEST_DEPENDENCIES)
+    session.install(*COMMON_TEST_DEPENDENCIES, PYTORCH)
     session.install("-r", "requirements/ci/requirements-onnx-weekly.txt")
     session.install(".", "--no-deps")
     session.run("pip", "list")
