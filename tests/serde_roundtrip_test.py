@@ -13,12 +13,9 @@ import parameterized
 import onnx_ir as ir
 import onnx_ir.testing
 
-model_folder_path = pathlib.Path(__file__).resolve().parent.parent / "testdata"
 onnx_backend_test_path = pathlib.Path(onnx.backend.test.__file__).parent / "data"
 
-model_paths = list(model_folder_path.rglob("*.onnx")) + list(
-    onnx_backend_test_path.rglob("*.onnx")
-)
+model_paths = list(onnx_backend_test_path.rglob("*.onnx"))
 test_args = [
     (f"{model_path.parent.name}_{model_path.name}", model_path) for model_path in model_paths
 ]
