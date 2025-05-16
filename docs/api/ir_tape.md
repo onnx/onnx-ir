@@ -1,4 +1,4 @@
-# ir.tape
+# onnx_ir.tape
 
 ```{eval-rst}
 .. automodule:: onnx_ir.tape

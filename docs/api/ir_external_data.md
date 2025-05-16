@@ -1,4 +1,4 @@
-# ir.external_data
+# onnx_ir.external_data
 
 ```{eval-rst}
 .. automodule::onnx_ir.external_data

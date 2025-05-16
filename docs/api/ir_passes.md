@@ -1,8 +1,7 @@
-# ir.passes
+# onnx_ir.passes
 
 ```{eval-rst}
 .. automodule::onnx_ir.passes
-.. currentmodule:: onnxscript
 ```
 
 ## Use built-in passes
@@ -21,12 +20,12 @@ Alternatively, inherent the base class `onnx_ir.passes.PassBase <onnx_ir.passes.
     :template: classtemplate.rst
     :nosignatures:
 
-    ir.passes.PassBase
-    ir.passes.InPlacePass
-    ir.passes.FunctionalPass
-    ir.passes.Sequential
-    ir.passes.PassResult
-    ir.passes.PassManager
+    onnx_ir.passes.PassBase
+    onnx_ir.passes.InPlacePass
+    onnx_ir.passes.FunctionalPass
+    onnx_ir.passes.Sequential
+    onnx_ir.passes.PassResult
+    onnx_ir.passes.PassManager
 ```
 
 ## Errors

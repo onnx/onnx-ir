@@ -1,4 +1,4 @@
-# ir.traversal
+# onnx_ir.traversal
 
 ```{eval-rst}
 .. automodule:: onnx_ir.traversal
