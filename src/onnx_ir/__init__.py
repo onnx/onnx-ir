@@ -85,6 +85,8 @@ __all__ = [
     "DEBUG",
 ]
 
+import types
+
 from onnx_ir import convenience, external_data, passes, serde, tape, traversal
 from onnx_ir._convenience._constructors import node, tensor
 from onnx_ir._core import (
@@ -156,8 +158,9 @@ def __set_module() -> None:
     """Set the module of all functions in this module to this public module."""
     global_dict = globals()
     for name in __all__:
-        if hasattr(global_dict[name], "__module__"):
-            global_dict[name].__module__ = __name__
+        obj = global_dict[name]
+        if hasattr(obj, "__module__") and not isinstance(obj, types.GenericAlias):
+            obj.__module__ = __name__
 
 
 __set_module()

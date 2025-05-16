@@ -9,6 +9,7 @@ import itertools
 import os
 import pathlib
 import pkgutil
+import types
 import unittest
 from collections.abc import Iterable
 
@@ -75,6 +76,9 @@ def _validate_module(modname: str, failure_list: list[str]) -> None:
         why_not_looks_public = ""
         if elem_module is None:
             # Omit objects that do not define __module__. This is typically global vars or modules
+            return
+        if isinstance(obj, types.GenericAlias):
+            # GenericAlias objects cannot have their module set
             return
         elem_modname_starts_with_mod = (
             elem_module is not None
