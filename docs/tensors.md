@@ -24,7 +24,7 @@ Directly initializing an `onnx_ir.TensorProtoTensor`, as below, is possible. How
 .. exec_code::
 
     import onnx
-    from onnxscript import ir
+    import onnx_ir as ir
 
     tensor_proto = onnx.helper.make_tensor("tensor", onnx.TensorProto.INT16, (3,), [1, 2, 3])
     tensor = ir.TensorProtoTensor(tensor_proto)
@@ -64,7 +64,7 @@ To create a tensor from objects other than NumPy array, you need to specify the 
 .. exec_code::
 
     import torch
-    from onnxscript import ir
+    import onnx_ir as ir
 
     torch_tensor = torch.tensor([1, 2, 3], dtype=torch.float16)
     tensor = ir.Tensor(torch_tensor, dtype=ir.DataType.FLOAT16)
@@ -88,7 +88,7 @@ In the following scenario, we show how to go from a `TensorProto` to an `onnx_ir
 ```{eval-rst}
 .. exec_code::
 
-    from onnxscript import ir
+    import onnx_ir as ir
     import onnx
     import numpy as np
 
@@ -157,7 +157,7 @@ The following example shows how to create a `FLOAT8E4M3FN` tensor, transform its
 ```{eval-rst}
 .. exec_code::
 
-    from onnxscript import ir
+    import onnx_ir as ir
     import numpy as np
 
     array = np.array([0b1, 0b11], dtype=np.uint8)
@@ -195,7 +195,7 @@ To fully support arrays from other frameworks, it is usually a good idea to crea
     import numpy.typing as npt
     import torch
 
-    from onnxscript import ir
+    import onnx_ir as ir
 
 
     class TorchTensor(ir.Tensor):
@@ -290,7 +290,7 @@ Since `onnx_ir.Tensor` implements the `__array__` method and `__dlpack__` method
 ```{eval-rst}
 .. exec_code::
 
-    from onnxscript import ir
+    import onnx_ir as ir
 
     # We can call numpy methods directly on ir.Tensor
     import numpy as np

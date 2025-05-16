@@ -2,7 +2,6 @@
 
 ```{eval-rst}
 .. automodule::onnx_ir
-.. currentmodule:: onnxscript
 ```
 
 ## Functions and constructors
@@ -13,13 +12,13 @@
     :template: functiontemplate.rst
     :nosignatures:
 
-    ir.load
-    ir.save
-    ir.from_proto
-    ir.from_onnx_text
-    ir.to_proto
-    ir.tensor
-    ir.node
+    onnx_ir.load
+    onnx_ir.save
+    onnx_ir.from_proto
+    onnx_ir.from_onnx_text
+    onnx_ir.to_proto
+    onnx_ir.tensor
+    onnx_ir.node
 ```
 
 ## Classes
@@ -30,26 +29,26 @@
     :template: classtemplate_inherited.rst
     :nosignatures:
 
-    ir.TensorProtocol
-    ir.Value
-    ir.Node
-    ir.Graph
-    ir.Model
-    ir.GraphView
-    ir.Function
-    ir.Attr
-    ir.RefAttr
-    ir.Shape
-    ir.SymbolicDim
-    ir.TypeAndShape
-    ir.TensorType
-    ir.SparseTensorType
-    ir.SequenceType
-    ir.OptionalType
-    ir.Tensor
-    ir.ExternalTensor
-    ir.StringTensor
-    ir.LazyTensor
+    onnx_ir.TensorProtocol
+    onnx_ir.Value
+    onnx_ir.Node
+    onnx_ir.Graph
+    onnx_ir.Model
+    onnx_ir.GraphView
+    onnx_ir.Function
+    onnx_ir.Attr
+    onnx_ir.RefAttr
+    onnx_ir.Shape
+    onnx_ir.SymbolicDim
+    onnx_ir.TypeAndShape
+    onnx_ir.TensorType
+    onnx_ir.SparseTensorType
+    onnx_ir.SequenceType
+    onnx_ir.OptionalType
+    onnx_ir.Tensor
+    onnx_ir.ExternalTensor
+    onnx_ir.StringTensor
+    onnx_ir.LazyTensor
 ```
 
 ## Enums
@@ -60,6 +59,6 @@
     :template: classtemplate.rst
     :nosignatures:
 
-    ir.DataType
-    ir.AttributeType
+    onnx_ir.DataType
+    onnx_ir.AttributeType
 ```
