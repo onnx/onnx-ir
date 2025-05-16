@@ -1,3 +1,5 @@
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
 """Turn an ONNX model into a textproto and strip all tensors.
 
 Usage:

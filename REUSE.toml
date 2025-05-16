@@ -14,6 +14,7 @@ path = [
     "**/*.ipynb",
     "**/*.md",
     "**/*.rst",
+    "**/*.textproto",
     "**/*.toml",
     "**/*.yml",
     "CODEOWNERS",
