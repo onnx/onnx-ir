@@ -1,4 +1,4 @@
-# ir.passes
+# onnx_ir.passes
 
 ```{eval-rst}
 .. automodule::onnx_ir.passes

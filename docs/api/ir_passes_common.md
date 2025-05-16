@@ -1,4 +1,4 @@
-# ir.passes.common
+# onnx_ir.passes.common
 
 Built-in passes provided by the ONNX IR
 

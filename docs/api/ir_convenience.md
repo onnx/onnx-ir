@@ -1,4 +1,4 @@
-# ir.convenience
+# onnx_ir.convenience
 
 ```{eval-rst}
 .. automodule::onnx_ir.convenience
