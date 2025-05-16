@@ -3,6 +3,7 @@
 Usage:
     python create_test_model.py <onnx_model_path>
 """
+
 import argparse
 
 import onnx
@@ -17,8 +18,11 @@ def strip_tensor_data(tensor: onnx.TensorProto) -> None:
     del tensor.string_data[:]
     del tensor.uint64_data[:]
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Convert ONNX model to textproto and strip tensor data.")
+    parser = argparse.ArgumentParser(
+        description="Convert ONNX model to textproto and strip tensor data."
+    )
     parser.add_argument("onnx_model", type=str, help="Path to the ONNX model file.")
     args = parser.parse_args()
 

@@ -9,11 +9,10 @@ import onnx_ir as ir
 
 
 class GraphViewTest(unittest.TestCase):
-    @unittest.skip("Test model is missing due to storage constraints")
     def test_it_can_be_serialized_as_graph_proto(self):
         data_path = (
             pathlib.Path(__file__).parent.parent
-            / "testdata/torchscript_model/torchscript_model.onnx"
+            / "testdata/e2e_models/torchscript_model/torchscript_model.textproto"
         )
         model_proto = onnx.load(data_path)
         model = ir.serde.deserialize_model(model_proto)
