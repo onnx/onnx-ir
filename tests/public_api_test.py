@@ -74,7 +74,8 @@ def _validate_module(modname: str, failure_list: list[str]) -> None:
         # Only used for nice error message below
         why_not_looks_public = ""
         if elem_module is None:
-            why_not_looks_public = "because it does not have a `__module__` attribute"
+            # Omit objects that do not define __module__. This is typically global vars or modules
+            return
         elem_modname_starts_with_mod = (
             elem_module is not None
             and elem_module.startswith(IR_NAMESPACE)
