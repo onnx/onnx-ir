@@ -12,7 +12,8 @@ __all__ = [
 ]
 
 import collections
-from typing import TYPE_CHECKING, Iterable, SupportsIndex
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, SupportsIndex
 
 import onnx_ir
 

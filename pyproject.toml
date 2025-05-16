@@ -44,7 +44,7 @@ warn_unused_ignores = false
 
 [tool.ruff]
 line-length = 95
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.lint]
 select = [
@@ -99,7 +99,6 @@ ignore = [
     "SIM116", # Don't use dict lookup to replace if-else
     "TRY003", # Messages can be constructed in the exception
 ]
-ignore-init-module-imports = true
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "pathlib".msg = "Using pathlib can impact performance. Use os.path instead"

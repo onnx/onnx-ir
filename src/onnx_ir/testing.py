@@ -10,7 +10,8 @@ __all__ = [
 
 import difflib
 import math
-from typing import Any, Collection, Sequence
+from collections.abc import Collection, Sequence
+from typing import Any
 
 import google.protobuf.message
 import onnx
