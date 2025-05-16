@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "onnx-ir"
 dynamic = ["version"]
-description = "Efficient in-memory representation for ONNX"
+description = "Efficient in-memory intermediate representation for ONNX"
 authors = [
     {name = "ONNX Contributors", email = "onnx-technical-discuss@lists.lfaidata.foundation"},
 ]
