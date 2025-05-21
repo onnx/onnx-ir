@@ -100,7 +100,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -126,7 +125,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     needs: [test, build]
     steps:
