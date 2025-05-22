@@ -133,6 +133,6 @@ jobs:
           name: dist
           path: dist
       - name: Publish package
-        uses: pypa/gh-action-pypi-publish@fb13cb306901256ace3dab689990e13a5550ffaa
+        uses: pypa/gh-action-pypi-publish@v1
         with:
           attestations: true
