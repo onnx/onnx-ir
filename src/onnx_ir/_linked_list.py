@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Sequence
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, overload
 
 T = TypeVar("T")
 
@@ -137,11 +137,18 @@ class DoublyLinkedSet(Sequence[T], Generic[T]):
         )
         return self._length
 
-    def __getitem__(self, index: int) -> T:
+    @overload
+    def __getitem__(self, index: int) -> T: ...
+    @overload
+    def __getitem__(self, index: slice) -> Sequence[T]: ...
+
+    def __getitem__(self, index):
         """Get the node at the given index.
 
         Complexity is O(n).
         """
+        if isinstance(index, slice):
+            return tuple(self)[index]
         if index >= self._length or index < -self._length:
             raise IndexError(
                 f"Index out of range: {index} not in range [-{self._length}, {self._length})"
