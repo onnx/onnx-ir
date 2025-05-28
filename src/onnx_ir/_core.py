@@ -1283,7 +1283,7 @@ def _short_tensor_str_for_node(x: Value) -> str:
 
 
 def _normalize_domain(domain: str) -> str:
-    """Normalize 'ai.onnx' to ''."""
+    """Normalize 'ai.onnx' to ''"""
     return "" if domain == "ai.onnx" else domain
 
 
@@ -1325,7 +1325,7 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
         domain: str,
         op_type: str,
         inputs: Iterable[Value | None],
-        attributes: Iterable[Attr | RefAttr] = (),
+        attributes: Iterable[Attr] = (),
         *,
         overload: str = "",
         num_outputs: int | None = None,
@@ -1357,7 +1357,7 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
             metadata_props: The metadata properties.
 
         Raises:
-            TypeError: If the attributes are not :class:`Attr` or :class:`RefAttr`.
+            TypeError: If the attributes are not :class:`Attr`.
             ValueError: If ``num_outputs``, when not ``None``, is not the same as the length of the outputs.
             ValueError: If an output value is ``None``, when outputs is specified.
             ValueError: If an output value has a producer set already, when outputs is specified.
@@ -1372,13 +1372,13 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
         # Values belong to their defining nodes. The values list is immutable
         self._outputs: tuple[Value, ...] = self._create_outputs(num_outputs, outputs)
         attributes = tuple(attributes)
-        if attributes and not isinstance(attributes[0], (Attr, RefAttr)):
+        if attributes and not isinstance(attributes[0], Attr):
             raise TypeError(
-                f"Expected the attributes to be Attr or RefAttr, got {type(attributes[0])}. "
+                f"Expected the attributes to be Attr, got {type(attributes[0])}. "
                 "If you are copying the attributes from another node, make sure you call "
                 "node.attributes.values() because it is a dictionary."
             )
-        self._attributes: OrderedDict[str, Attr | RefAttr] = OrderedDict(
+        self._attributes: OrderedDict[str, Attr] = OrderedDict(
             (attr.name, attr) for attr in attributes
         )
         self._overload: str = overload
@@ -1637,7 +1637,7 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
         raise AttributeError("outputs is immutable. Please create a new node instead.")
 
     @property
-    def attributes(self) -> OrderedDict[str, Attr | RefAttr]:
+    def attributes(self) -> OrderedDict[str, Attr]:
         """The attributes of the node."""
         return self._attributes
 
@@ -1713,7 +1713,7 @@ class _TensorTypeBase(_protocols.TypeProtocol, _display.PrettyPrintable, Hashabl
 
     @property
     def elem_type(self) -> _enums.DataType:
-        """Return the element type of the tensor type."""
+        """Return the element type of the tensor type"""
         return self.dtype
 
     def __hash__(self) -> int:
@@ -2103,6 +2103,7 @@ def Input(
 
     This is equivalent to calling ``Value(name=name, shape=shape, type=type, doc_string=doc_string)``.
     """
+
     # NOTE: The function name is capitalized to maintain API backward compatibility.
 
     return Value(name=name, shape=shape, type=type, doc_string=doc_string)
@@ -3109,22 +3110,28 @@ def {full_name}(
         return f"{self.__class__.__name__}({self.domain!r}, {self.name!r}, {self.overload!r}, inputs={self.inputs!r}, attributes={self.attributes!r}), outputs={self.outputs!r})"
 
 
-class RefAttr(_protocols.ReferenceAttributeProtocol, _display.PrettyPrintable):
-    """Reference attribute."""
+class Attr(
+    _protocols.AttributeProtocol,
+    _protocols.ReferenceAttributeProtocol,
+    _display.PrettyPrintable,
+):
+    """Base class for ONNX attributes or references."""
 
-    __slots__ = ("_name", "_ref_attr_name", "_type", "doc_string")
+    __slots__ = ("_name", "_ref_attr_name", "_type", "_value", "doc_string")
 
     def __init__(
         self,
         name: str,
-        ref_attr_name: str,
         type: _enums.AttributeType,
+        value: Any,
+        ref_attr_name: str | None = None,
         *,
         doc_string: str | None = None,
-    ) -> None:
+    ):
         self._name = name
-        self._ref_attr_name = ref_attr_name
         self._type = type
+        self._value = value
+        self._ref_attr_name = ref_attr_name
         self.doc_string = doc_string
 
     @property
@@ -3136,42 +3143,20 @@ class RefAttr(_protocols.ReferenceAttributeProtocol, _display.PrettyPrintable):
         self._name = value
 
     @property
-    def ref_attr_name(self) -> str:
-        return self._ref_attr_name
-
-    @ref_attr_name.setter
-    def ref_attr_name(self, value: str) -> None:
-        self._ref_attr_name = value
-
-    @property
     def type(self) -> _enums.AttributeType:
         return self._type
 
-    @type.setter
-    def type(self, value: _enums.AttributeType) -> None:
-        self._type = value
+    @property
+    def value(self) -> Any:
+        return self._value
 
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self._name!r}, {self._type!r}, ref_attr_name={self.ref_attr_name!r})"
+    @property
+    def ref_attr_name(self) -> str | None:
+        return self._ref_attr_name
 
-
-class Attr(_protocols.AttributeProtocol, _display.PrettyPrintable):
-    """Base class for ONNX attributes."""
-
-    __slots__ = ("doc_string", "name", "type", "value")
-
-    def __init__(
-        self,
-        name: str,
-        type: _enums.AttributeType,
-        value: Any,
-        *,
-        doc_string: str | None = None,
-    ):
-        self.name = name
-        self.type = type
-        self.value = value
-        self.doc_string = doc_string
+    def is_ref(self) -> bool:
+        """Check if this attribute is a reference attribute."""
+        return self.ref_attr_name is not None
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, _protocols.AttributeProtocol):
@@ -3188,44 +3173,72 @@ class Attr(_protocols.AttributeProtocol, _display.PrettyPrintable):
         return True
 
     def __str__(self) -> str:
+        if self.is_ref():
+            return f"@{self.ref_attr_name}"
         if self.type == _enums.AttributeType.GRAPH:
             return textwrap.indent("\n" + str(self.value), " " * 4)
         return str(self.value)
 
     def __repr__(self) -> str:
+        if self.is_ref():
+            return f"{self.__class__.__name__}({self.name!r}, {self.type!r}, ref_attr_name={self.ref_attr_name!r})"
         return f"{self.__class__.__name__}({self.name!r}, {self.type!r}, {self.value!r})"
 
     # Well typed getters
     def as_float(self) -> float:
         """Get the attribute value as a float."""
+        if self.type != _enums.AttributeType.FLOAT:
+            raise TypeError(
+                f"Attribute '{self.name}' is not of type FLOAT. Actual type: {self.type}"
+            )
         # Do not use isinstance check because it may prevent np.float32 etc. from being used
         return float(self.value)
 
     def as_int(self) -> int:
         """Get the attribute value as an int."""
+        if self.type != _enums.AttributeType.INT:
+            raise TypeError(
+                f"Attribute '{self.name}' is not of type INT. Actual type: {self.type}"
+            )
         # Do not use isinstance check because it may prevent np.int32 etc. from being used
         return int(self.value)
 
     def as_string(self) -> str:
         """Get the attribute value as a string."""
+        if self.type != _enums.AttributeType.STRING:
+            raise TypeError(
+                f"Attribute '{self.name}' is not of type STRING. Actual type: {self.type}"
+            )
         if not isinstance(self.value, str):
             raise TypeError(f"Value of attribute '{self!r}' is not a string.")
         return self.value
 
     def as_tensor(self) -> _protocols.TensorProtocol:
         """Get the attribute value as a tensor."""
+        if self.type != _enums.AttributeType.TENSOR:
+            raise TypeError(
+                f"Attribute '{self.name}' is not of type TENSOR. Actual type: {self.type}"
+            )
         if not isinstance(self.value, _protocols.TensorProtocol):
             raise TypeError(f"Value of attribute '{self!r}' is not a tensor.")
         return self.value
 
     def as_graph(self) -> Graph:
         """Get the attribute value as a graph."""
+        if self.type != _enums.AttributeType.GRAPH:
+            raise TypeError(
+                f"Attribute '{self.name}' is not of type GRAPH. Actual type: {self.type}"
+            )
         if not isinstance(self.value, Graph):
             raise TypeError(f"Value of attribute '{self!r}' is not a graph.")
         return self.value
 
     def as_floats(self) -> Sequence[float]:
         """Get the attribute value as a sequence of floats."""
+        if self.type != _enums.AttributeType.FLOATS:
+            raise TypeError(
+                f"Attribute '{self.name}' is not of type FLOATS. Actual type: {self.type}"
+            )
         if not isinstance(self.value, Sequence):
             raise TypeError(f"Value of attribute '{self!r}' is not a Sequence.")
         # Do not use isinstance check on elements because it may prevent np.int32 etc. from being used
@@ -3234,6 +3247,10 @@ class Attr(_protocols.AttributeProtocol, _display.PrettyPrintable):
 
     def as_ints(self) -> Sequence[int]:
         """Get the attribute value as a sequence of ints."""
+        if self.type != _enums.AttributeType.INTS:
+            raise TypeError(
+                f"Attribute '{self.name}' is not of type INTS. Actual type: {self.type}"
+            )
         if not isinstance(self.value, Sequence):
             raise TypeError(f"Value of attribute '{self!r}' is not a Sequence.")
         # Do not use isinstance check on elements because it may prevent np.int32 etc. from being used
@@ -3242,6 +3259,10 @@ class Attr(_protocols.AttributeProtocol, _display.PrettyPrintable):
 
     def as_strings(self) -> Sequence[str]:
         """Get the attribute value as a sequence of strings."""
+        if self.type != _enums.AttributeType.STRINGS:
+            raise TypeError(
+                f"Attribute '{self.name}' is not of type STRINGS. Actual type: {self.type}"
+            )
         if not isinstance(self.value, Sequence):
             raise TypeError(f"Value of attribute '{self!r}' is not a Sequence.")
         if onnx_ir.DEBUG:
@@ -3252,6 +3273,10 @@ class Attr(_protocols.AttributeProtocol, _display.PrettyPrintable):
 
     def as_tensors(self) -> Sequence[_protocols.TensorProtocol]:
         """Get the attribute value as a sequence of tensors."""
+        if self.type != _enums.AttributeType.TENSORS:
+            raise TypeError(
+                f"Attribute '{self.name}' is not of type TENSORS. Actual type: {self.type}"
+            )
         if not isinstance(self.value, Sequence):
             raise TypeError(f"Value of attribute '{self!r}' is not a Sequence.")
         if onnx_ir.DEBUG:
@@ -3262,6 +3287,10 @@ class Attr(_protocols.AttributeProtocol, _display.PrettyPrintable):
 
     def as_graphs(self) -> Sequence[Graph]:
         """Get the attribute value as a sequence of graphs."""
+        if self.type != _enums.AttributeType.GRAPHS:
+            raise TypeError(
+                f"Attribute '{self.name}' is not of type GRAPHS. Actual type: {self.type}"
+            )
         if not isinstance(self.value, Sequence):
             raise TypeError(f"Value of attribute '{self!r}' is not a Sequence.")
         if onnx_ir.DEBUG:
@@ -3272,6 +3301,29 @@ class Attr(_protocols.AttributeProtocol, _display.PrettyPrintable):
 
 
 # NOTE: The following functions are just for convenience
+
+
+def RefAttr(
+    name: str,
+    ref_attr_name: str,
+    type: _enums.AttributeType,
+    doc_string: str | None = None,
+) -> Attr:
+    """Create a reference attribute.
+
+    Args:
+        name: The name of the attribute.
+        type: The type of the attribute.
+        ref_attr_name: The name of the referenced attribute.
+        doc_string: Documentation string.
+
+    Returns:
+        A reference attribute.
+    """
+    # NOTE: The function name is capitalized to maintain API backward compatibility.
+    return Attr(name, type, None, ref_attr_name=ref_attr_name, doc_string=doc_string)
+
+
 def AttrFloat32(name: str, value: float, doc_string: str | None = None) -> Attr:
     """Create a float attribute."""
     # NOTE: The function name is capitalized to maintain API backward compatibility.

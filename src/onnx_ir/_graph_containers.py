@@ -15,8 +15,6 @@ import collections
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, SupportsIndex
 
-import onnx_ir
-
 if TYPE_CHECKING:
     from onnx_ir import _core
 
@@ -91,6 +89,11 @@ class _GraphIO(collections.UserList["_core.Value"]):
             self._maybe_unset_graph(value)
         super().clear()
 
+    def copy(self) -> list[_core.Value]:
+        """Return a shallow copy of the list."""
+        # This is a shallow copy, so the values are not copied, just the references
+        return self.data.copy()
+
     def __setitem__(self, i, item) -> None:
         """Replace an input/output to the node."""
         if isinstance(item, Iterable) and isinstance(i, slice):
@@ -125,7 +128,6 @@ class _GraphIO(collections.UserList["_core.Value"]):
     __iadd__ = _unimplemented
     __mul__ = _unimplemented
     __rmul__ = _unimplemented
-    copy = _unimplemented
 
 
 class GraphInputs(_GraphIO):
@@ -133,7 +135,7 @@ class GraphInputs(_GraphIO):
 
     def _check_invariance(self) -> None:
         """Check the invariance of the graph."""
-        if not onnx_ir.DEBUG:
+        if not onnxscript.DEBUG:
             return
         for value in self.data:
             if value._graph is self._graph:
@@ -171,7 +173,7 @@ class GraphOutputs(_GraphIO):
 
     def _check_invariance(self) -> None:
         """Check the invariance of the graph."""
-        if not onnx_ir.DEBUG:
+        if not onnxscript.DEBUG:
             return
         for value in self.data:
             if value._graph is self._graph:
