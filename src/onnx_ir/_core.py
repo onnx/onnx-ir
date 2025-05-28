@@ -2103,7 +2103,6 @@ def Input(
 
     This is equivalent to calling ``Value(name=name, shape=shape, type=type, doc_string=doc_string)``.
     """
-
     # NOTE: The function name is capitalized to maintain API backward compatibility.
 
     return Value(name=name, shape=shape, type=type, doc_string=doc_string)
