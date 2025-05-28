@@ -35,8 +35,7 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class _ExternalDataInfo:
-    """
-    A class that stores information about a tensor that is to be stored as external data.
+    """A class that stores information about a tensor that is to be stored as external data.
 
     Attributes:
         name: The name of the tensor that is to be stored as external data.
