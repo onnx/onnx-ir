@@ -1466,9 +1466,9 @@ def serialize_node_into(node_proto: onnx.NodeProto, from_: _protocols.NodeProtoc
 
     for attr in from_.attributes.values():
         if not attr.is_ref():
-            serialize_attribute_into(node_proto.attribute.add(), from_=attr)
+            serialize_attribute_into(node_proto.attribute.add(), from_=attr)  # type: ignore[arg-type]
         else:
-            serialize_reference_attribute_into(node_proto.attribute.add(), from_=attr)
+            serialize_reference_attribute_into(node_proto.attribute.add(), from_=attr)  # type: ignore[arg-type]
 
 
 def serialize_tensor(tensor: _protocols.TensorProtocol) -> onnx.TensorProto:
