@@ -87,7 +87,7 @@ class Tape:
         output: ir.Value | None = None,
     ) -> ir.Value:
         if attributes is None:
-            attrs: Sequence[ir.Attr | ir.RefAttr] = ()
+            attrs: Sequence[ir.Attr] = ()
         else:
             attrs = _convenience.convert_attributes(attributes)
         output_kwargs: dict[str, Any]
@@ -139,7 +139,7 @@ class Tape:
         else:
             output_kwargs = dict(outputs=outputs)
         if attributes is None:
-            attrs: Sequence[ir.Attr | ir.RefAttr] = ()
+            attrs: Sequence[ir.Attr] = ()
         else:
             attrs = _convenience.convert_attributes(attributes)
         node = ir.Node(
