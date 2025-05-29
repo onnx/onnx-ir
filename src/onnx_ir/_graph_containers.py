@@ -278,11 +278,11 @@ class Attributes(collections.UserDict[str, _core.Attr]):
     """The attributes of a Node."""
     def __init__(self, attrs: Iterable[_core.Attr] | Mapping[str, _core.Attr]):
         super().__init__()
-        # TODO: Check runtime
         if isinstance(attrs, Mapping):
             self.update(attrs)
-        for attr in attrs:
-            self[attr.name] = attr
+        else:
+            for attr in attrs:
+                self[attr.name] = attr
 
     def __setitem__(self, key: str, value: _core.Attr) -> None:
         """Set an attribute for the node."""
@@ -291,11 +291,6 @@ class Attributes(collections.UserDict[str, _core.Attr]):
         if not isinstance(value, _core.Attr):
             raise TypeError(f"Value must be an Attr, not {type(value)}")
         super().__setitem__(key, value)
-
-    def __getitem__(self, key: str | int) -> onnx_ir.Attr:
-        if type(key) is int:
-            return tuple(self.data.values())[key]
-        return super().__getitem__(key)
 
     def add(self, value: _core.Attr) -> None:
         """Add an attribute to the node."""
