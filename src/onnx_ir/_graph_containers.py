@@ -13,7 +13,7 @@ __all__ = [
 
 import collections
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, SupportsIndex
+from typing import TYPE_CHECKING, Mapping, SupportsIndex
 
 import onnx_ir
 
@@ -250,6 +250,8 @@ class GraphInitializers(collections.UserDict[str, "_core.Value"]):
             )
         if not isinstance(key, str):
             raise TypeError(f"Key must be a string, not {type(key)}")
+        if not value.name:
+            raise ValueError(f"Initializer must have a name: {value!r}")
         if key in self.data:
             # If the key already exists, unset the old value
             old_value = self.data[key]
@@ -266,3 +268,35 @@ class GraphInitializers(collections.UserDict[str, "_core.Value"]):
         # the dictionary is not modified
         self._maybe_unset_graph(value)
         super().__delitem__(key)
+
+    def add(self, value: _core.Value) -> None:
+        """Add an initializer to the graph."""
+        self[value.name] = value  # type: ignore[arg-type]
+
+
+class Attributes(collections.UserDict[str, _core.Attr]):
+    """The attributes of a Node."""
+    def __init__(self, attrs: Iterable[_core.Attr] | Mapping[str, _core.Attr]):
+        super().__init__()
+        # TODO: Check runtime
+        if isinstance(attrs, Mapping):
+            self.update(attrs)
+        for attr in attrs:
+            self[attr.name] = attr
+
+    def __setitem__(self, key: str, value: _core.Attr) -> None:
+        """Set an attribute for the node."""
+        if type(key) is not str:
+            raise TypeError(f"Key must be a string, not {type(key)}")
+        if not isinstance(value, _core.Attr):
+            raise TypeError(f"Value must be an Attr, not {type(value)}")
+        super().__setitem__(key, value)
+
+    def __getitem__(self, key: str | int) -> onnx_ir.Attr:
+        if type(key) is int:
+            return tuple(self.data.values())[key]
+        return super().__getitem__(key)
+
+    def add(self, value: _core.Attr) -> None:
+        """Add an attribute to the node."""
+        self[value.name] = value
