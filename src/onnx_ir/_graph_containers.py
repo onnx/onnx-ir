@@ -13,12 +13,10 @@ __all__ = [
 
 import collections
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Mapping, SupportsIndex
+from typing import SupportsIndex
 
 import onnx_ir
-
-if TYPE_CHECKING:
-    from onnx_ir import _core
+from onnx_ir import _core
 
 
 class _GraphIO(collections.UserList["_core.Value"]):
@@ -274,15 +272,11 @@ class GraphInitializers(collections.UserDict[str, "_core.Value"]):
         self[value.name] = value  # type: ignore[arg-type]
 
 
-class Attributes(collections.UserDict[str, _core.Attr]):
+class Attributes(collections.UserDict[str, "_core.Attr"]):
     """The attributes of a Node."""
-    def __init__(self, attrs: Iterable[_core.Attr] | Mapping[str, _core.Attr]):
-        super().__init__()
-        if isinstance(attrs, Mapping):
-            self.update(attrs)
-        else:
-            for attr in attrs:
-                self[attr.name] = attr
+
+    def __init__(self, attrs: Iterable[_core.Attr]):
+        super().__init__({attr.name: attr for attr in attrs})
 
     def __setitem__(self, key: str, value: _core.Attr) -> None:
         """Set an attribute for the node."""

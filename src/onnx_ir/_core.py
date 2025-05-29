@@ -22,12 +22,12 @@ import os
 import sys
 import textwrap
 import typing
-from collections import OrderedDict
 from collections.abc import (
     Collection,
     Hashable,
     Iterable,
     Iterator,
+    Mapping,
     MutableMapping,
     MutableSequence,
     Sequence,
@@ -39,7 +39,6 @@ from typing import (
     Any,
     Callable,
     Generic,
-    Mapping,
     NamedTuple,
     SupportsInt,
     Union,
@@ -1372,7 +1371,11 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
         self._inputs: tuple[Value | None, ...] = tuple(inputs)
         # Values belong to their defining nodes. The values list is immutable
         self._outputs: tuple[Value, ...] = self._create_outputs(num_outputs, outputs)
-        self._attributes: _graph_containers.Attributes = _graph_containers.Attributes(self, attributes)
+        if isinstance(attributes, Mapping):
+            attributes = tuple(attributes.values())
+        self._attributes: _graph_containers.Attributes = _graph_containers.Attributes(
+            attributes
+        )
         self._overload: str = overload
         # TODO(justinchuby): Potentially support a version range
         self._version: int | None = version
@@ -2925,6 +2928,8 @@ class Function(_protocols.FunctionProtocol, Sequence[Node], _display.PrettyPrint
         self._name = name
         self._overload = overload
         self._graph = graph
+        if isinstance(attributes, Mapping):
+            attributes = tuple(attributes.values())
         self._attributes = _graph_containers.Attributes(attributes)
 
     def identifier(self) -> _protocols.OperatorIdentifier:
