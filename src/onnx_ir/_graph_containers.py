@@ -343,8 +343,8 @@ class Attributes(collections.UserDict[str, "_core.Attr"]):
         return default
 
     def get_tensors(
-        self, key: str, default: T = None
-    ) -> Sequence[_protocols.TensorProtocol] | T:  # type: ignore[assignment]
+        self, key: str, default: T = None  # type: ignore[assignment]
+    ) -> Sequence[_protocols.TensorProtocol] | T:
         """Get the Sequence of tensors from the attribute."""
         if key in self:
             return self[key].as_tensors()
