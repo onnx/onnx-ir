@@ -1,6 +1,8 @@
 # Configuration for lintrunner https://github.com/suo/lintrunner
 merge_base_with = 'main'
 
+test
+
 [[linter]]
 code = 'RUFF'
 include_patterns = [
