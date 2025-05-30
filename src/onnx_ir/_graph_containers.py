@@ -294,49 +294,49 @@ class Attributes(collections.UserDict[str, "_core.Attr"]):
         """Add an attribute to the node."""
         self[value.name] = value
 
-    def get_int(self, key: str, default: T = None) -> int | T:
+    def get_int(self, key: str, default: T = None) -> int | T:  # type: ignore[assignment]
         """Get the integer value of the attribute."""
         if key in self:
             return self[key].as_int()
         return default
 
-    def get_float(self, key: str, default: T = None) -> float | T:
+    def get_float(self, key: str, default: T = None) -> float | T:  # type: ignore[assignment]
         """Get the float value of the attribute."""
         if key in self:
             return self[key].as_float()
         return default
 
-    def get_string(self, key: str, default: T = None) -> str | T:
+    def get_string(self, key: str, default: T = None) -> str | T:  # type: ignore[assignment]
         """Get the string value of the attribute."""
         if key in self:
             return self[key].as_string()
         return default
 
-    def get_tensor(self, key: str, default: T = None) -> _protocols.TensorProtocol | T:
+    def get_tensor(self, key: str, default: T = None) -> _protocols.TensorProtocol | T:  # type: ignore[assignment]
         """Get the tensor value of the attribute."""
         if key in self:
             return self[key].as_tensor()
         return default
 
-    def get_graph(self, key: str, default: T = None) -> _core.Graph | T:
+    def get_graph(self, key: str, default: T = None) -> _core.Graph | T:  # type: ignore[assignment]
         """Get the graph value of the attribute."""
         if key in self:
             return self[key].as_graph()
         return default
 
-    def get_ints(self, key: str, default: T = None) -> Sequence[int] | T:
+    def get_ints(self, key: str, default: T = None) -> Sequence[int] | T:  # type: ignore[assignment]
         """Get the Sequence of integers from the attribute."""
         if key in self:
             return self[key].as_ints()
         return default
 
-    def get_floats(self, key: str, default: T = None) -> Sequence[float] | T:
+    def get_floats(self, key: str, default: T = None) -> Sequence[float] | T:  # type: ignore[assignment]
         """Get the Sequence of floats from the attribute."""
         if key in self:
             return self[key].as_floats()
         return default
 
-    def get_strings(self, key: str, default: T = None) -> Sequence[str] | T:
+    def get_strings(self, key: str, default: T = None) -> Sequence[str] | T:  # type: ignore[assignment]
         """Get the Sequence of strings from the attribute."""
         if key in self:
             return self[key].as_strings()
@@ -344,13 +344,13 @@ class Attributes(collections.UserDict[str, "_core.Attr"]):
 
     def get_tensors(
         self, key: str, default: T = None
-    ) -> Sequence[_protocols.TensorProtocol] | T:
+    ) -> Sequence[_protocols.TensorProtocol] | T:  # type: ignore[assignment]
         """Get the Sequence of tensors from the attribute."""
         if key in self:
             return self[key].as_tensors()
         return default
 
-    def get_graphs(self, key: str, default: T = None) -> Sequence[_core.Graph] | T:
+    def get_graphs(self, key: str, default: T = None) -> Sequence[_core.Graph] | T:  # type: ignore[assignment]
         """Get the Sequence of graphs from the attribute."""
         if key in self:
             return self[key].as_graphs()
