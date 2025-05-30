@@ -269,7 +269,7 @@ class GraphInitializers(collections.UserDict[str, "_core.Value"]):
 
     def add(self, value: _core.Value) -> None:
         """Add an initializer to the graph."""
-        self[value.name] = value  # type: ignore[arg-type]
+        self[value.name] = value  # type: ignore[index]
 
 
 class Attributes(collections.UserDict[str, "_core.Attr"]):
