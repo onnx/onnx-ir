@@ -6,11 +6,11 @@ import unittest
 
 import numpy as np
 import onnxruntime as ort
-
-import onnx_ir as ir
 from onnxscript import FLOAT, script
 from onnxscript import opset18 as op
 from onnxscript.ir.passes.common import common_subexpression_elimination
+
+import onnx_ir as ir
 
 
 class TestCommonSubexpressionEliminationPass(unittest.TestCase):
