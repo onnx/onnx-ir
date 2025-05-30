@@ -140,6 +140,7 @@ class LiftSubgraphInitializersToMainGraphPass(ir.passes.InPlacePass):
 
     Initializers that are also graph inputs will not be lifted.
     """
+
     def call(self, model: ir.Model) -> ir.passes.PassResult:
         count = 0
         registered_initializer_names: dict[str, int] = {}
