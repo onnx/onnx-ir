@@ -9,10 +9,9 @@ __all__ = [
 ]
 
 import logging
-from typing import Sequence
+from collections.abc import Sequence
 
 import onnx_ir as ir
-
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +34,6 @@ class CommonSubexpressionEliminationPass(ir.passes.InPlacePass):
 
 def _eliminate_common_subexpression(graph: ir.Graph, modified: bool) -> bool:
     """Eliminate common subexpression in ONNX graphs."""
-
     # node to node identifier, length of outputs, inputs, and attributes
     existing_node_info_to_the_node: dict[
         tuple[
