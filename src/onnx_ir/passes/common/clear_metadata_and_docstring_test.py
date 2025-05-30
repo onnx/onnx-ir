@@ -30,7 +30,7 @@ class TestClearMetadataAndDocStringPass(unittest.TestCase):
         )
         mul_node = ir.node(
             "Mul",
-            inputs=[add_node.outputs[0], inputs[1]],
+            inputs=[add_node.o(), inputs[1]],
             num_outputs=1,
             metadata_props={"mul_key": "mul_value"},
             doc_string="This is a Mul node",
@@ -69,7 +69,7 @@ class TestClearMetadataAndDocStringPass(unittest.TestCase):
         )
         sub_node = ir.node(
             "Sub",
-            inputs=[function.outputs[0], const_node.outputs[0]],
+            inputs=[function.o(), const_node.o()],
             num_outputs=1,
             metadata_props={"sub_key": "sub_value"},
             doc_string="This is a Sub node",
