@@ -57,6 +57,14 @@ class TestClearMetadataAndDocStringPass(unittest.TestCase):
             domain="my_domain",
             attributes=[],
         )
+        func_node = ir.node(
+            "my_function",
+            inputs=[add_node.o(), inputs[1]],
+            domain = "my_domain",
+            metadata_props={"mul_key": "mul_value"},
+            doc_string="This is a Mul node",
+        )
+        # TODO(justinchuby): This graph is broken. The output of the function cannot be a input to a node
         # Create a model with the graph and function
         constant_tensor = ir.tensor(np.random.rand(2, 3).astype(ir.DataType.FLOAT.numpy()))
         const_node = ir.node(
