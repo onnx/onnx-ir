@@ -28,7 +28,6 @@ COMMON_TEST_DEPENDENCIES = (
     "typing_extensions>=4.10",
     "ml-dtypes",
     "onnxruntime",
-    "onnxscript --no-deps",
 )
 ONNX = "onnx==1.18"
 ONNX_RUNTIME = "onnxruntime==1.20.1"
@@ -52,6 +51,7 @@ def test(session):
         ONNX,
         PYTORCH,
     )
+    session.install("onnxscript", "--no-deps")
     session.install(".", "--no-deps")
     session.run("pip", "list")
     session.run("pytest", "src", "--doctest-modules", *session.posargs)
