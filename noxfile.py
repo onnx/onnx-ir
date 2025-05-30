@@ -28,6 +28,7 @@ COMMON_TEST_DEPENDENCIES = (
     "typing_extensions>=4.10",
     "ml-dtypes",
     "onnxruntime",
+    "onnxscript",
 )
 ONNX = "onnx==1.18"
 ONNX_RUNTIME = "onnxruntime==1.20.1"
