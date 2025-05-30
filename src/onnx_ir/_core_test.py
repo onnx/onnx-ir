@@ -861,6 +861,19 @@ class NodeTest(unittest.TestCase):
         node.domain = "ai.onnx"
         self.assertEqual(node.domain, "")
 
+    def test_attributes_add(self):
+        node = _core.Node("ai.onnx", "TestOp", inputs=())
+        node.attributes.add(_core.AttrInt64("test_attr", 1))
+        self.assertIn("test_attr", node.attributes)
+        self.assertEqual(node.attributes["test_attr"].value, 1)
+
+    def test_attributes_set_raise_with_type_error(self):
+        node = _core.Node("ai.onnx", "TestOp", inputs=())
+        with self.assertRaises(TypeError):
+            node.attributes["test_attr"] = 1
+        with self.assertRaises(TypeError):
+            node.attributes[1] = _core.AttrInt64("test_attr", 1)
+
     # TODO(justinchuby): Test all methods
 
 
