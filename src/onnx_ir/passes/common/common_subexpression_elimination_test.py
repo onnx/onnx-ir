@@ -8,9 +8,9 @@ import numpy as np
 import onnxruntime as ort
 from onnxscript import FLOAT, script
 from onnxscript import opset18 as op
-from onnxscript.ir.passes.common import common_subexpression_elimination
 
 import onnx_ir as ir
+from onnx_ir.passes.common import common_subexpression_elimination
 
 
 class TestCommonSubexpressionEliminationPass(unittest.TestCase):
