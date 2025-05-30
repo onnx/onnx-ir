@@ -874,6 +874,13 @@ class NodeTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             node.attributes[1] = _core.AttrInt64("test_attr", 1)
 
+    def test_init_accepts_attribute_mapping(self):
+        node = _core.Node(
+            "ai.onnx", "TestOp", inputs=(), attributes=[_core.AttrInt64("test_attr", 1)]
+        )
+        new_node = _core.Node("", "OtherOp", inputs=(), attributes=node.attributes)
+        self.assertEqual(new_node.attributes, node.attributes)
+
     # TODO(justinchuby): Test all methods
 
 
