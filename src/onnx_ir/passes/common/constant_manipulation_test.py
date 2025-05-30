@@ -178,9 +178,7 @@ class TestLiftConstantsToInitializersPass(unittest.TestCase):
             attributes={constant_attribute: constant_value},
             num_outputs=1,
         )
-        identity_node_constant = ir.node(
-            "Identity", inputs=[const_node.o()], num_outputs=1
-        )
+        identity_node_constant = ir.node("Identity", inputs=[const_node.o()], num_outputs=1)
         identity_node_input = ir.node("Identity", inputs=[input_value], num_outputs=1)
 
         model = ir.Model(
