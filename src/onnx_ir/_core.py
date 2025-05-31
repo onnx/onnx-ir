@@ -1552,6 +1552,40 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
             "Directly mutating the input sequence is unsupported. Please use Node.replace_input_with() instead."
         )
 
+    @property
+    def outputs(self) -> Sequence[Value]:
+        """The output values of the node.
+
+        The outputs are immutable. To change the outputs, create a new node and
+        replace the inputs of the using nodes of this node's outputs by calling
+        :meth:`replace_input_with` on the using nodes of this node's outputs.
+        """
+        return self._outputs
+
+    @outputs.setter
+    def outputs(self, _: Sequence[Value]) -> None:
+        raise AttributeError("outputs is immutable. Please create a new node instead.")
+
+    def i(self, index: int = 0) -> Value | None:
+        """Get the input value at the given index.
+
+        This is a convenience method that is equivalent to `self.inputs[index]`.
+
+        Raises:
+            IndexError: If the index is out of range.
+        """
+        return self.inputs[index]
+
+    def o(self, index: int = 0) -> Value:
+        """Get the output value at the given index.
+
+        This is a convenience method that is equivalent to `self.outputs[index]`.
+
+        Raises:
+            IndexError: If the index is out of range.
+        """
+        return self.outputs[index]
+
     def predecessors(self) -> Sequence[Node]:
         """Return the predecessor nodes of the node, deduplicated, in a deterministic order."""
         # Use the ordered nature of a dictionary to deduplicate the nodes
@@ -1621,20 +1655,6 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
         if self._graph is None:
             raise ValueError("The node to append to does not belong to any graph.")
         self._graph.insert_after(self, nodes)
-
-    @property
-    def outputs(self) -> Sequence[Value]:
-        """The output values of the node.
-
-        The outputs are immutable. To change the outputs, create a new node and
-        replace the inputs of the using nodes of this node's outputs by calling
-        :meth:`replace_input_with` on the using nodes of this node's outputs.
-        """
-        return self._outputs
-
-    @outputs.setter
-    def outputs(self, _: Sequence[Value]) -> None:
-        raise AttributeError("outputs is immutable. Please create a new node instead.")
 
     @property
     def attributes(self) -> OrderedDict[str, Attr]:
