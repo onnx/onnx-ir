@@ -1034,12 +1034,12 @@ class Shape(_protocols.ShapeProtocol, _display.PrettyPrintable):
 
     A shape can be frozen (made immutable). When the shape is frozen, it cannot be
     unfrozen, making it suitable to be shared across tensors or values.
-    Call :method:`freeze` to freeze the shape.
+    Call :meth:`freeze` to freeze the shape.
 
-    To update the dimension of a frozen shape, call :method:`copy` to create a
+    To update the dimension of a frozen shape, call :meth:`copy` to create a
     new shape with the same dimensions that can be modified.
 
-    Use :method:`get_denotation` and :method:`set_denotation` to access and modify the denotations.
+    Use :meth:`get_denotation` and :meth:`set_denotation` to access and modify the denotations.
 
     Example::
 
@@ -1122,7 +1122,7 @@ class Shape(_protocols.ShapeProtocol, _display.PrettyPrintable):
         """Whether the shape is frozen.
 
         When the shape is frozen, it cannot be unfrozen, making it suitable to be shared.
-        Call :method:`freeze` to freeze the shape. Call :method:`copy` to create a
+        Call :meth:`freeze` to freeze the shape. Call :meth:`copy` to create a
         new shape with the same dimensions that can be modified.
         """
         return self._frozen
