@@ -378,9 +378,7 @@ def replace_nodes_and_values(
     graph_or_function.remove(old_nodes, safe=True)
 
 
-def get_constant_tensor(
-    value: _protocols.ValueProtocol,
-) -> _protocols.TensorProtocol | None:
+def get_constant_tensor(value: _protocols.ValueProtocol) -> _protocols.TensorProtocol | None:
     """Get the constant tensor from a value, if it exists.
 
     Args:
