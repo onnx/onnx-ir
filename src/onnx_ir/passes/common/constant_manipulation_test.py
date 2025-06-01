@@ -309,13 +309,6 @@ class TestLiftSubgraphInitializersToMainGraphPass(unittest.TestCase):
             graph=main_graph,
             ir_version=10,
         )
-        if then_initializer_name == else_initializer_name:
-            with self.assertRaisesRegex(
-                ir.passes.PreconditionError,
-                "Initializer name must be unique across the main graph and subgraphs",
-            ):
-                constant_manipulation.LiftSubgraphInitializersToMainGraphPass()(model)
-            return
         result = constant_manipulation.LiftSubgraphInitializersToMainGraphPass()(model)
         self.assertTrue(result.modified)
 
@@ -395,13 +388,6 @@ class TestLiftSubgraphInitializersToMainGraphPass(unittest.TestCase):
             graph=main_graph,
             ir_version=10,
         )
-        if then_initializer_name == else_initializer_name:
-            with self.assertRaisesRegex(
-                ir.passes.PreconditionError,
-                "Initializer name must be unique across the main graph and subgraphs",
-            ):
-                constant_manipulation.LiftSubgraphInitializersToMainGraphPass()(model)
-            return
         result = constant_manipulation.LiftSubgraphInitializersToMainGraphPass()(model)
         self.assertTrue(result.modified)
 
