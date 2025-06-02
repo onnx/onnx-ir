@@ -1564,7 +1564,7 @@ class GraphContainersTest(unittest.TestCase):
         self.assertNotIn(self.value3, self.graph.outputs)
         self.assertIn(self.value3, outputs_copy)
 
-    def test_set_initializers(self):
+    def test_initializers_setitem(self):
         self.graph.initializers["initializer1"] = self.value3
         self.assertIn("initializer1", self.graph.initializers)
         self.assertTrue(self.value3.is_initializer())
@@ -1578,11 +1578,11 @@ class GraphContainersTest(unittest.TestCase):
         self.assertFalse(self.value3.is_initializer())
         self.assertIsNone(self.value3.graph)
 
-    def test_set_initializers_raises_when_key_does_not_match(self):
+    def test_initializers_setitem_raises_when_key_does_not_match(self):
         with self.assertRaisesRegex(ValueError, "does not match the name of the value"):
             self.graph.initializers["some_key"] = self.value3
 
-    def test_set_initializers_raises_when_it_belongs_to_another_graph(self):
+    def test_initializers_setitem_raises_when_it_belongs_to_another_graph(self):
         other_graph = _core.Graph(inputs=(), outputs=(), nodes=())
         other_graph.initializers["initializer1"] = self.value3
         with self.assertRaisesRegex(
@@ -1596,10 +1596,50 @@ class GraphContainersTest(unittest.TestCase):
         self.assertTrue(self.value3.is_initializer())
         self.assertIs(self.value3.graph, self.graph)
 
-    def test_set_initializers_raises_when_value_does_not_have_a_name(self):
+    def test_initializers_setitem_raises_when_value_does_not_have_a_name(self):
         self.value3.name = None
         with self.assertRaises(TypeError):
             self.graph.initializers[None] = self.value3
+
+        with self.assertRaisesRegex(ValueError, "cannot be an empty string"):
+            self.graph.initializers[""] = _core.Value(name="")
+
+    def test_initializers_setitem_checks_value_name_match(self):
+        with self.assertRaisesRegex(ValueError, "does not match"):
+            self.graph.initializers["some_name"] = _core.Value(name="some_other_name")
+
+    def test_initializers_setitem_assigns_key_to_value_name_if_not_set(self):
+        value = _core.Value(name=None)
+        self.graph.initializers["some_name"] = value
+        self.assertEqual(value.name, "some_name")
+        self.assertIs(value, self.graph.initializers["some_name"])
+
+        value = _core.Value(name="")
+        self.graph.initializers["some_other_name"] = value
+        self.assertEqual(value.name, "some_other_name")
+        self.assertIs(value, self.graph.initializers["some_other_name"])
+
+    def test_initializers_setitem_checks_value_type(self):
+        with self.assertRaisesRegex(TypeError, "must be a Value object"):
+            self.graph.initializers["some_name"] = ir.tensor([1, 2, 3], name="some_tensor")
+
+    def test_initializers_setitem_raises_when_value_is_node_output(self):
+        node = ir.node("SomeOp", inputs=[])
+        with self.assertRaisesRegex(ValueError, "produced by a node"):
+            self.graph.initializers["some_name"] = node.outputs[0]
+
+    def test_initializers_add_checks_value_name(self):
+        # Initializers should always have a name
+        with self.assertRaisesRegex(ValueError, "cannot be an empty string"):
+            self.graph.initializers.add(_core.Value(name=""))
+
+        with self.assertRaisesRegex(TypeError, "must be a string"):
+            self.graph.initializers.add(_core.Value(name=None))
+
+    def test_initializers_add_checks_value_type(self):
+        # Initializers should be of type Value
+        with self.assertRaisesRegex(TypeError, "must be a Value object"):
+            self.graph.initializers.add(ir.tensor([1, 2, 3], name="some_tensor"))
 
     def test_delete_initializer(self):
         self.graph.initializers["initializer1"] = self.value3

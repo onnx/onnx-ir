@@ -262,7 +262,7 @@ class GraphInitializers(collections.UserDict[str, "_core.Value"]):
             value.name = key
         elif key != value.name:
             raise ValueError(
-                f"Key '{key}' does not match the name of the value '{value.name}'"
+                f"Key '{key}' does not match the name of the value '{value.name}'. Please use the value.name as the key."
             )
         if value.producer() is not None:
             raise ValueError(
