@@ -174,6 +174,4 @@ def _is_non_deterministic_op(node: ir.Node) -> bool:
 
 def _is_onnx_domain(d: str) -> bool:
     """Check if the domain is the ONNX domain."""
-    if d == "ai.onnx":
-        d = ""
     return d == ""
