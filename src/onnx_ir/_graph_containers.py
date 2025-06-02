@@ -6,21 +6,23 @@
 
 from __future__ import annotations
 
-from onnx_ir import _protocols
-
 __all__ = [
     "GraphInputs",
     "GraphOutputs",
 ]
 
+import logging
 import collections
 from collections.abc import Iterable, Sequence
 from typing import SupportsIndex, TypeVar
 
 import onnx_ir
 from onnx_ir import _core
+from onnx_ir import _protocols
 
 T = TypeVar("T")
+
+logger = logging.getLogger(__name__)
 
 
 class _GraphIO(collections.UserList["_core.Value"]):
@@ -250,14 +252,23 @@ class GraphInitializers(collections.UserDict[str, "_core.Value"]):
 
     def __setitem__(self, key: str, value: _core.Value) -> None:
         """Set an initializer for the graph."""
-        if key != value.name:
+        if not isinstance(value, _core.Value):
+            raise TypeError(f"value must be a Value object, not {type(value)}")
+        if not isinstance(key, str):
+            raise TypeError(f"Value name must be a string, not {type(key)}")
+        if key == "":
+            raise ValueError("Value name cannot be an empty string")
+        if not value.name:
+            logger.info("Value %s does not have a name, setting it to '%s'", value, key)
+            value.name = key
+        elif key != value.name:
             raise ValueError(
                 f"Key '{key}' does not match the name of the value '{value.name}'"
             )
-        if not isinstance(key, str):
-            raise TypeError(f"Key must be a string, not {type(key)}")
-        if not value.name:
-            raise ValueError(f"Initializer must have a name: {value!r}")
+        if value.producer() is not None:
+            raise ValueError(
+                f"Value '{value}' is produced by a node and cannot be a graph initializer"
+            )
         if key in self.data:
             # If the key already exists, unset the old value
             old_value = self.data[key]

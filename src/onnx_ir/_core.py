@@ -2196,17 +2196,9 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
         # Private fields that are not to be accessed by any other classes
         self._inputs = _graph_containers.GraphInputs(self, inputs)
         self._outputs = _graph_containers.GraphOutputs(self, outputs)
-        self._initializers = _graph_containers.GraphInitializers(self)
-        for initializer in initializers:
-            if isinstance(initializer, str):
-                raise TypeError(
-                    "Initializer must be a Value, not a string. "
-                    "If you are copying the initializers from another graph, "
-                    "make sure you call graph.initializers.values() because it is a dictionary."
-                )
-            if initializer.name is None:
-                raise ValueError(f"Initializer must have a name: {initializer}")
-            self._initializers[initializer.name] = initializer
+        self._initializers = _graph_containers.GraphInitializers(
+            self, {initializer.name: initializer for initializer in initializers}
+        )
         self._doc_string = doc_string
         self._opset_imports = opset_imports or {}
         self._metadata: _metadata.MetadataStore | None = None
@@ -2229,7 +2221,7 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
         return self._outputs
 
     @property
-    def initializers(self) -> MutableMapping[str, Value]:
+    def initializers(self) -> _graph_containers.GraphInitializers:
         return self._initializers
 
     def register_initializer(self, value: Value) -> None:
@@ -2258,10 +2250,6 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
                     " it is not the same object: existing={self._initializers[value.name]!r},"
                     f" new={value!r}"
                 )
-        if value.producer() is not None:
-            raise ValueError(
-                f"Value '{value!r}' is produced by a node and cannot be an initializer."
-            )
         if value.const_value is None:
             raise ValueError(
                 f"Value '{value!r}' must have its const_value set to be an initializer."
@@ -2696,7 +2684,7 @@ class GraphView(Sequence[Node], _display.PrettyPrintable):
         outputs: Sequence[Value],
         *,
         nodes: Iterable[Node],
-        initializers: Sequence[_protocols.ValueProtocol] = (),
+        initializers: Sequence[Value] = (),
         doc_string: str | None = None,
         opset_imports: dict[str, int] | None = None,
         name: str | None = None,
@@ -2705,10 +2693,7 @@ class GraphView(Sequence[Node], _display.PrettyPrintable):
         self.name = name
         self.inputs = tuple(inputs)
         self.outputs = tuple(outputs)
-        for initializer in initializers:
-            if initializer.name is None:
-                raise ValueError(f"Initializer must have a name: {initializer}")
-        self.initializers = {tensor.name: tensor for tensor in initializers}
+        self.initializers = {initializer.name: initializer for initializer in initializers}
         self.doc_string = doc_string
         self.opset_imports = opset_imports or {}
         self._metadata: _metadata.MetadataStore | None = None
