@@ -302,3 +302,22 @@ class TestCommonSubexpressionEliminationPass(unittest.TestCase):
         # The outputs should still have the correct names
         self.assertEqual(new_graph.outputs[0].name, output_name_0)
         self.assertEqual(new_graph.outputs[1].name, output_name_1)
+
+    def test_non_deterministic_ops_are_not_csed(self):
+        """Test if non-deterministic ops are not CSEd.
+
+        def f(x):
+            a = x.random_uniform()
+            b = x.random_uniform()
+            return a + b
+        """
+
+        @script()
+        def test_model(x: FLOAT[2, 2]) -> FLOAT[2, 2]:
+            a = op.RandomUniform(shape=[2, 2])
+            b = op.RandomUniform(shape=[2, 2])
+            return a + b + x
+
+        model_proto = test_model.to_model_proto()
+        model = ir.serde.deserialize_model(model_proto)
+        self.check_graph(model, [np.random.rand(2, 2)], delta_nodes=[0])

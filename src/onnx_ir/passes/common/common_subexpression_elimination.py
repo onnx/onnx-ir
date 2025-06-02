@@ -72,6 +72,12 @@ def _eliminate_common_subexpression(graph: ir.Graph, modified: bool) -> bool:
 
         if control_flow_op:
             # If the node is a control flow op, we skip it.
+            logger.debug("Skipping control flow op %s", node)
+            continue
+
+        if _is_non_deterministic_op(node):
+            # If the node is a non-deterministic op, we skip it.
+            logger.debug("Skipping non-deterministic op %s", node)
             continue
 
         node_info = (
@@ -123,9 +129,10 @@ def _remove_node_and_replace_values(
         for idx, graph_output in enumerate(graph.outputs):
             if graph_output in replacement_mapping:
                 new_value = replacement_mapping[graph_output]
-                if new_value.is_graph_output():
-                    # If the new value is also a graph output, we need to
-                    # create a Identity node to preserve the remove_value.
+                if new_value.is_graph_output() or new_value.is_graph_input():
+                    # If the new value is also a graph input/output, we need to
+                    # create a Identity node to preserve the remove_value and
+                    # prevent from changing new_value name.
                     identity_node = ir.node(
                         "Identity",
                         inputs=[new_value],
@@ -150,3 +157,23 @@ def _remove_node_and_replace_values(
                     graph.outputs[idx] = new_value
 
     graph.remove(remove_node, safe=True)
+
+
+def _is_non_deterministic_op(node: ir.Node) -> bool:
+    non_deterministic_ops = frozenset(
+        {
+            "RandomUniform",
+            "RandomNormal",
+            "RandomUniformLike",
+            "RandomNormalLike",
+            "Multinomial",
+        }
+    )
+    return node.op_type in non_deterministic_ops and _is_onnx_domain(node.domain)
+
+
+def _is_onnx_domain(d: str) -> bool:
+    """Check if the domain is the ONNX domain."""
+    if d == "ai.onnx":
+        d = ""
+    return d == ""
