@@ -154,6 +154,10 @@ class GraphInputs(_GraphIO):
             raise ValueError(
                 f"Value '{value}' is already owned by a different graph. Please remove the value from the previous graph first"
             )
+        if value.producer() is not None:
+            raise ValueError(
+                f"Value '{value}' is produced by a node and cannot be an input to the graph. Please create new Values for graph inputs"
+            )
         self._ref_counter[value] += 1
         value._is_graph_input = True
         value._graph = self._graph
