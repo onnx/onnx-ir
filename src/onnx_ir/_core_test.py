@@ -1324,6 +1324,16 @@ class GraphContainersTest(unittest.TestCase):
         self.assertNotIn(self.value3, self.graph.inputs)
         self.assertIn(self.value3, inputs_copy)
 
+    def test_inputs_append_raises_when_input_is_node_output(self):
+        node = ir.node("SomeOp", inputs=[])
+        with self.assertRaisesRegex(ValueError, "produced by a node"):
+            self.graph.inputs.append(node.outputs[0])
+
+    def test_inputs_extend_raises_when_input_is_node_output(self):
+        node = ir.node("SomeOp", inputs=[])
+        with self.assertRaisesRegex(ValueError, "produced by a node"):
+            self.graph.inputs.extend(node.outputs)
+
     def test_append_to_outputs(self):
         self.graph.outputs.append(self.value2)
         self.assertIn(self.value2, self.graph.outputs)
