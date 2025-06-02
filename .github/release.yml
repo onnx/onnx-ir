@@ -13,14 +13,17 @@ changelog:
     - title: Graph Passes
       labels:
         - "module: passes"
+    - title: Bug fixes
+      labels:
+        - "topic: bug fix"
     - title: Build, CI and Tests
       labels:
-        - "topic: build"
-        - "topic: CI pipelines"
-        - "topic: test"
+        - "module: build"
+        - "module: CI pipelines"
+        - "module: test"
     - title: Documentation
       labels:
-        - "topic: docs"
+        - "module: docs"
     - title: Other Changes
       labels:
         - "*"
