@@ -2221,6 +2221,18 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
 
     @property
     def initializers(self) -> _graph_containers.GraphInitializers:
+        """The initializers of the graph as a ``MutableMapping[str, Value]``.
+
+        The keys are the names of the initializers. The values are the :class:`Value` objects.
+
+        This property additionally supports the ``add`` method, which takes a :class:`Value`
+        and adds it to the initializers if it is not already present.
+
+        .. note::
+            When setting an initializer with ``graph.initializers[key] = value``,
+            if the value does not have a name, it will be assigned ``key`` as its name.
+
+        """
         return self._initializers
 
     def register_initializer(self, value: Value) -> None:
