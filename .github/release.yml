@@ -10,6 +10,9 @@ changelog:
     - title: API
       labels:
         - "module: api"
+    - title: Core
+      labels:
+        - "module: core"
     - title: Graph Passes
       labels:
         - "module: passes"
