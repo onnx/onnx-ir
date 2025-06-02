@@ -28,7 +28,6 @@ from collections.abc import (
     Iterable,
     Iterator,
     Mapping,
-    MutableMapping,
     MutableSequence,
     Sequence,
 )

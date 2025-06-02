@@ -11,14 +11,13 @@ __all__ = [
     "GraphOutputs",
 ]
 
-import logging
 import collections
+import logging
 from collections.abc import Iterable, Sequence
 from typing import SupportsIndex, TypeVar
 
 import onnx_ir
-from onnx_ir import _core
-from onnx_ir import _protocols
+from onnx_ir import _core, _protocols
 
 T = TypeVar("T")
 
