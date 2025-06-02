@@ -1,0 +1,26 @@
+changelog:
+  exclude:
+    authors:
+      - dependabot
+  categories:
+    - title: Breaking Changes and Deprecations
+      labels:
+        - "topic: bc breaking"
+        - "topic: deprecation"
+    - title: API
+      labels:
+        - "module: api"
+    - title: Graph Passes
+      labels:
+        - "module: passes"
+    - title: Build, CI and Tests
+      labels:
+        - "topic: build"
+        - "topic: CI pipelines"
+        - "topic: test"
+    - title: Documentation
+      labels:
+        - "topic: docs"
+    - title: Other Changes
+      labels:
+        - "*"
