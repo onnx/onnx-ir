@@ -69,7 +69,7 @@ import numpy as np
 import onnx
 import onnx.external_data_helper
 
-from onnx_ir import _core, _enums, _protocols, _type_casting
+from onnx_ir import _core, _enums, _protocols, _type_casting, _convenience
 
 if typing.TYPE_CHECKING:
     import google.protobuf.internal.containers as proto_containers
@@ -190,13 +190,27 @@ def from_proto(proto: object) -> object:
     )
 
 
-def from_onnx_text(model_text: str, /) -> _core.Model:
+def from_onnx_text(
+    model_text: str,
+    /,
+    with_initializers: Mapping[str, _protocols.TensorProtocol] | None = None,
+) -> _core.Model:
     """Convert the ONNX textual representation to an IR model.
 
     Read more about the textual representation at: https://onnx.ai/onnx/repo-docs/Syntax.html
     """
     proto = onnx.parser.parse_model(model_text)
-    return deserialize_model(proto)
+    model = deserialize_model(proto)
+    values = _convenience.create_value_mapping(model.graph)
+    if with_initializers:
+        # Add initializers to the model
+        for name, tensor in with_initializers.items():
+            if name not in values:
+                raise ValueError(f"Value '{name}' does not exist in model.")
+            initializer = values[name]
+            initializer.const_value = tensor
+            model.graph.register_initializer(initializer)
+    return model
 
 
 @typing.overload
