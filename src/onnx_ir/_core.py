@@ -22,13 +22,12 @@ import os
 import sys
 import textwrap
 import typing
-from collections import OrderedDict
 from collections.abc import (
     Collection,
     Hashable,
     Iterable,
     Iterator,
-    MutableMapping,
+    Mapping,
     MutableSequence,
     Sequence,
 )
@@ -1325,7 +1324,7 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
         domain: str,
         op_type: str,
         inputs: Iterable[Value | None],
-        attributes: Iterable[Attr] = (),
+        attributes: Iterable[Attr] | Mapping[str, Attr] = (),
         *,
         overload: str = "",
         num_outputs: int | None = None,
@@ -1371,15 +1370,10 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
         self._inputs: tuple[Value | None, ...] = tuple(inputs)
         # Values belong to their defining nodes. The values list is immutable
         self._outputs: tuple[Value, ...] = self._create_outputs(num_outputs, outputs)
-        attributes = tuple(attributes)
-        if attributes and not isinstance(attributes[0], Attr):
-            raise TypeError(
-                f"Expected the attributes to be Attr, got {type(attributes[0])}. "
-                "If you are copying the attributes from another node, make sure you call "
-                "node.attributes.values() because it is a dictionary."
-            )
-        self._attributes: OrderedDict[str, Attr] = OrderedDict(
-            (attr.name, attr) for attr in attributes
+        if isinstance(attributes, Mapping):
+            attributes = tuple(attributes.values())
+        self._attributes: _graph_containers.Attributes = _graph_containers.Attributes(
+            attributes
         )
         self._overload: str = overload
         # TODO(justinchuby): Potentially support a version range
@@ -1657,7 +1651,7 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
         self._graph.insert_after(self, nodes)
 
     @property
-    def attributes(self) -> OrderedDict[str, Attr]:
+    def attributes(self) -> _graph_containers.Attributes:
         """The attributes of the node."""
         return self._attributes
 
@@ -2221,17 +2215,9 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
         # Private fields that are not to be accessed by any other classes
         self._inputs = _graph_containers.GraphInputs(self, inputs)
         self._outputs = _graph_containers.GraphOutputs(self, outputs)
-        self._initializers = _graph_containers.GraphInitializers(self)
-        for initializer in initializers:
-            if isinstance(initializer, str):
-                raise TypeError(
-                    "Initializer must be a Value, not a string. "
-                    "If you are copying the initializers from another graph, "
-                    "make sure you call graph.initializers.values() because it is a dictionary."
-                )
-            if initializer.name is None:
-                raise ValueError(f"Initializer must have a name: {initializer}")
-            self._initializers[initializer.name] = initializer
+        self._initializers = _graph_containers.GraphInitializers(
+            self, {initializer.name: initializer for initializer in initializers}
+        )
         self._doc_string = doc_string
         self._opset_imports = opset_imports or {}
         self._metadata: _metadata.MetadataStore | None = None
@@ -2254,7 +2240,19 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
         return self._outputs
 
     @property
-    def initializers(self) -> MutableMapping[str, Value]:
+    def initializers(self) -> _graph_containers.GraphInitializers:
+        """The initializers of the graph as a ``MutableMapping[str, Value]``.
+
+        The keys are the names of the initializers. The values are the :class:`Value` objects.
+
+        This property additionally supports the ``add`` method, which takes a :class:`Value`
+        and adds it to the initializers if it is not already present.
+
+        .. note::
+            When setting an initializer with ``graph.initializers[key] = value``,
+            if the value does not have a name, it will be assigned ``key`` as its name.
+
+        """
         return self._initializers
 
     def register_initializer(self, value: Value) -> None:
@@ -2283,15 +2281,11 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
                     " it is not the same object: existing={self._initializers[value.name]!r},"
                     f" new={value!r}"
                 )
-        if value.producer() is not None:
-            raise ValueError(
-                f"Value '{value!r}' is produced by a node and cannot be an initializer."
-            )
         if value.const_value is None:
             raise ValueError(
                 f"Value '{value!r}' must have its const_value set to be an initializer."
             )
-        self._initializers[value.name] = value
+        self._initializers.add(value)
 
     @property
     def doc_string(self) -> str | None:
@@ -2721,7 +2715,7 @@ class GraphView(Sequence[Node], _display.PrettyPrintable):
         outputs: Sequence[Value],
         *,
         nodes: Iterable[Node],
-        initializers: Sequence[_protocols.ValueProtocol] = (),
+        initializers: Sequence[Value] = (),
         doc_string: str | None = None,
         opset_imports: dict[str, int] | None = None,
         name: str | None = None,
@@ -2730,10 +2724,7 @@ class GraphView(Sequence[Node], _display.PrettyPrintable):
         self.name = name
         self.inputs = tuple(inputs)
         self.outputs = tuple(outputs)
-        for initializer in initializers:
-            if initializer.name is None:
-                raise ValueError(f"Initializer must have a name: {initializer}")
-        self.initializers = {tensor.name: tensor for tensor in initializers}
+        self.initializers = {initializer.name: initializer for initializer in initializers}
         self.doc_string = doc_string
         self.opset_imports = opset_imports or {}
         self._metadata: _metadata.MetadataStore | None = None
@@ -2947,13 +2938,15 @@ class Function(_protocols.FunctionProtocol, Sequence[Node], _display.PrettyPrint
         # Ensure the inputs and outputs of the function belong to a graph
         # and not from an outer scope
         graph: Graph,
-        attributes: Sequence[Attr],
+        attributes: Iterable[Attr] | Mapping[str, Attr],
     ) -> None:
         self._domain = domain
         self._name = name
         self._overload = overload
         self._graph = graph
-        self._attributes = OrderedDict((attr.name, attr) for attr in attributes)
+        if isinstance(attributes, Mapping):
+            attributes = tuple(attributes.values())
+        self._attributes = _graph_containers.Attributes(attributes)
 
     def identifier(self) -> _protocols.OperatorIdentifier:
         return self.domain, self.name, self.overload
@@ -2991,7 +2984,7 @@ class Function(_protocols.FunctionProtocol, Sequence[Node], _display.PrettyPrint
         return self._graph.outputs
 
     @property
-    def attributes(self) -> OrderedDict[str, Attr]:
+    def attributes(self) -> _graph_containers.Attributes:
         return self._attributes
 
     @typing.overload
