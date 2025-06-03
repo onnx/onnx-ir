@@ -1563,7 +1563,15 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
     def i(self, index: int = 0) -> Value | None:
         """Get the input value at the given index.
 
-        This is a convenience method that is equivalent to `self.inputs[index]`.
+        This is a convenience method that is equivalent to ``node.inputs[index]``.
+
+        The following is equivalent::
+
+            node.inputs[0] == node.i(0) == node.i()  # Default index is 0
+            node.inputs[index] == node.i(index)
+
+        Returns:
+            The input value at the given index.
 
         Raises:
             IndexError: If the index is out of range.
@@ -1573,7 +1581,15 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
     def o(self, index: int = 0) -> Value:
         """Get the output value at the given index.
 
-        This is a convenience method that is equivalent to `self.outputs[index]`.
+        This is a convenience method that is equivalent to ``node.outputs[index]``.
+
+        The following is equivalent::
+
+            node.outputs[0] == node.o(0) == node.o()  # Default index is 0
+            node.outputs[index] == node.o(index)
+
+        Returns:
+            The output value at the given index.
 
         Raises:
             IndexError: If the index is out of range.
