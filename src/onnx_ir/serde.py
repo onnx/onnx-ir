@@ -198,6 +198,18 @@ def from_onnx_text(
     """Convert the ONNX textual representation to an IR model.
 
     Read more about the textual representation at: https://onnx.ai/onnx/repo-docs/Syntax.html
+
+    Args:
+        model_text: The ONNX textual representation of the model.
+        with_initializers: A mapping of initializer names to tensors. If provided, these tensors
+            will be added to the model as initializers. If a name does not exist in the model,
+            a ValueError will be raised.
+
+    Returns:
+        The IR model corresponding to the ONNX textual representation.
+
+    Raises:
+        ValueError: If a name in `with_initializers` does not exist in the model.
     """
     proto = onnx.parser.parse_model(model_text)
     model = deserialize_model(proto)
@@ -211,6 +223,25 @@ def from_onnx_text(
             initializer.const_value = tensor
             model.graph.register_initializer(initializer)
     return model
+
+
+def to_onnx_text(
+    model: _protocols.ModelProtocol, /, without_initializers: bool = False
+) -> str:
+    """Convert the IR model to the ONNX textual representation.
+
+    Args:
+        model: The IR model to convert.
+        without_initializers: If True, the initializers will not be included in the output.
+
+    Returns:
+        The ONNX textual representation of the model.
+    """
+    proto = serialize_model(model)
+    if without_initializers:
+        del proto.graph.initializer[:]
+    text = onnx.printer.to_text(proto)
+    return text
 
 
 @typing.overload
