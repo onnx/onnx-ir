@@ -50,6 +50,18 @@
     onnx_ir.LazyTensor
 ```
 
+### Internal Containers
+
+```{eval-rst}
+.. autosummary::
+    :toctree: generated
+    :template: classtemplate_inherited.rst
+    :nosignatures:
+
+    onnx_ir._graph_containers.GraphInitializers
+    onnx_ir._graph_containers.Attributes
+```
+
 ## Enums
 
 ```{eval-rst}

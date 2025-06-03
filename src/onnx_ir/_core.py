@@ -1033,12 +1033,12 @@ class Shape(_protocols.ShapeProtocol, _display.PrettyPrintable):
 
     A shape can be frozen (made immutable). When the shape is frozen, it cannot be
     unfrozen, making it suitable to be shared across tensors or values.
-    Call :method:`freeze` to freeze the shape.
+    Call :meth:`freeze` to freeze the shape.
 
-    To update the dimension of a frozen shape, call :method:`copy` to create a
+    To update the dimension of a frozen shape, call :meth:`copy` to create a
     new shape with the same dimensions that can be modified.
 
-    Use :method:`get_denotation` and :method:`set_denotation` to access and modify the denotations.
+    Use :meth:`get_denotation` and :meth:`set_denotation` to access and modify the denotations.
 
     Example::
 
@@ -1121,7 +1121,7 @@ class Shape(_protocols.ShapeProtocol, _display.PrettyPrintable):
         """Whether the shape is frozen.
 
         When the shape is frozen, it cannot be unfrozen, making it suitable to be shared.
-        Call :method:`freeze` to freeze the shape. Call :method:`copy` to create a
+        Call :meth:`freeze` to freeze the shape. Call :meth:`copy` to create a
         new shape with the same dimensions that can be modified.
         """
         return self._frozen
@@ -1632,7 +1632,15 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
 
     @property
     def attributes(self) -> _graph_containers.Attributes:
-        """The attributes of the node."""
+        """The attributes of the node as ``dict[str, Attr]`` with additional access methods.
+
+        Use it as a dictionary with keys being the attribute names and values being the
+        :class:`Attr` objects.
+
+        Use ``node.attributes.add(attr)`` to add an attribute to the node.
+        Use ``node.attributes.get_int(name, default)`` to get an integer attribute value.
+        Refer to the :class:`~onnx_ir._graph_containers.Attributes` for more methods.
+        """
         return self._attributes
 
     @property
@@ -2221,7 +2229,7 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
 
     @property
     def initializers(self) -> _graph_containers.GraphInitializers:
-        """The initializers of the graph as a ``MutableMapping[str, Value]``.
+        """The initializers of the graph as a ``dict[str, Value]``.
 
         The keys are the names of the initializers. The values are the :class:`Value` objects.
 
