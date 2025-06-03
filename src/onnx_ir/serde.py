@@ -226,19 +226,19 @@ def from_onnx_text(
 
 
 def to_onnx_text(
-    model: _protocols.ModelProtocol, /, without_initializers: bool = False
+    model: _protocols.ModelProtocol, /, exclude_initializers: bool = False
 ) -> str:
     """Convert the IR model to the ONNX textual representation.
 
     Args:
         model: The IR model to convert.
-        without_initializers: If True, the initializers will not be included in the output.
+        exclude_initializers: If True, the initializers will not be included in the output.
 
     Returns:
         The ONNX textual representation of the model.
     """
     proto = serialize_model(model)
-    if without_initializers:
+    if exclude_initializers:
         del proto.graph.initializer[:]
     text = onnx.printer.to_text(proto)
     return text
