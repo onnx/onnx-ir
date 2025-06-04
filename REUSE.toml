@@ -13,6 +13,7 @@ path = [
     "**/*.css",
     "**/*.ipynb",
     "**/*.md",
+    "**/*.png",
     "**/*.rst",
     "**/*.textproto",
     "**/*.toml",
