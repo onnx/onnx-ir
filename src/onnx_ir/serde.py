@@ -37,6 +37,7 @@ __all__ = [
     "deserialize_value_info_proto",
     # Serialization
     "to_proto",
+    "to_onnx_text",
     "serialize_attribute_into",
     "serialize_attribute",
     "serialize_dimension_into",
@@ -69,7 +70,7 @@ import numpy as np
 import onnx
 import onnx.external_data_helper
 
-from onnx_ir import _core, _enums, _protocols, _type_casting, _convenience
+from onnx_ir import _convenience, _core, _enums, _protocols, _type_casting
 
 if typing.TYPE_CHECKING:
     import google.protobuf.internal.containers as proto_containers
