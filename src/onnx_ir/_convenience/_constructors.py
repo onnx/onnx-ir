@@ -155,7 +155,7 @@ def node(
     doc_string: str | None = None,
     metadata_props: dict[str, str] | None = None,
 ) -> ir.Node:
-    """Create an :class:`ir.Node`.
+    """Create an :class:`~onnx_ir.Node`.
 
     This is a convenience constructor for creating a Node that supports Python
     objects as attributes.
