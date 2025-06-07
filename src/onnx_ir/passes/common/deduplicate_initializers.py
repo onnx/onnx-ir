@@ -1,8 +1,25 @@
-from onnx_ir._core import Node, Graph
+# Copyright (c) ONNX Project Contributors
+# SPDX-License-Identifier: Apache-2.0
+"""Pass for removing duplicated initializer tensors from a graph."""
+
+from __future__ import annotations
+
+__all__ = [
+    "DeduplicateInitializersPass",
+]
+
+from onnx_ir._core import Graph, Node
 from onnx_ir.traversal import RecursiveGraphIterator
 
 
 class DeduplicateInitializersPass:
+    """Remove duplicated initializer tensors from the graph.
+
+    This pass detects initializers with identical shape, dtype, and tensor content,
+    and replaces all duplicate references with a canonical one. Subgraphs are handled
+    using RecursiveGraphIterator.
+    """
+
     def apply(self, graph: Graph) -> Graph:
         seen = {}      # (dtype, shape) → {tobytes: name}
         name_map = {}  # Duplicate name → canonical name
@@ -31,6 +48,3 @@ class DeduplicateInitializersPass:
                     node.replace_input_with(i, replacement)
 
         return graph
-
-
-
