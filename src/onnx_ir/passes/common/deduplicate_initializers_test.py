@@ -3,62 +3,102 @@
 """Unit tests for the DeduplicateInitializersPass."""
 
 import unittest
+import onnx
 import numpy as np
 
-from onnx_ir._core import Tensor, Value, Node, Graph
-from onnx_ir.passes.common.deduplicate_initializers import DeduplicateInitializersPass
+import onnx_ir as ir
+import onnx_ir.passes.common.deduplicate_initializers as dedup_pass
 
 
-class DeduplicateInitializersPassTest(unittest.TestCase):
-    def setUp(self):
-        # Shared tensor content
-        self.arr = np.array([1, 2, 3])
-        self.tensor1 = Tensor(self.arr)
-        self.tensor2 = Tensor(self.arr.copy())  # Identical but separate object
-        self.tensor3 = Tensor(self.arr.copy())  # For subgraph
+class DeduplicateInitializersTest(unittest.TestCase):
+    def apply_pass(self, model: onnx.ModelProto) -> onnx.ModelProto:
+        model_ir = ir.serde.deserialize_model(model)
+        dedup_pass.DeduplicateInitializersPass()(model_ir)
+        return ir.serde.serialize_model(model_ir)
 
-    def test_deduplication_in_main_and_subgraph(self):
-        v1 = Value(name="w1", const_value=self.tensor1)
-        v2 = Value(name="w2", const_value=self.tensor2)
-        v3 = Value(name="w3", const_value=self.tensor3)
-
-        # Main graph node using w1 and w2
-        main_node = Node("", "Add", inputs=[v1, v2], outputs=[])
-
-        # Subgraph node using w3
-        sub_node = Node("", "Conv", inputs=[v3], outputs=[])
-        subgraph = Graph(
-            inputs=[],
-            outputs=[],
-            nodes=[sub_node],
-            initializers=[v3],
-            name="subgraph"
+    def test_deduplicates_identical_initializers(self):
+        model = onnx.parser.parse_model(
+            """
+            <ir_version: 10, opset_import: ["" : 17]>
+            agraph () => ()
+            <float[3] w1 = {1.0, 2.0, 3.0}, float[3] w2 = {1.0, 2.0, 3.0}> {
+                sum = Add(w1, w2)
+            }
+            """
         )
+        self.assertEqual(len(model.graph.initializer), 2)
+        new_model = self.apply_pass(model)
+        self.assertEqual(len(new_model.graph.initializer), 1)
+        add_node = new_model.graph.node[0]
+        self.assertEqual(add_node.input[0], add_node.input[1])
 
-        # Link subgraph to main node
-        main_node.blocks = [subgraph]
-
-        # Main graph with w1 and w2 (duplicates)
-        main_graph = Graph(
-            inputs=[],
-            outputs=[],
-            nodes=[main_node],
-            initializers=[v1, v2],
-            name="main_graph"
+    
+    def test_initializers_with_different_shapes_not_deduplicated(self):
+        model = onnx.parser.parse_model(
+            """
+            <ir_version: 10, opset_import: ["" : 17]>
+            agraph () => ()
+            <float[2] w1 = {1.0, 2.0}, float[3] w2 = {1.0, 2.0, 3.0}> {
+                sum = Add(w1, w2)
+            }
+            """
         )
+        new_model = self.apply_pass(model)
+        self.assertEqual(len(new_model.graph.initializer), 2)
 
-        DeduplicateInitializersPass().apply(main_graph)
+    def test_initializers_with_different_dtypes_not_deduplicated(self):
+        model = onnx.parser.parse_model(
+            """
+            <ir_version: 10, opset_import: ["" : 17]>
+            agraph () => ()
+            <float[2] w1 = {1.0, 2.0}, double[2] w2 = {1.0, 2.0}> {
+                sum = Add(w1, w2)
+            }
+            """
+        )
+        new_model = self.apply_pass(model)
+        self.assertEqual(len(new_model.graph.initializer), 2)
 
-        # Post conditions
-        self.assertIn("w1", main_graph.initializers)
-        self.assertNotIn("w2", main_graph.initializers)
-        self.assertEqual(main_node.inputs[0].name, "w1")
-        self.assertEqual(main_node.inputs[1].name, "w1")
+    def test_scalar_initializer_deduplication(self):
+        model = onnx.parser.parse_model(
+            """
+            <ir_version: 10, opset_import: ["" : 17]>
+            agraph () => ()
+            <float w1 = {5.0}, float w2 = {5.0}> {
+                sum = Add(w1, w2)
+            }
+            """
+        )
+        new_model = self.apply_pass(model)
+        self.assertEqual(len(new_model.graph.initializer), 1)
 
-        # Subgraph should be untouched (no cross-graph deduplication)
-        self.assertIn("w3", subgraph.initializers)
-        self.assertEqual(sub_node.inputs[0].name, "w3")
+    def test_multiple_duplicates(self):
+        model = onnx.parser.parse_model(
+            """
+            <ir_version: 10, opset_import: ["" : 17]>
+            agraph () => ()
+            <float[2] w1 = {1.0, 1.0}, float[2] w2 = {1.0, 1.0}, float[2] w3 = {1.0, 1.0}> {
+                temp = Add(w1, w2)
+                out = Add(temp, w3)
+            }
+            """
+        )
+        new_model = self.apply_pass(model)
+        self.assertEqual(len(new_model.graph.initializer), 1)
 
+    def test_unique_values_not_deduplicated(self):
+        model = onnx.parser.parse_model(
+            """
+            <ir_version: 10, opset_import: ["" : 17]>
+            agraph () => ()
+            <float[2] w1 = {1.0, 2.0}, float[2] w2 = {2.0, 1.0}> {
+                sum = Add(w1, w2)
+            }
+            """
+        )
+        new_model = self.apply_pass(model)
+        self.assertEqual(len(new_model.graph.initializer), 2)
 
+    
 if __name__ == "__main__":
     unittest.main()
