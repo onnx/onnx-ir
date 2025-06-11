@@ -27,13 +27,17 @@ class DeduplicateInitializersPass(onnx_ir.passes.InPlacePass):
 
     def call(self, model: onnx_ir.Model) -> onnx_ir.passes.PassResult:
         graph = model.graph
-        seen = {}      # (dtype, shape) → {hash: [(name, tobytes)]}
+        seen: dict[tuple[str, tuple[int, ...]], dict[int, list[tuple[str, bytes]]]] = {}
+
         name_map = {}  # Duplicate name → canonical name
 
         for initializer in list(graph.initializers.values()):
-            dtype = initializer.const_value.dtype
-            shape = tuple(initializer.const_value.shape)
-            content = initializer.const_value.tobytes()
+            const_val = initializer.const_value
+            if const_val is None:
+                continue  # Skip if initializer has no constant value
+            dtype = const_val.dtype
+            shape = tuple(const_val.shape)
+            content = const_val.tobytes()
             content_hash = hashlib.sha256(content).hexdigest()
 
             key = (dtype, shape)
@@ -46,9 +50,11 @@ class DeduplicateInitializersPass(onnx_ir.passes.InPlacePass):
                 for existing_name, existing_bytes in group[content_hash]:
                     if existing_bytes == content:
                         name_map[initializer.name] = existing_name
-                        graph.initializers.pop(initializer.name)
-                        break
+                        if initializer.name is not None:
+                            graph.initializers.pop(initializer.name)
+                        break  # only break when deduplication is successful
                 else:
+                    # no matching content found: append as a new entry
                     group[content_hash].append((initializer.name, content))
             else:
                 group[content_hash] = [(initializer.name, content)]

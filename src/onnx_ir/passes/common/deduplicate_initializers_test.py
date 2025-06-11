@@ -3,8 +3,8 @@
 """Unit tests for the DeduplicateInitializersPass."""
 
 import unittest
+
 import onnx
-import numpy as np
 
 import onnx_ir as ir
 import onnx_ir.passes.common.deduplicate_initializers as dedup_pass
@@ -32,7 +32,6 @@ class DeduplicateInitializersTest(unittest.TestCase):
         add_node = new_model.graph.node[0]
         self.assertEqual(add_node.input[0], add_node.input[1])
 
-    
     def test_initializers_with_different_shapes_not_deduplicated(self):
         model = onnx.parser.parse_model(
             """
@@ -99,6 +98,6 @@ class DeduplicateInitializersTest(unittest.TestCase):
         new_model = self.apply_pass(model)
         self.assertEqual(len(new_model.graph.initializer), 2)
 
-    
+
 if __name__ == "__main__":
     unittest.main()
