@@ -5,7 +5,6 @@
 import unittest
 
 import onnx
-
 import onnx_ir as ir
 import onnx_ir.passes.common.deduplicate_initializers as dedup_pass
 
