@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 """Unit tests for the DeduplicateInitializersPass."""
 
-import unittest
-
 import onnx
 import onnx_ir as ir
 import onnx_ir.passes.common.deduplicate_initializers as dedup_pass
 
+
+import unittest
 
 class DeduplicateInitializersTest(unittest.TestCase):
     def apply_pass(self, model: onnx.ModelProto) -> onnx.ModelProto:
