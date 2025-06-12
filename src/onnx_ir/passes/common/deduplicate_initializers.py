@@ -8,6 +8,7 @@ __all__ = [
     "DeduplicateInitializersPass",
 ]
 
+
 import hashlib
 
 import onnx_ir
