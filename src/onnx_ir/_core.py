@@ -421,7 +421,8 @@ class Tensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatible]): 
                 self._dtype = _enums.DataType.from_numpy(value.dtype)
             else:
                 raise ValueError(
-                    "The dtype must be specified when the value is not a numpy array."
+                    "The dtype must be specified when the value is not a numpy array. "
+                    "Value type: {type(value)}"
                 )
         else:
             if isinstance(value, np.ndarray):
