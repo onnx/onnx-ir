@@ -27,7 +27,7 @@ class DeduplicateInitializersPass(onnx_ir.passes.InPlacePass):
 
     def call(self, model: onnx_ir.Model) -> onnx_ir.passes.PassResult:
         graph = model.graph
-        seen: dict[tuple[str, tuple[int, ...]], dict[int, list[tuple[str, bytes]]]] = {}
+        seen: dict[tuple[str, tuple[int, ...]], dict[str, list[onnx_ir.Value]]] = {}
 
         name_map = {}  # Duplicate name → canonical name
 
@@ -35,8 +35,8 @@ class DeduplicateInitializersPass(onnx_ir.passes.InPlacePass):
             const_val = initializer.const_value
             if const_val is None:
                 continue  # Skip if initializer has no constant value
-            dtype = const_val.dtype
-            shape = tuple(const_val.shape)
+            dtype = const_val.dtype.name
+            shape = tuple(int(dim) if isinstance(dim, int) else -1 for dim in const_val.shape)
             content = const_val.tobytes()
             content_hash = hashlib.sha256(content).hexdigest()
 
@@ -46,24 +46,29 @@ class DeduplicateInitializersPass(onnx_ir.passes.InPlacePass):
 
             group = seen[key]
             if content_hash in group:
-                # Verify collision using full bytes
-                for existing_name, existing_bytes in group[content_hash]:
-                    if existing_bytes == content:
-                        name_map[initializer.name] = existing_name
-                        if initializer.name is not None:
-                            graph.initializers.pop(initializer.name)
+                for existing_val in group[content_hash]:
+                    if (
+                        existing_val.const_value is not None
+                        and existing_val.const_value.tobytes() == content
+                    ):
+                        assert initializer.name is not None
+                        name_map[initializer.name] = existing_val.name
+                        graph.initializers.pop(initializer.name)
                         break  # only break when deduplication is successful
-                else:
-                    # no matching content found: append as a new entry
-                    group[content_hash].append((initializer.name, content))
+                    else:
+                        # no matching content found: append as a new entry
+                        assert initializer.name is not None
+                        group[content_hash].append(initializer)
             else:
-                group[content_hash] = [(initializer.name, content)]
+                assert initializer.name is not None
+                group[content_hash] = [initializer]
 
         for node in onnx_ir.traversal.RecursiveGraphIterator(graph):
             for i, input_val in enumerate(node.inputs):
                 if input_val and input_val.name in name_map:
                     canonical_name = name_map[input_val.name]
-                    replacement = graph.initializers[canonical_name]
-                    node.replace_input_with(i, replacement)
+                    if canonical_name is not None:
+                        replacement = graph.initializers[canonical_name]
+                        node.replace_input_with(i, replacement)
 
         return onnx_ir.passes.PassResult(model=model, modified=bool(name_map))
