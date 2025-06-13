@@ -1813,7 +1813,7 @@ class Value(_protocols.ValueProtocol, _display.PrettyPrintable):
     To check if the value is an is an input, output or initializer of a graph,
     use :meth:`is_graph_input`, :meth:`is_graph_output` or :meth:`is_initializer`.
 
-    Use :meth:`graph` to get the graph that owns the value.
+    Use :attr:`graph` to get the graph that owns the value.
     """
 
     __slots__ = (
