@@ -2367,7 +2367,7 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
         return len(self)
 
     def all_nodes(self) -> Iterator[Node]:
-        """Get all nodes in the graph and its subgraphs in O(#nodes + #values) time.
+        """Get all nodes in the graph and its subgraphs in O(#nodes + #attributes) time.
 
         This is an alias for ``onnx_ir.traversal.RecursiveGraphIterator(graph)``.
         Consider using
@@ -2378,7 +2378,7 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
         return onnx_ir.traversal.RecursiveGraphIterator(self)
 
     def subgraphs(self) -> Iterator[Graph]:
-        """Get all subgraphs in the graph in O(#nodes + #values) time."""
+        """Get all subgraphs in the graph in O(#nodes + #attributes) time."""
         seen_graphs: set[Graph] = set()
         for node in onnx_ir.traversal.RecursiveGraphIterator(self):
             graph = node.graph
@@ -3038,7 +3038,7 @@ class Function(_protocols.FunctionProtocol, Sequence[Node], _display.PrettyPrint
         return self._graph.metadata_props
 
     def all_nodes(self) -> Iterator[Node]:
-        """Get all nodes in the graph and its subgraphs in O(#nodes + #values) time.
+        """Get all nodes in the graph and its subgraphs in O(#nodes + #attributes) time.
 
         This is an alias for ``onnx_ir.traversal.RecursiveGraphIterator(graph)``.
         Consider using
@@ -3049,7 +3049,7 @@ class Function(_protocols.FunctionProtocol, Sequence[Node], _display.PrettyPrint
         return onnx_ir.traversal.RecursiveGraphIterator(self)
 
     def subgraphs(self) -> Iterator[Graph]:
-        """Get all subgraphs in the function in O(#nodes + #values) time."""
+        """Get all subgraphs in the function in O(#nodes + #attributes) time."""
         seen_graphs: set[Graph] = set()
         for node in onnx_ir.traversal.RecursiveGraphIterator(self):
             graph = node.graph
