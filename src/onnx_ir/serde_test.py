@@ -54,6 +54,25 @@ class ConvenienceFunctionsTest(unittest.TestCase):
     def test_to_proto(self, _: str, ir_object):
         serde.to_proto(ir_object)
 
+    def test_from_to_onnx_text(self):
+        model_text = """\
+<
+   ir_version: 7,
+   opset_import: ["" : 17]
+>
+agraph (float[1,4,512,512] input_x, float[1,4,512,64] input_y) => (float[4,512,512] reshape_x) {
+   [node_name] shape_a = Constant <value: tensor = int64[3] {4,512,512}> ()
+   reshape_x = Reshape (input_x, shape_a)
+}"""
+        self.maxDiff = None
+        model = serde.from_onnx_text(model_text)
+        self.assertIsInstance(model, ir.Model)
+        self.assertEqual(model.ir_version, 7)
+        self.assertEqual(len(model.graph.inputs), 2)
+        self.assertEqual(len(model.graph.outputs), 1)
+        onnx_text_roundtrip = serde.to_onnx_text(model)
+        self.assertEqual(model_text.strip(), onnx_text_roundtrip.strip())
+
 
 class TensorProtoTensorTest(unittest.TestCase):
     @parameterized.parameterized.expand(
