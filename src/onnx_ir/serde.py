@@ -63,7 +63,7 @@ __all__ = [
 import collections
 import logging
 import os
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from typing import Any, Callable
 
 import numpy as np
@@ -194,7 +194,7 @@ def from_proto(proto: object) -> object:
 def from_onnx_text(
     model_text: str,
     /,
-    initializers: Sequence[_protocols.TensorProtocol] | None = None,
+    initializers: Iterable[_protocols.TensorProtocol] | None = None,
 ) -> _core.Model:
     """Convert the ONNX textual representation to an IR model.
 
@@ -202,7 +202,7 @@ def from_onnx_text(
 
     Args:
         model_text: The ONNX textual representation of the model.
-        initializers: A Sequence of tensors. If provided, these tensors
+        initializers: Tensors to be added as initializers. If provided, these tensors
             will be added to the model as initializers. If a name does not exist in the model,
             a ValueError will be raised.
 
