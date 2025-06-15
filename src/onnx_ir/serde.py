@@ -202,7 +202,7 @@ def from_onnx_text(
 
     Args:
         model_text: The ONNX textual representation of the model.
-        initializers: A list of tensors. If provided, these tensors
+        initializers: A Sequence of tensors. If provided, these tensors
             will be added to the model as initializers. If a name does not exist in the model,
             a ValueError will be raised.
 
