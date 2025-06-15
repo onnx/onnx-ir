@@ -85,7 +85,7 @@ agraph (float[1] input_x, float[2] input_y) => (float[2] result) {
         self.maxDiff = None
         array = np.array([1.0, 2.0], dtype=np.float32)
         model = serde.from_onnx_text(
-            model_text, with_initializers={"input_y": ir.tensor(array)}
+            model_text, initializers=[ir.tensor(array, name="input_y")]
         )
         np.testing.assert_array_equal(model.graph.inputs[1].const_value.numpy(), array)
         expected_text = """\
