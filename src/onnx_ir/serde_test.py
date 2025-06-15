@@ -57,7 +57,7 @@ class ConvenienceFunctionsTest(unittest.TestCase):
     def test_from_to_onnx_text(self):
         model_text = """\
 <
-   ir_version: 7,
+   ir_version: 10,
    opset_import: ["" : 17]
 >
 agraph (float[1,4,512,512] input_x, float[1,4,512,64] input_y) => (float[4,512,512] reshape_x) {
@@ -67,11 +67,54 @@ agraph (float[1,4,512,512] input_x, float[1,4,512,64] input_y) => (float[4,512,5
         self.maxDiff = None
         model = serde.from_onnx_text(model_text)
         self.assertIsInstance(model, ir.Model)
-        self.assertEqual(model.ir_version, 7)
+        self.assertEqual(model.ir_version, 10)
         self.assertEqual(len(model.graph.inputs), 2)
         self.assertEqual(len(model.graph.outputs), 1)
         onnx_text_roundtrip = serde.to_onnx_text(model)
         self.assertEqual(model_text.strip(), onnx_text_roundtrip.strip())
+
+    def test_from_to_onnx_text_with_initializers(self):
+        model_text = """\
+<
+   ir_version: 10,
+   opset_import: ["" : 17]
+>
+agraph (float[1] input_x, float[2] input_y) => (float[2] result) {
+   [node_name] result = Add (input_x, input_y)
+}"""
+        self.maxDiff = None
+        array = np.array([1.0, 2.0], dtype=np.float32)
+        model = serde.from_onnx_text(
+            model_text, with_initializers={"input_y": ir.tensor(array)}
+        )
+        np.testing.assert_array_equal(model.graph.inputs[1].const_value.numpy(), array)
+        expected_text = """\
+<
+   ir_version: 10,
+   opset_import: ["" : 17]
+>
+agraph (float[1] input_x, float[2] input_y) => (float[2] result)
+   <float[2] input_y =  {1,2}>
+{
+   [node_name] result = Add (input_x, input_y)
+}"""
+        onnx_text_roundtrip = serde.to_onnx_text(model)
+        stripped_lines = [line.rstrip() for line in onnx_text_roundtrip.splitlines()]
+        result = "\n".join(stripped_lines)
+        self.assertEqual(result, expected_text)
+
+        onnx_text_without_initializers = serde.to_onnx_text(model, exclude_initializers=True)
+        expected_text_without_initializers = """\
+<
+   ir_version: 10,
+   opset_import: ["" : 17]
+>
+agraph (float[1] input_x, float[2] input_y) => (float[2] result) {
+   [node_name] result = Add (input_x, input_y)
+}"""
+        self.assertEqual(
+            onnx_text_without_initializers.strip(), expected_text_without_initializers
+        )
 
 
 class TensorProtoTensorTest(unittest.TestCase):

@@ -73,6 +73,7 @@ __all__ = [
     "from_proto",
     "from_onnx_text",
     "to_proto",
+    "to_onnx_text",
     # Convenience constructors
     "tensor",
     "node",
@@ -149,7 +150,7 @@ from onnx_ir._protocols import (
     TypeProtocol,
     ValueProtocol,
 )
-from onnx_ir.serde import TensorProtoTensor, from_onnx_text, from_proto, to_proto
+from onnx_ir.serde import TensorProtoTensor, from_onnx_text, from_proto, to_onnx_text, to_proto
 
 DEBUG = False
 
