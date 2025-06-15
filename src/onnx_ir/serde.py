@@ -210,7 +210,7 @@ def from_onnx_text(
         The IR model corresponding to the ONNX textual representation.
 
     Raises:
-        ValueError: If a name in `with_initializers` does not exist in the model.
+        ValueError: If a tensor name in `initializers` does not match any value in the model.
     """
     proto = onnx.parser.parse_model(model_text)
     model = deserialize_model(proto)
