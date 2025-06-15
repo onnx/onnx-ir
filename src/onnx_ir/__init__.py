@@ -83,7 +83,6 @@ __all__ = [
     "save",
     # Flags
     "DEBUG",
-    "to_onnx_text",
 ]
 
 import types
