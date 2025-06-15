@@ -17,8 +17,9 @@ __all__ = [
 ]
 
 from collections.abc import Mapping, Sequence
-from typing import Union
+from typing import Union, cast
 
+import numpy as np
 import onnx
 
 from onnx_ir import _core, _enums, _protocols, serde
@@ -375,3 +376,58 @@ def replace_nodes_and_values(
     # insert new nodes after the index node
     graph_or_function.insert_after(insertion_point, new_nodes)
     graph_or_function.remove(old_nodes, safe=True)
+
+
+def get_constant_tensor(
+    value: _protocols.ValueProtocol, propagate_shape_type: bool = False
+) -> _protocols.TensorProtocol | None:
+    """Get the constant tensor from a value, if it exists.
+
+    Args:
+        value: The value to get the constant tensor from.
+        propagate_shape_type: If True, the shape and type of the value will be
+            propagated to the Value.
+
+    Returns:
+        The constant tensor if it exists, otherwise None.
+    """
+    tensor = None
+    if value.const_value is not None:
+        tensor = value.const_value
+    else:
+        node = value.producer()
+        if node is None:
+            return None
+        if node.op_type != "Constant" or node.domain != "":
+            return None
+        if len(node.attributes) != 1:
+            return None
+        attr_name, attr_value = next(iter(node.attributes.items()))
+        if len(node.outputs) != 1:
+            return None
+        ir_value = node.outputs[0]
+
+        if attr_value is None or not isinstance(attr_value, _core.Attr):
+            return None
+
+        if attr_name in {"value_float", "value_floats"}:
+            tensor = _core.Tensor(
+                np.array(attr_value.value, dtype=np.float32), name=ir_value.name
+            )
+        elif attr_name in {"value_int", "value_ints"}:
+            tensor = _core.Tensor(
+                np.array(attr_value.value, dtype=np.int64), name=ir_value.name
+            )
+        elif attr_name in {"value_string", "value_strings"}:
+            tensor = _core.StringTensor(
+                np.array(attr_value.value, dtype=np.bytes_), name=ir_value.name
+            )
+        elif attr_name == "value":
+            tensor = attr_value.as_tensor()
+        else:
+            return None
+    if tensor is not None and propagate_shape_type:
+        # Propagate the shape and type of the tensor to the value
+        value.shape = tensor.shape  # type: ignore[assignment]
+        value.dtype = tensor.type  # type: ignore[assignment]
+    return tensor
