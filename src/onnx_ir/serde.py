@@ -63,7 +63,7 @@ __all__ = [
 import collections
 import logging
 import os
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from typing import Any, Callable
 
 import numpy as np
@@ -194,7 +194,7 @@ def from_proto(proto: object) -> object:
 def from_onnx_text(
     model_text: str,
     /,
-    with_initializers: Mapping[str, _protocols.TensorProtocol] | None = None,
+    initializers: Iterable[_protocols.TensorProtocol] | None = None,
 ) -> _core.Model:
     """Convert the ONNX textual representation to an IR model.
 
@@ -202,7 +202,7 @@ def from_onnx_text(
 
     Args:
         model_text: The ONNX textual representation of the model.
-        with_initializers: A mapping of initializer names to tensors. If provided, these tensors
+        initializers: Tensors to be added as initializers. If provided, these tensors
             will be added to the model as initializers. If a name does not exist in the model,
             a ValueError will be raised.
 
@@ -210,14 +210,20 @@ def from_onnx_text(
         The IR model corresponding to the ONNX textual representation.
 
     Raises:
-        ValueError: If a name in `with_initializers` does not exist in the model.
+        ValueError: If a tensor name in `initializers` does not match any value in the model.
     """
     proto = onnx.parser.parse_model(model_text)
     model = deserialize_model(proto)
     values = _convenience.create_value_mapping(model.graph)
-    if with_initializers:
+    if initializers:
         # Add initializers to the model
-        for name, tensor in with_initializers.items():
+        for tensor in initializers:
+            name = tensor.name
+            if not name:
+                raise ValueError(
+                    "Initializer tensor must have a name. "
+                    f"Please provide a name for the initializer: {tensor}"
+                )
             if name not in values:
                 raise ValueError(f"Value '{name}' does not exist in model.")
             initializer = values[name]

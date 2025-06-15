@@ -21,7 +21,7 @@ from typing import Union
 
 import onnx
 
-from onnx_ir import _core, _enums, _protocols, serde
+from onnx_ir import _core, _enums, _protocols, serde, traversal
 
 SupportedAttrTypes = Union[
     str,
@@ -313,7 +313,9 @@ def replace_all_uses_with(
 def create_value_mapping(graph: _core.Graph) -> dict[str, _core.Value]:
     """Return a dictionary mapping names to values in the graph.
 
-    The mapping does not include values from subgraphs.
+    The mapping includes values from subgraphs. Duplicated names are omitted,
+    and the first value with that name is returned. Values with empty names
+    are excluded from the mapping.
 
     Args:
         graph: The graph to extract the mapping from.
@@ -327,10 +329,22 @@ def create_value_mapping(graph: _core.Graph) -> dict[str, _core.Value]:
     for input in graph.inputs:
         if not input.name:
             continue
+        if input.name in values:
+            continue
         values[input.name] = input
-    for node in graph:
+    for node in traversal.RecursiveGraphIterator(graph):
+        for value in node.inputs:
+            if not value:
+                continue
+            if not value.name:
+                continue
+            if value.name in values:
+                continue
+            values[value.name] = value
         for value in node.outputs:
             if not value.name:
+                continue
+            if value.name in values:
                 continue
             values[value.name] = value
     return values
