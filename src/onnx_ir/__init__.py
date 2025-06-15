@@ -73,6 +73,7 @@ __all__ = [
     "from_proto",
     "from_onnx_text",
     "to_proto",
+    "to_onnx_text",
     # Convenience constructors
     "tensor",
     "node",
