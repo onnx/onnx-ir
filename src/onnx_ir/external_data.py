@@ -12,6 +12,7 @@ __all__ = [
     "convert_tensors_from_external",
 ]
 
+import asyncio
 import dataclasses
 import logging
 import os
@@ -153,6 +154,39 @@ def _compute_external_data_info(
     return external_data_info
 
 
+async def _producer(
+    tensors: Sequence[_protocols.TensorProtocol],
+    external_data_infos: Sequence[_ExternalDataInfo],
+    queue: asyncio.Queue[tuple[int, bytes] | None],
+) -> None:
+    """Produce tensor data to be written to an external file."""
+    for tensor, tensor_info in zip(tensors, external_data_infos, strict=True):
+        current_offset = tensor_info.offset
+        assert tensor is not None
+        raw_data = tensor.tobytes()
+        if isinstance(tensor, _core.ExternalTensor):
+            tensor.release()
+        await queue.put((current_offset, raw_data))
+    await queue.put(None)  # Sentinel to signal completion
+
+
+async def _consumer(
+    file_path: str | os.PathLike,
+    queue: asyncio.Queue[tuple[int, bytes] | None],
+) -> None:
+    """Consume tensor data and write it to an external file."""
+    with open(file_path, "wb") as data_file:
+        while True:
+            item = await queue.get()
+            if item is None:
+                break
+            current_offset, raw_data = item
+            file_size = data_file.tell()
+            if current_offset > file_size:
+                data_file.write(b"\0" * (current_offset - file_size))
+            data_file.write(raw_data)
+
+
 def _write_external_data(
     tensors: Sequence[_protocols.TensorProtocol],
     external_data_infos: Sequence[_ExternalDataInfo],
@@ -168,18 +202,13 @@ def _write_external_data(
     assert len(tensors) == len(external_data_infos), (
         "Number of tensors and external data infos should match"
     )
-    with open(file_path, "wb") as data_file:
-        for tensor, tensor_info in zip(tensors, external_data_infos, strict=True):
-            current_offset = tensor_info.offset
-            assert tensor is not None
-            raw_data = tensor.tobytes()
-            if isinstance(tensor, _core.ExternalTensor):
-                tensor.release()
-            # Pad file to required offset if needed
-            file_size = data_file.tell()
-            if current_offset > file_size:
-                data_file.write(b"\0" * (current_offset - file_size))
-            data_file.write(raw_data)
+    queue = asyncio.Queue()
+    async def runner():
+        await asyncio.gather(
+            _producer(tensors, external_data_infos, queue),
+            _consumer(file_path, queue),
+        )
+    asyncio.run(runner())
 
 
 def _create_external_tensor(
@@ -285,6 +314,7 @@ def convert_tensors_to_external(
         external_info = _compute_external_data_info(tensor, current_offset)
         external_data_infos.append(external_info)
         current_offset = external_info.offset + external_info.length
+
     _write_external_data(sorted_tensors, external_data_infos, path)
 
     # Create external tensor objects
