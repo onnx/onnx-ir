@@ -398,6 +398,14 @@ def get_const_tensor(
 ) -> _protocols.TensorProtocol | None:
     """Get the constant tensor from a value, if it exists.
 
+    A constant tensor can be obtained if the value has a ``const_value`` set
+    (as in the case of an initializer) or if the value is produced by a
+    Constant node.
+
+    This function will not alter the ``const_value`` of the value, but
+    it will propagate the shape and type of the constant tensor to the value
+    if `propagate_shape_type` is set to True.
+
     Args:
         value: The value to get the constant tensor from.
         propagate_shape_type: If True, the shape and type of the value will be
