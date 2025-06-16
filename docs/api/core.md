@@ -17,6 +17,7 @@
     onnx_ir.from_proto
     onnx_ir.from_onnx_text
     onnx_ir.to_proto
+    onnx_ir.to_onnx_text
     onnx_ir.tensor
     onnx_ir.node
 ```
@@ -48,6 +49,18 @@
     onnx_ir.ExternalTensor
     onnx_ir.StringTensor
     onnx_ir.LazyTensor
+```
+
+### Internal Containers
+
+```{eval-rst}
+.. autosummary::
+    :toctree: generated
+    :template: classtemplate_inherited.rst
+    :nosignatures:
+
+    onnx_ir._graph_containers.GraphInitializers
+    onnx_ir._graph_containers.Attributes
 ```
 
 ## Enums

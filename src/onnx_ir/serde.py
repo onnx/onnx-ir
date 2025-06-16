@@ -37,6 +37,7 @@ __all__ = [
     "deserialize_value_info_proto",
     # Serialization
     "to_proto",
+    "to_onnx_text",
     "serialize_attribute_into",
     "serialize_attribute",
     "serialize_dimension_into",
@@ -62,14 +63,14 @@ __all__ = [
 import collections
 import logging
 import os
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from typing import Any, Callable
 
 import numpy as np
 import onnx
 import onnx.external_data_helper
 
-from onnx_ir import _core, _enums, _protocols, _type_casting
+from onnx_ir import _convenience, _core, _enums, _protocols, _type_casting
 
 if typing.TYPE_CHECKING:
     import google.protobuf.internal.containers as proto_containers
@@ -190,13 +191,64 @@ def from_proto(proto: object) -> object:
     )
 
 
-def from_onnx_text(model_text: str, /) -> _core.Model:
+def from_onnx_text(
+    model_text: str,
+    /,
+    initializers: Iterable[_protocols.TensorProtocol] | None = None,
+) -> _core.Model:
     """Convert the ONNX textual representation to an IR model.
 
     Read more about the textual representation at: https://onnx.ai/onnx/repo-docs/Syntax.html
+
+    Args:
+        model_text: The ONNX textual representation of the model.
+        initializers: Tensors to be added as initializers. If provided, these tensors
+            will be added to the model as initializers. If a name does not exist in the model,
+            a ValueError will be raised.
+
+    Returns:
+        The IR model corresponding to the ONNX textual representation.
+
+    Raises:
+        ValueError: If a tensor name in `initializers` does not match any value in the model.
     """
     proto = onnx.parser.parse_model(model_text)
-    return deserialize_model(proto)
+    model = deserialize_model(proto)
+    values = _convenience.create_value_mapping(model.graph)
+    if initializers:
+        # Add initializers to the model
+        for tensor in initializers:
+            name = tensor.name
+            if not name:
+                raise ValueError(
+                    "Initializer tensor must have a name. "
+                    f"Please provide a name for the initializer: {tensor}"
+                )
+            if name not in values:
+                raise ValueError(f"Value '{name}' does not exist in model.")
+            initializer = values[name]
+            initializer.const_value = tensor
+            model.graph.register_initializer(initializer)
+    return model
+
+
+def to_onnx_text(
+    model: _protocols.ModelProtocol, /, exclude_initializers: bool = False
+) -> str:
+    """Convert the IR model to the ONNX textual representation.
+
+    Args:
+        model: The IR model to convert.
+        exclude_initializers: If True, the initializers will not be included in the output.
+
+    Returns:
+        The ONNX textual representation of the model.
+    """
+    proto = serialize_model(model)
+    if exclude_initializers:
+        del proto.graph.initializer[:]
+    text = onnx.printer.to_text(proto)
+    return text
 
 
 @typing.overload

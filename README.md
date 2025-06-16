@@ -8,6 +8,24 @@
 
 An in-memory IR that supports the full ONNX spec, designed for graph construction, analysis and transformation.
 
+## Getting Started
+
+[onnx-ir documentation](https://onnx.ai/ir-py/)
+
+### Installation
+
+Via pip:
+
+```
+pip install onnx-ir
+```
+
+Or from source:
+
+```
+pip install git+https://github.com/onnx/ir-py.git
+```
+
 ## Features ✨
 
 - Full ONNX spec support: all valid models representable by ONNX protobuf, and a subset of invalid models (so you can load and fix them).

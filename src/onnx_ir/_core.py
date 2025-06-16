@@ -421,7 +421,8 @@ class Tensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatible]): 
                 self._dtype = _enums.DataType.from_numpy(value.dtype)
             else:
                 raise ValueError(
-                    "The dtype must be specified when the value is not a numpy array."
+                    "The dtype must be specified when the value is not a numpy array. "
+                    "Value type: {type(value)}"
                 )
         else:
             if isinstance(value, np.ndarray):
@@ -1033,12 +1034,12 @@ class Shape(_protocols.ShapeProtocol, _display.PrettyPrintable):
 
     A shape can be frozen (made immutable). When the shape is frozen, it cannot be
     unfrozen, making it suitable to be shared across tensors or values.
-    Call :method:`freeze` to freeze the shape.
+    Call :meth:`freeze` to freeze the shape.
 
-    To update the dimension of a frozen shape, call :method:`copy` to create a
+    To update the dimension of a frozen shape, call :meth:`copy` to create a
     new shape with the same dimensions that can be modified.
 
-    Use :method:`get_denotation` and :method:`set_denotation` to access and modify the denotations.
+    Use :meth:`get_denotation` and :meth:`set_denotation` to access and modify the denotations.
 
     Example::
 
@@ -1121,7 +1122,7 @@ class Shape(_protocols.ShapeProtocol, _display.PrettyPrintable):
         """Whether the shape is frozen.
 
         When the shape is frozen, it cannot be unfrozen, making it suitable to be shared.
-        Call :method:`freeze` to freeze the shape. Call :method:`copy` to create a
+        Call :meth:`freeze` to freeze the shape. Call :meth:`copy` to create a
         new shape with the same dimensions that can be modified.
         """
         return self._frozen
@@ -1632,7 +1633,15 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
 
     @property
     def attributes(self) -> _graph_containers.Attributes:
-        """The attributes of the node."""
+        """The attributes of the node as ``dict[str, Attr]`` with additional access methods.
+
+        Use it as a dictionary with keys being the attribute names and values being the
+        :class:`Attr` objects.
+
+        Use ``node.attributes.add(attr)`` to add an attribute to the node.
+        Use ``node.attributes.get_int(name, default)`` to get an integer attribute value.
+        Refer to the :class:`~onnx_ir._graph_containers.Attributes` for more methods.
+        """
         return self._attributes
 
     @property
@@ -2221,7 +2230,7 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
 
     @property
     def initializers(self) -> _graph_containers.GraphInitializers:
-        """The initializers of the graph as a ``MutableMapping[str, Value]``.
+        """The initializers of the graph as a ``dict[str, Value]``.
 
         The keys are the names of the initializers. The values are the :class:`Value` objects.
 
@@ -2356,6 +2365,28 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
         """
         # NOTE: This is a method specific to Graph, not required by the protocol unless proven
         return len(self)
+
+    def all_nodes(self) -> Iterator[Node]:
+        """Get all nodes in the graph and its subgraphs in O(#nodes + #attributes) time.
+
+        This is an alias for ``onnx_ir.traversal.RecursiveGraphIterator(graph)``.
+        Consider using
+        :class:`onnx_ir.traversal.RecursiveGraphIterator` for more advanced
+        traversals on nodes.
+        """
+        # NOTE: This is a method specific to Graph, not required by the protocol unless proven
+        return onnx_ir.traversal.RecursiveGraphIterator(self)
+
+    def subgraphs(self) -> Iterator[Graph]:
+        """Get all subgraphs in the graph in O(#nodes + #attributes) time."""
+        seen_graphs: set[Graph] = set()
+        for node in onnx_ir.traversal.RecursiveGraphIterator(self):
+            graph = node.graph
+            if graph is self:
+                continue
+            if graph is not None and graph not in seen_graphs:
+                seen_graphs.add(graph)
+                yield graph
 
     # Mutation methods
     def append(self, node: Node, /) -> None:
@@ -2862,7 +2893,7 @@ Model(
         """Get all graphs and subgraphs in the model.
 
         This is a convenience method to traverse the model. Consider using
-        `onnx_ir.traversal.RecursiveGraphIterator` for more advanced
+        :class:`onnx_ir.traversal.RecursiveGraphIterator` for more advanced
         traversals on nodes.
         """
         # NOTE(justinchuby): Given
@@ -2871,11 +2902,8 @@ Model(
         # (3) Users familiar with onnxruntime optimization tools expect this method
         # I created this method as a core method instead of an iterator in
         # `traversal.py`.
-        seen_graphs: set[Graph] = set()
-        for node in onnx_ir.traversal.RecursiveGraphIterator(self.graph):
-            if node.graph is not None and node.graph not in seen_graphs:
-                seen_graphs.add(node.graph)
-                yield node.graph
+        yield self.graph
+        yield from self.graph.subgraphs()
 
 
 class Function(_protocols.FunctionProtocol, Sequence[Node], _display.PrettyPrintable):
@@ -3008,6 +3036,28 @@ class Function(_protocols.FunctionProtocol, Sequence[Node], _display.PrettyPrint
     @property
     def metadata_props(self) -> dict[str, str]:
         return self._graph.metadata_props
+
+    def all_nodes(self) -> Iterator[Node]:
+        """Get all nodes in the graph and its subgraphs in O(#nodes + #attributes) time.
+
+        This is an alias for ``onnx_ir.traversal.RecursiveGraphIterator(graph)``.
+        Consider using
+        :class:`onnx_ir.traversal.RecursiveGraphIterator` for more advanced
+        traversals on nodes.
+        """
+        # NOTE: This is a method specific to Graph, not required by the protocol unless proven
+        return onnx_ir.traversal.RecursiveGraphIterator(self)
+
+    def subgraphs(self) -> Iterator[Graph]:
+        """Get all subgraphs in the function in O(#nodes + #attributes) time."""
+        seen_graphs: set[Graph] = set()
+        for node in onnx_ir.traversal.RecursiveGraphIterator(self):
+            graph = node.graph
+            if graph is self._graph:
+                continue
+            if graph is not None and graph not in seen_graphs:
+                seen_graphs.add(graph)
+                yield graph
 
     # Mutation methods
     def append(self, node: Node, /) -> None:
