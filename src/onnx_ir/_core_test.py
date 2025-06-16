@@ -1276,6 +1276,72 @@ class GraphTest(unittest.TestCase):
             ("d", "c", "b", "a", ">", "if"),
         )
 
+    def test_all_nodes_returns_all_nodes(self):
+        # Create a graph with a subgraph
+        v0 = _core.Value(name="v0")
+        v1 = _core.Value(name="v1")
+        node0 = _core.Node("", "A", inputs=(v0,), num_outputs=1)
+        node1 = _core.Node("", "B", inputs=(v1,), num_outputs=1)
+        sub_node = _core.Node(
+            "", "Sub", inputs=(node0.outputs[0], node1.outputs[0]), num_outputs=1
+        )
+        subgraph = _core.Graph(
+            inputs=(), outputs=(sub_node.outputs[0],), nodes=(sub_node,), name="subgraph"
+        )
+        main_node = _core.Node(
+            "",
+            "If",
+            inputs=(node0.outputs[0],),
+            attributes=[ir.AttrGraph("then_branch", subgraph)],
+        )
+        graph = _core.Graph(
+            inputs=(v0, v1),
+            outputs=(main_node.outputs[0],),
+            nodes=(node0, node1, main_node),
+            name="main_graph",
+        )
+        all_nodes = list(graph.all_nodes())
+        # Should include node0, node1, main_node, and sub_node
+        self.assertIn(node0, all_nodes)
+        self.assertIn(node1, all_nodes)
+        self.assertIn(main_node, all_nodes)
+        self.assertIn(sub_node, all_nodes)
+        self.assertEqual(len(all_nodes), 4)
+
+    def test_subgraphs_returns_all_subgraphs(self):
+        # Create a graph with two subgraphs
+        v0 = _core.Value(name="v0")
+        v1 = _core.Value(name="v1")
+        node0 = _core.Node("", "A", inputs=(v0,), num_outputs=1)
+        node1 = _core.Node("", "B", inputs=(v1,), num_outputs=1)
+        sub_node1 = _core.Node("", "Sub1", inputs=(node0.outputs[0],), num_outputs=1)
+        sub_node2 = _core.Node("", "Sub2", inputs=(node1.outputs[0],), num_outputs=1)
+        subgraph1 = _core.Graph(
+            inputs=(), outputs=(sub_node1.outputs[0],), nodes=(sub_node1,), name="subgraph1"
+        )
+        subgraph2 = _core.Graph(
+            inputs=(), outputs=(sub_node2.outputs[0],), nodes=(sub_node2,), name="subgraph2"
+        )
+        main_node = _core.Node(
+            "",
+            "If",
+            inputs=(node0.outputs[0],),
+            attributes=[
+                ir.AttrGraph("then_branch", subgraph1),
+                ir.AttrGraph("else_branch", subgraph2),
+            ],
+        )
+        graph = _core.Graph(
+            inputs=(v0, v1),
+            outputs=(main_node.outputs[0],),
+            nodes=(node0, node1, main_node),
+            name="main_graph",
+        )
+        subgraphs = list(graph.subgraphs())
+        self.assertIn(subgraph1, subgraphs)
+        self.assertIn(subgraph2, subgraphs)
+        self.assertEqual(len(subgraphs), 2)
+
 
 class GraphContainersTest(unittest.TestCase):
     """Test containers for input, output and initializers of a graph."""
