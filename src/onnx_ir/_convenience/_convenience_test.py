@@ -99,6 +99,5 @@ class GetConstantTensorTest(unittest.TestCase):
         self.assertEqual(node.outputs[0].type, ir.TensorType(result_2.dtype))
 
 
-
 if __name__ == "__main__":
     unittest.main()
