@@ -12,7 +12,7 @@ __all__ = [
     "load_to_model",
     "convert_tensors_to_external",
     "convert_tensors_from_external",
-    "CallBackInfo",
+    "CallbackInfo",
 ]
 
 import dataclasses
@@ -52,7 +52,7 @@ class _ExternalDataInfo:
 
 
 @dataclasses.dataclass
-class CallBackInfo:
+class CallbackInfo:
     """A class that shares information about a tensor that is to be saved as external data for callback functions.
 
     Attributes:
@@ -175,7 +175,7 @@ def _write_external_data(
     tensors: Sequence[_protocols.TensorProtocol],
     external_data_infos: Sequence[_ExternalDataInfo],
     file_path: str | os.PathLike,
-    callback: Callable[[_protocols.TensorProtocol, CallBackInfo], None] | None = None,
+    callback: Callable[[_protocols.TensorProtocol, CallbackInfo], None] | None = None,
 ) -> None:
     """Write tensor data to an external file according to information stored in ExternalDataInfo objects.
 
@@ -197,7 +197,7 @@ def _write_external_data(
             if callback is not None:
                 callback(
                     tensor,
-                    CallBackInfo(
+                    CallbackInfo(
                         total=tensors_count,
                         index=i,
                         offset=tensor_info.offset,
@@ -261,7 +261,7 @@ def convert_tensors_to_external(
     tensors: Sequence[_protocols.TensorProtocol],
     base_dir: str | os.PathLike,
     relative_path: str | os.PathLike,
-    callback: Callable[[_protocols.TensorProtocol, CallBackInfo], None] | None = None,
+    callback: Callable[[_protocols.TensorProtocol, CallbackInfo], None] | None = None,
 ) -> list[_core.ExternalTensor]:
     """Convert a sequence of any TensorProtocol tensors to external tensors.
 
@@ -372,7 +372,7 @@ def unload_from_model(
     relative_path: str | os.PathLike,
     *,
     size_threshold_bytes: int = 0,
-    callback: Callable[[_protocols.TensorProtocol, CallBackInfo], None] | None = None,
+    callback: Callable[[_protocols.TensorProtocol, CallbackInfo], None] | None = None,
 ) -> _core.Model:
     """Convert all initializers equal or above size_threshold_bytes to external tensors in-place and save data to a single data file.
 

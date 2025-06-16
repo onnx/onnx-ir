@@ -44,7 +44,7 @@ def save(
     format: str | None = None,
     external_data: str | os.PathLike | None = None,
     size_threshold_bytes: int = 256,
-    callback: Callable[[_protocols.TensorProtocol, _external_data.CallBackInfo], None]
+    callback: Callable[[_protocols.TensorProtocol, _external_data.CallbackInfo], None]
     | None = None,
 ) -> None:
     """Save an ONNX model to a file.
@@ -65,7 +65,7 @@ def save(
             with tqdm.tqdm() as pbar:
             total_set = False
 
-            def callback(tensor: ir.TensorProtocol, metadata: ir.external_data.CallBackInfo) -> None:
+            def callback(tensor: ir.TensorProtocol, metadata: ir.external_data.CallbackInfo) -> None:
                 nonlocal total_set
                 if not total_set:
                     pbar.total = metadata.total
