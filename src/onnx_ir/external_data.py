@@ -13,9 +13,11 @@ __all__ = [
 ]
 
 import asyncio
+import concurrent.futures
 import dataclasses
 import logging
 import os
+import queue
 from collections.abc import Iterator, Sequence
 
 from onnx_ir import _core, _enums, _protocols
@@ -154,61 +156,52 @@ def _compute_external_data_info(
     return external_data_info
 
 
-async def _producer(
-    tensors: Sequence[_protocols.TensorProtocol],
-    external_data_infos: Sequence[_ExternalDataInfo],
-    queue: asyncio.Queue[tuple[int, bytes] | None],
-) -> None:
-    """Produce tensor data to be written to an external file."""
-    for tensor, tensor_info in zip(tensors, external_data_infos, strict=True):
-        current_offset = tensor_info.offset
-        assert tensor is not None
-        raw_data = tensor.tobytes()
-        if isinstance(tensor, _core.ExternalTensor):
-            tensor.release()
-        await queue.put((current_offset, raw_data))
-    await queue.put(None)  # Sentinel to signal completion
-
-
-async def _consumer(
-    file_path: str | os.PathLike,
-    queue: asyncio.Queue[tuple[int, bytes] | None],
-) -> None:
-    """Consume tensor data and write it to an external file."""
-    with open(file_path, "wb") as data_file:
-        while True:
-            item = await queue.get()
-            if item is None:
-                break
-            current_offset, raw_data = item
-            file_size = data_file.tell()
-            if current_offset > file_size:
-                data_file.write(b"\0" * (current_offset - file_size))
-            data_file.write(raw_data)
-
-
 def _write_external_data(
     tensors: Sequence[_protocols.TensorProtocol],
     external_data_infos: Sequence[_ExternalDataInfo],
     file_path: str | os.PathLike,
 ) -> None:
-    """Write tensor data to an external file according to information stored in ExternalDataInfo objects.
-
-    Args:
-        tensors: Tensors to be written as external data.
-        external_data_infos: External data information stored for each tensor to be written as external data.
-        file_path: Location to which external data is to be stored.
-    """
+    """Write tensor data to an external file using producer-consumer pattern with threads."""
     assert len(tensors) == len(external_data_infos), (
         "Number of tensors and external data infos should match"
     )
-    queue = asyncio.Queue()
-    async def runner():
-        await asyncio.gather(
-            _producer(tensors, external_data_infos, queue),
-            _consumer(file_path, queue),
-        )
-    asyncio.run(runner())
+    q: queue.Queue[tuple[str, int, bytes] | None] = queue.Queue(maxsize=8)
+
+
+    def producer() -> None:
+        """Produce tensor data to be written to an external file."""
+        for tensor, tensor_info in zip(tensors, external_data_infos, strict=True):
+            current_offset = tensor_info.offset
+            assert tensor is not None
+            raw_data = tensor.tobytes()
+            if isinstance(tensor, _core.ExternalTensor):
+                tensor.release()
+            assert tensor.name is not None, "Tensor name should not be None"
+            q.put((tensor.name, current_offset, raw_data))
+        q.put(None)  # Sentinel to signal completion
+
+    def consumer():
+        with open(file_path, "wb") as data_file:
+            while True:
+                item = q.get()
+                if item is None:
+                    break
+                name, current_offset, raw_data = item
+                print(name, "at offset", current_offset, "size", len(raw_data))
+                file_size = data_file.tell()
+                if current_offset > file_size:
+                    data_file.write(b"\0" * (current_offset - file_size))
+                data_file.write(raw_data)
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Start consumer thread
+        consumer_thread = executor.submit(consumer)
+        # Start producer threads
+        producer_thread = executor.submit(producer)
+        # Signal consumer when all producers are done
+
+        # Wait for all to finish
+        concurrent.futures.wait([producer_thread, consumer_thread])
 
 
 def _create_external_tensor(
