@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import Callable
+from typing import Any, Callable
 
 __all__ = [
     "set_base_dir",
@@ -159,7 +159,7 @@ def _write_external_data(
     tensors: Sequence[_protocols.TensorProtocol],
     external_data_infos: Sequence[_ExternalDataInfo],
     file_path: str | os.PathLike,
-    callback: Callable[[_protocols.TensorProtocol, int, int], None] | None = None,
+    callback: Callable[[_protocols.TensorProtocol, dict[str, Any]], None] | None = None,
 ) -> None:
     """Write tensor data to an external file according to information stored in ExternalDataInfo objects.
 
@@ -168,16 +168,27 @@ def _write_external_data(
         external_data_infos: External data information stored for each tensor to be written as external data.
         file_path: Location to which external data is to be stored.
         callback: Optional callback function that is called for each tensor before writing to file
-            for debugging or logging purposes.
+            for debugging or logging purposes. The keys for the metadata dictionary are
+            "total", "index", "offset", and "size_bytes".
     """
     tensors_count = len(tensors)
     assert tensors_count == len(external_data_infos), (
         "Number of tensors and external data infos should match"
     )
     with open(file_path, "wb") as data_file:
-        for i, (tensor, tensor_info) in enumerate(zip(tensors, external_data_infos, strict=True)):
+        for i, (tensor, tensor_info) in enumerate(
+            zip(tensors, external_data_infos, strict=True)
+        ):
             if callback is not None:
-                callback(tensor, tensors_count, i)
+                callback(
+                    tensor,
+                    {
+                        "total": tensors_count,
+                        "index": i,
+                        "offset": tensor_info.offset,
+                        "size_bytes": tensor_info.length,
+                    },
+                )
             current_offset = tensor_info.offset
             assert tensor is not None
             raw_data = tensor.tobytes()
@@ -236,7 +247,7 @@ def convert_tensors_to_external(
     tensors: Sequence[_protocols.TensorProtocol],
     base_dir: str | os.PathLike,
     relative_path: str | os.PathLike,
-    callback: Callable[[_protocols.TensorProtocol, int, int], None] | None = None,
+    callback: Callable[[_protocols.TensorProtocol, dict[str, Any]], None] | None = None,
 ) -> list[_core.ExternalTensor]:
     """Convert a sequence of any TensorProtocol tensors to external tensors.
 
@@ -248,7 +259,8 @@ def convert_tensors_to_external(
         base_dir: Path of base directory.
         relative_path: Path to which external data is to be stored, relative to the ONNX file.
         callback: Optional callback function that is called for each tensor before writing to file
-            for debugging or logging purposes.
+            for debugging or logging purposes. The keys for the metadata dictionary are
+            "total", "index", "offset", and "size_bytes".
 
     Returns:
         A list of external tensors derived from a list of input tensors. The order
@@ -347,7 +359,7 @@ def unload_from_model(
     relative_path: str | os.PathLike,
     *,
     size_threshold_bytes: int = 0,
-    callback: Callable[[_protocols.TensorProtocol, int, int], None] | None = None,
+    callback: Callable[[_protocols.TensorProtocol, dict[str, Any]], None] | None = None,
 ) -> _core.Model:
     """Convert all initializers equal or above size_threshold_bytes to external tensors in-place and save data to a single data file.
 
@@ -369,7 +381,8 @@ def unload_from_model(
             E.g. "model.data"
         size_threshold_bytes: Save to external data if the tensor size in bytes is larger than this threshold.
         callback: Optional callback function that is called for each tensor before writing to file
-            for debugging or logging purposes.
+            for debugging or logging purposes. The keys for the metadata dictionary are
+            "total", "index", "offset", and "size_bytes".
 
     Returns:
         An ir.Model with all initializer data equal or above ``size_threshold_bytes``

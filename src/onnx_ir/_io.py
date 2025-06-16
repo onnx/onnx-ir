@@ -7,7 +7,7 @@ from __future__ import annotations
 __all__ = ["load", "save"]
 
 import os
-from typing import Callable
+from typing import Any, Callable
 
 import onnx
 
@@ -44,7 +44,7 @@ def save(
     format: str | None = None,
     external_data: str | os.PathLike | None = None,
     size_threshold_bytes: int = 256,
-    callback: Callable[[_protocols.TensorProtocol], None] | None = None,
+    callback: Callable[[_protocols.TensorProtocol, dict[str, Any]], None] | None = None,
 ) -> None:
     """Save an ONNX model to a file.
 
@@ -68,7 +68,8 @@ def save(
         size_threshold_bytes: Save to external data if the tensor size in bytes is larger than this threshold.
             Effective only when ``external_data`` is set.
         callback: A callback function that is called for each tensor that is saved to external data
-            for debugging or logging purposes.
+            for debugging or logging purposes. The keys for the metadata dictionary are
+            "total", "index", "offset", and "size_bytes".
 
     Raises:
         ValueError: If the external data path is an absolute path.
