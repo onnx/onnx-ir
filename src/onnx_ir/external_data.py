@@ -159,7 +159,7 @@ def _write_external_data(
     tensors: Sequence[_protocols.TensorProtocol],
     external_data_infos: Sequence[_ExternalDataInfo],
     file_path: str | os.PathLike,
-    callback: Callable[[_protocols.TensorProtocol], None] | None = None,
+    callback: Callable[[_protocols.TensorProtocol, int, int], None] | None = None,
 ) -> None:
     """Write tensor data to an external file according to information stored in ExternalDataInfo objects.
 
@@ -170,13 +170,14 @@ def _write_external_data(
         callback: Optional callback function that is called for each tensor before writing to file
             for debugging or logging purposes.
     """
-    assert len(tensors) == len(external_data_infos), (
+    tensors_count = len(tensors)
+    assert tensors_count == len(external_data_infos), (
         "Number of tensors and external data infos should match"
     )
     with open(file_path, "wb") as data_file:
-        for tensor, tensor_info in zip(tensors, external_data_infos, strict=True):
+        for i, (tensor, tensor_info) in enumerate(zip(tensors, external_data_infos, strict=True)):
             if callback is not None:
-                callback(tensor)
+                callback(tensor, tensors_count, i)
             current_offset = tensor_info.offset
             assert tensor is not None
             raw_data = tensor.tobytes()
@@ -235,7 +236,7 @@ def convert_tensors_to_external(
     tensors: Sequence[_protocols.TensorProtocol],
     base_dir: str | os.PathLike,
     relative_path: str | os.PathLike,
-    callback: Callable[[_protocols.TensorProtocol], None] | None = None,
+    callback: Callable[[_protocols.TensorProtocol, int, int], None] | None = None,
 ) -> list[_core.ExternalTensor]:
     """Convert a sequence of any TensorProtocol tensors to external tensors.
 
@@ -346,7 +347,7 @@ def unload_from_model(
     relative_path: str | os.PathLike,
     *,
     size_threshold_bytes: int = 0,
-    callback: Callable[[_protocols.TensorProtocol], None] | None = None,
+    callback: Callable[[_protocols.TensorProtocol, int, int], None] | None = None,
 ) -> _core.Model:
     """Convert all initializers equal or above size_threshold_bytes to external tensors in-place and save data to a single data file.
 
