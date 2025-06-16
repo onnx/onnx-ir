@@ -1290,6 +1290,10 @@ def _normalize_domain(domain: str) -> str:
 class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
     """IR Node.
 
+    .. tip::
+        For a more convenient way to create a node that supports Python objects
+        as attributes, use the :func:`onnx_ir.node` constructor.
+
     If the ``graph`` is provided, the node will be added to the graph. Otherwise,
     user is responsible to call ``graph.append(node)`` (or other mutation methods
     in :class:`Graph`) to add the node to the graph.
@@ -1301,7 +1305,7 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
     the new output values by calling :meth:`replace_input_with` on the using nodes
     of this node's outputs.
 
-    .. note:
+    .. note::
         When the ``domain`` is `"ai.onnx"`, it is normalized to `""`.
     """
 
@@ -1808,12 +1812,13 @@ class Value(_protocols.ValueProtocol, _display.PrettyPrintable):
     The index of the output of the node that produces the value can be accessed with
     :meth:`index`.
 
-    To find all the nodes that use this value as an input, call :meth:`uses`.
+    To find all the nodes that use this value as an input, call :meth:`uses`. Consuming
+    nodes can be obtained with :meth:`consumers`.
 
     To check if the value is an is an input, output or initializer of a graph,
     use :meth:`is_graph_input`, :meth:`is_graph_output` or :meth:`is_initializer`.
 
-    Use :meth:`graph` to get the graph that owns the value.
+    Use :attr:`graph` to get the graph that owns the value.
     """
 
     __slots__ = (
