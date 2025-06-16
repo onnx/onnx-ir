@@ -109,11 +109,12 @@ def save(
         base_dir = os.path.dirname(path)
 
         # Store the original initializer values so they can be restored if modify_model=False
-        initializer_values: dict[_core.Graph, tuple[_core.Value, ...]] = {}
-        tensors: dict[_core.Graph, list[_protocols.TensorProtocol | None]] = {}
+        initializer_values: list[_core.Value] = []
+        tensors: list[_protocols.TensorProtocol | None] = []
         for graph in model.graphs():
-            initializer_values[graph] = tuple(model.graph.initializers.values())
-            tensors[graph] = [v.const_value for v in model.graph.initializers.values()]
+            # Collect from all subgraphs as well
+            initializer_values.extend(graph.initializers.values())
+            tensors.extend([v.const_value for v in graph.initializers.values()])
 
         try:
             model = _external_data.unload_from_model(
@@ -128,11 +129,8 @@ def save(
 
         finally:
             # Restore the original initializer values so the model is unchanged
-            for graph in model.graphs():
-                for initializer, tensor in zip(
-                    initializer_values[graph], tensors[graph], strict=True
-                ):
-                    initializer.const_value = tensor
+            for initializer, tensor in zip(initializer_values, tensors, strict=True):
+                initializer.const_value = tensor
 
     else:
         proto = serde.serialize_model(model)
