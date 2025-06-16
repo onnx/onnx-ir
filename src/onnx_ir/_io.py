@@ -54,6 +54,30 @@ def save(
     to load the newly saved model, or provide a different external data path that
     is not currently referenced by any tensors in the model.
 
+    .. tip::
+
+        A simple progress bar can be implemented by passing a callback function as the following::
+
+            import onnx_ir as ir
+            import tqdm
+
+            with tqdm.tqdm() as pbar:
+            total_set = False
+
+            def callback(tensor: ir.TensorProtocol, metadata: dict):
+                nonlocal total_set
+                if not total_set:
+                    pbar.total = metadata["total"]
+                    total_set = True
+
+                pbar.update()
+                pbar.set_description(f"Saving {tensor.name} ({tensor.dtype}, {tensor.shape})")
+
+            ir.save(
+                ...,
+                callback=callback,
+            )
+
     Args:
         model: The model to save.
         path: The path to save the model to. E.g. "model.onnx".
@@ -69,7 +93,10 @@ def save(
             Effective only when ``external_data`` is set.
         callback: A callback function that is called for each tensor that is saved to external data
             for debugging or logging purposes. The keys for the metadata dictionary are
-            "total", "index", "offset", and "size_bytes".
+
+            - ``"total"`` (the total number of tensors to save),
+            - ``"index"`` (the index of the tensor being saved),
+            - ``"offset"`` (the offset of the tensor in the external data file)
 
     Raises:
         ValueError: If the external data path is an absolute path.

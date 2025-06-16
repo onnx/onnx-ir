@@ -167,9 +167,12 @@ def _write_external_data(
         tensors: Tensors to be written as external data.
         external_data_infos: External data information stored for each tensor to be written as external data.
         file_path: Location to which external data is to be stored.
-        callback: Optional callback function that is called for each tensor before writing to file
+        callback: A callback function that is called for each tensor that is saved to external data
             for debugging or logging purposes. The keys for the metadata dictionary are
-            "total", "index", "offset", and "size_bytes".
+
+            - ``"total"`` (the total number of tensors to save),
+            - ``"index"`` (the index of the tensor being saved),
+            - ``"offset"`` (the offset of the tensor in the external data file)
     """
     tensors_count = len(tensors)
     assert tensors_count == len(external_data_infos), (
@@ -258,9 +261,12 @@ def convert_tensors_to_external(
         tensors: Tensors to be converted to external tensors. They can be external tensors themselves.
         base_dir: Path of base directory.
         relative_path: Path to which external data is to be stored, relative to the ONNX file.
-        callback: Optional callback function that is called for each tensor before writing to file
+        callback: A callback function that is called for each tensor that is saved to external data
             for debugging or logging purposes. The keys for the metadata dictionary are
-            "total", "index", "offset", and "size_bytes".
+
+            - ``"total"`` (the total number of tensors to save),
+            - ``"index"`` (the index of the tensor being saved),
+            - ``"offset"`` (the offset of the tensor in the external data file)
 
     Returns:
         A list of external tensors derived from a list of input tensors. The order
@@ -380,9 +386,12 @@ def unload_from_model(
         relative_path: Path to which external data is to be stored, relative to the ONNX file.
             E.g. "model.data"
         size_threshold_bytes: Save to external data if the tensor size in bytes is larger than this threshold.
-        callback: Optional callback function that is called for each tensor before writing to file
+        callback: A callback function that is called for each tensor that is saved to external data
             for debugging or logging purposes. The keys for the metadata dictionary are
-            "total", "index", "offset", and "size_bytes".
+
+            - ``"total"`` (the total number of tensors to save),
+            - ``"index"`` (the index of the tensor being saved),
+            - ``"offset"`` (the offset of the tensor in the external data file)
 
     Returns:
         An ir.Model with all initializer data equal or above ``size_threshold_bytes``
