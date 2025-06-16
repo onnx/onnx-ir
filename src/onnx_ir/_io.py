@@ -65,7 +65,7 @@ def save(
             with tqdm.tqdm() as pbar:
             total_set = False
 
-            def callback(tensor: ir.TensorProtocol, metadata):
+            def callback(tensor: ir.TensorProtocol, metadata: ir.external_data.CallBackInfo) -> None:
                 nonlocal total_set
                 if not total_set:
                     pbar.total = metadata.total
