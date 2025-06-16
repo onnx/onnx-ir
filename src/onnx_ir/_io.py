@@ -110,11 +110,10 @@ def save(
 
         # Store the original initializer values so they can be restored if modify_model=False
         initializer_values: list[_core.Value] = []
-        tensors: list[_protocols.TensorProtocol | None] = []
         for graph in model.graphs():
             # Collect from all subgraphs as well
             initializer_values.extend(graph.initializers.values())
-            tensors.extend([v.const_value for v in graph.initializers.values()])
+        tensors = [v.const_value for v in initializer_values]
 
         try:
             model = _external_data.unload_from_model(
