@@ -411,6 +411,7 @@ def unload_from_model(
         [v.const_value for v in initializers_to_become_external],  # type: ignore[misc]
         base_dir=base_dir,
         relative_path=relative_path,
+        callback=callback,
     )
 
     # Replace the initializer values with external tensors and save the model
