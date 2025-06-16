@@ -63,21 +63,21 @@ def save(
             import tqdm
 
             with tqdm.tqdm() as pbar:
-            total_set = False
-
-            def callback(tensor: ir.TensorProtocol, metadata: ir.external_data.CallbackInfo) -> None:
-                nonlocal total_set
-                if not total_set:
-                    pbar.total = metadata.total
-                    total_set = True
-
-                pbar.update()
-                pbar.set_description(f"Saving {tensor.name} ({tensor.dtype}, {tensor.shape}) at offset {metadata.offset}")
-
-            ir.save(
-                ...,
-                callback=callback,
-            )
+                total_set = False
+    
+                def callback(tensor: ir.TensorProtocol, metadata: ir.external_data.CallbackInfo) -> None:
+                    nonlocal total_set
+                    if not total_set:
+                        pbar.total = metadata.total
+                        total_set = True
+    
+                    pbar.update()
+                    pbar.set_description(f"Saving {tensor.name} ({tensor.dtype}, {tensor.shape}) at offset {metadata.offset}")
+    
+                ir.save(
+                    ...,
+                    callback=callback,
+                )
 
     Args:
         model: The model to save.
