@@ -8,7 +8,7 @@ __all__ = [
     "convert_attribute",
     "convert_attributes",
     "create_value_mapping",
-    "get_constant_tensor",
+    "get_const_tensor",
     "replace_all_uses_with",
     "replace_nodes_and_values",
 ]
@@ -17,7 +17,7 @@ from onnx_ir._convenience import (
     convert_attribute,
     convert_attributes,
     create_value_mapping,
-    get_constant_tensor,
+    get_const_tensor,
     replace_all_uses_with,
     replace_nodes_and_values,
 )

@@ -14,10 +14,11 @@ __all__ = [
     "replace_all_uses_with",
     "create_value_mapping",
     "replace_nodes_and_values",
+    "get_const_tensor",
 ]
 
 from collections.abc import Mapping, Sequence
-from typing import Union, cast
+from typing import Union
 
 import numpy as np
 import onnx
@@ -392,7 +393,7 @@ def replace_nodes_and_values(
     graph_or_function.remove(old_nodes, safe=True)
 
 
-def get_constant_tensor(
+def get_const_tensor(
     value: _protocols.ValueProtocol, propagate_shape_type: bool = False
 ) -> _protocols.TensorProtocol | None:
     """Get the constant tensor from a value, if it exists.
@@ -440,8 +441,9 @@ def get_constant_tensor(
             tensor = attr_value.as_tensor()
         else:
             return None
+    tensor.name = value.name
     if tensor is not None and propagate_shape_type:
         # Propagate the shape and type of the tensor to the value
         value.shape = tensor.shape  # type: ignore[assignment]
-        value.dtype = tensor.type  # type: ignore[assignment]
+        value.type = _core.TensorType(tensor.dtype)
     return tensor
