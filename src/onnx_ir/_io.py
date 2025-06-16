@@ -7,10 +7,11 @@ from __future__ import annotations
 __all__ = ["load", "save"]
 
 import os
+from typing import Callable
 
 import onnx
 
-from onnx_ir import _core, serde
+from onnx_ir import _core, _protocols, serde
 from onnx_ir import external_data as _external_data
 from onnx_ir._polyfill import zip
 
@@ -43,6 +44,7 @@ def save(
     format: str | None = None,
     external_data: str | os.PathLike | None = None,
     size_threshold_bytes: int = 256,
+    callback: Callable[[_protocols.TensorProtocol], None] | None = None,
 ) -> None:
     """Save an ONNX model to a file.
 
@@ -65,6 +67,8 @@ def save(
             it will be serialized in the ONNX Proto message.
         size_threshold_bytes: Save to external data if the tensor size in bytes is larger than this threshold.
             Effective only when ``external_data`` is set.
+        callback: A callback function that is called for each tensor that is saved to external data
+            for debugging or logging purposes.
 
     Raises:
         ValueError: If the external data path is an absolute path.
@@ -77,12 +81,17 @@ def save(
         base_dir = os.path.dirname(path)
 
         # Store the original initializer values so they can be restored if modify_model=False
+        # FIXME(justinchuby): Get the initializers from subgraphs as well
         initializer_values = tuple(model.graph.initializers.values())
         tensors = [v.const_value for v in initializer_values]
 
         try:
             model = _external_data.unload_from_model(
-                model, base_dir, external_data, size_threshold_bytes=size_threshold_bytes
+                model,
+                base_dir,
+                external_data,
+                size_threshold_bytes=size_threshold_bytes,
+                callback=callback,
             )
             proto = serde.serialize_model(model)
             onnx.save(proto, path, format=format)

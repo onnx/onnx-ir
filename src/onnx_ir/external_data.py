@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+from typing import Callable
+
 __all__ = [
     "set_base_dir",
     "unload_from_model",
@@ -157,6 +159,7 @@ def _write_external_data(
     tensors: Sequence[_protocols.TensorProtocol],
     external_data_infos: Sequence[_ExternalDataInfo],
     file_path: str | os.PathLike,
+    callback: Callable[[_protocols.TensorProtocol], None] | None = None,
 ) -> None:
     """Write tensor data to an external file according to information stored in ExternalDataInfo objects.
 
@@ -164,12 +167,16 @@ def _write_external_data(
         tensors: Tensors to be written as external data.
         external_data_infos: External data information stored for each tensor to be written as external data.
         file_path: Location to which external data is to be stored.
+        callback: Optional callback function that is called for each tensor before writing to file
+            for debugging or logging purposes.
     """
     assert len(tensors) == len(external_data_infos), (
         "Number of tensors and external data infos should match"
     )
     with open(file_path, "wb") as data_file:
         for tensor, tensor_info in zip(tensors, external_data_infos, strict=True):
+            if callback is not None:
+                callback(tensor)
             current_offset = tensor_info.offset
             assert tensor is not None
             raw_data = tensor.tobytes()
@@ -228,6 +235,7 @@ def convert_tensors_to_external(
     tensors: Sequence[_protocols.TensorProtocol],
     base_dir: str | os.PathLike,
     relative_path: str | os.PathLike,
+    callback: Callable[[_protocols.TensorProtocol], None] | None = None,
 ) -> list[_core.ExternalTensor]:
     """Convert a sequence of any TensorProtocol tensors to external tensors.
 
@@ -238,6 +246,8 @@ def convert_tensors_to_external(
         tensors: Tensors to be converted to external tensors. They can be external tensors themselves.
         base_dir: Path of base directory.
         relative_path: Path to which external data is to be stored, relative to the ONNX file.
+        callback: Optional callback function that is called for each tensor before writing to file
+            for debugging or logging purposes.
 
     Returns:
         A list of external tensors derived from a list of input tensors. The order
@@ -285,7 +295,7 @@ def convert_tensors_to_external(
         external_info = _compute_external_data_info(tensor, current_offset)
         external_data_infos.append(external_info)
         current_offset = external_info.offset + external_info.length
-    _write_external_data(sorted_tensors, external_data_infos, path)
+    _write_external_data(sorted_tensors, external_data_infos, path, callback=callback)
 
     # Create external tensor objects
     external_tensors: list[_core.ExternalTensor] = [
@@ -336,6 +346,7 @@ def unload_from_model(
     relative_path: str | os.PathLike,
     *,
     size_threshold_bytes: int = 0,
+    callback: Callable[[_protocols.TensorProtocol], None] | None = None,
 ) -> _core.Model:
     """Convert all initializers equal or above size_threshold_bytes to external tensors in-place and save data to a single data file.
 
@@ -356,6 +367,8 @@ def unload_from_model(
         relative_path: Path to which external data is to be stored, relative to the ONNX file.
             E.g. "model.data"
         size_threshold_bytes: Save to external data if the tensor size in bytes is larger than this threshold.
+        callback: Optional callback function that is called for each tensor before writing to file
+            for debugging or logging purposes.
 
     Returns:
         An ir.Model with all initializer data equal or above ``size_threshold_bytes``
