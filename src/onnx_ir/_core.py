@@ -1290,6 +1290,10 @@ def _normalize_domain(domain: str) -> str:
 class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
     """IR Node.
 
+    .. tip::
+        For a more convenient way to create a node that supports Python objects
+        as attributes, use the :func:`onnx_ir.node` constructor.
+
     If the ``graph`` is provided, the node will be added to the graph. Otherwise,
     user is responsible to call ``graph.append(node)`` (or other mutation methods
     in :class:`Graph`) to add the node to the graph.
@@ -1301,7 +1305,7 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
     the new output values by calling :meth:`replace_input_with` on the using nodes
     of this node's outputs.
 
-    .. note:
+    .. note::
         When the ``domain`` is `"ai.onnx"`, it is normalized to `""`.
     """
 
