@@ -139,6 +139,90 @@ class IOFunctionsTest(unittest.TestCase):
                     size_threshold_bytes=0,
                 )
 
+    def test_save_with_external_data_calls_callback_with_correct_metadata(self):
+        """Test that the callback is invoked with correct metadata when saving with external data."""
+        model = _create_simple_model_with_initializers()
+        callback_calls = []
+        
+        def test_callback(tensor, metadata):
+            callback_calls.append((tensor, metadata.copy()))
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = os.path.join(tmpdir, "model.onnx")
+            external_data_file = "model.data"
+            _io.save(
+                model, 
+                path, 
+                external_data=external_data_file, 
+                size_threshold_bytes=0,
+                callback=test_callback
+            )
+            
+            # Verify callback was called once for the one initializer
+            self.assertEqual(len(callback_calls), 1)
+            
+            tensor, metadata = callback_calls[0]
+            # Verify tensor is the expected initializer tensor
+            self.assertEqual(tensor.name, "initializer_0")
+            np.testing.assert_array_equal(tensor.numpy(), np.array([0.0]))
+            
+            # Verify metadata contains expected keys and values
+            self.assertIn("total", metadata)
+            self.assertIn("index", metadata)
+            self.assertIn("offset", metadata)
+            self.assertIn("size_bytes", metadata)
+            
+            self.assertEqual(metadata["total"], 1)
+            self.assertEqual(metadata["index"], 0)
+            self.assertIsInstance(metadata["offset"], int)
+            self.assertGreaterEqual(metadata["offset"], 0)
+            self.assertIsInstance(metadata["size_bytes"], int)
+            self.assertGreater(metadata["size_bytes"], 0)
+
+    def test_save_with_external_data_callback_none_works_correctly(self):
+        """Test that saving with callback=None works the same as before."""
+        model = _create_simple_model_with_initializers()
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = os.path.join(tmpdir, "model.onnx")
+            external_data_file = "model.data"
+            # This should work without any issues
+            _io.save(
+                model, 
+                path, 
+                external_data=external_data_file, 
+                size_threshold_bytes=0,
+                callback=None
+            )
+            
+            self.assertTrue(os.path.exists(path))
+            external_data_path = os.path.join(tmpdir, external_data_file)
+            self.assertTrue(os.path.exists(external_data_path))
+            
+            # Verify model can be loaded correctly
+            loaded_model = _io.load(path)
+            initializer_tensor = loaded_model.graph.initializers["initializer_0"].const_value
+            self.assertIsInstance(initializer_tensor, ir.ExternalTensor)
+            np.testing.assert_array_equal(initializer_tensor.numpy(), np.array([0.0]))
+
+    def test_save_without_external_data_ignores_callback(self):
+        """Test that callback is ignored when not using external data."""
+        model = _create_simple_model_with_initializers()
+        callback_mock = unittest.mock.Mock()
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = os.path.join(tmpdir, "model.onnx")
+            # Save without external data but with callback
+            _io.save(model, path, callback=callback_mock)
+            
+            # Callback should not have been called since no external data
+            callback_mock.assert_not_called()
+            
+            # Model should still save correctly
+            self.assertTrue(os.path.exists(path))
+            loaded_model = _io.load(path)
+            self.assertEqual(loaded_model.ir_version, model.ir_version)
+
 
 if __name__ == "__main__":
     unittest.main()
