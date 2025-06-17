@@ -2046,7 +2046,35 @@ class PackedTensorTest(unittest.TestCase):
         self.assertEqual(tensor.dtype, dtype)
         self.assertEqual(tensor.shape, shape)
         self.assertEqual(tensor.name, "test_packed")
-        np.testing.assert_array_equal(tensor.raw, packed_data)
+        self.assertIs(tensor.raw, packed_data)
+
+    @parameterized.parameterized.expand(
+        [
+            ("INT4", ir.DataType.INT4),
+            ("UINT4", ir.DataType.UINT4),
+            ("FLOAT4E2M1", ir.DataType.FLOAT4E2M1),
+        ]
+    )
+    def test_initialize_with_torch_tensor(self, _: str, dtype: ir.DataType):
+        packed_data = torch.tensor([424242], dtype=torch.uint32)
+        shape = _core.Shape([2, 4])
+
+        tensor = _core.PackedTensor(packed_data, dtype=dtype, shape=shape, name="test_packed")
+
+        self.assertEqual(tensor.dtype, dtype)
+        self.assertEqual(tensor.shape, shape)
+        self.assertEqual(tensor.name, "test_packed")
+        self.assertIs(tensor.raw, packed_data)
+        self.assertEqual(tensor.tobytes(), packed_data.numpy(force=True).tobytes())
+        np.testing.assert_array_equal(
+            tensor.numpy_packed().flatten(), packed_data.numpy(force=True).view(np.uint8)
+        )
+        np.testing.assert_array_equal(
+            tensor.numpy(),
+            _type_casting._unpack_uint4_as_uint8(
+                packed_data.numpy(force=True).view(np.uint8), dims=[2, 4]
+            ).view(dtype.numpy()),
+        )
 
     @parameterized.parameterized.expand(
         [
@@ -2241,7 +2269,7 @@ class PackedTensorTest(unittest.TestCase):
         self.assertEqual(tensor.size, 4)
         self.assertEqual(tensor.nbytes, 2)  # 4 elements * 0.5 bytes each = 2 bytes
         self.assertTrue(tensor.shape.frozen)
-        np.testing.assert_array_equal(tensor.raw, packed_data)
+        self.assertIs(tensor.raw, packed_data)
 
     def test_array_method_returns_unpacked_numpy_array(self):
         """Test that __array__ method returns unpacked numpy array."""
@@ -2280,7 +2308,7 @@ class PackedTensorTest(unittest.TestCase):
         # Properties should return the correct values
         self.assertEqual(tensor.dtype, ir.DataType.UINT4)
         self.assertEqual(tensor.shape, shape)
-        np.testing.assert_array_equal(tensor.raw, packed_data)
+        self.assertIs(tensor.raw, packed_data)
 
     def test_shape_is_frozen_after_initialization(self):
         """Test that the shape is frozen after PackedTensor initialization."""

@@ -1078,11 +1078,12 @@ class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatib
     def numpy_packed(self) -> npt.NDArray[np.uint8]:
         """Return the tensor as a packed array."""
         if isinstance(self._raw, np.ndarray) or _compatible_with_numpy(self._raw):
-            return np.asarray(self._raw, dtype=np.uint8)
-        assert _compatible_with_dlpack(self._raw), (
-            f"Bug: Expected DLPack or Numpy compatible objects, got {type(self._raw)}"
-        )
-        array = np.from_dlpack(self._raw)
+            array = np.asarray(self._raw)
+        else:
+            assert _compatible_with_dlpack(self._raw), (
+                f"Bug: Expected DLPack or Numpy compatible objects, got {type(self._raw)}"
+            )
+            array = np.from_dlpack(self._raw)
         if array.nbytes != self.nbytes:
             raise ValueError(
                 f"Expected the packed array to be {self.nbytes} bytes (from shape {self.shape}), but got {array.nbytes} bytes"

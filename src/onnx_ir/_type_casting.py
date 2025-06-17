@@ -40,6 +40,7 @@ def _unpack_uint4_as_uint8(
     Returns:
         A numpy array of int8/uint8 reshaped to dims.
     """
+    assert data.dtype == np.uint8, "Input data must be of type uint8"
     result = np.empty([data.size * 2], dtype=data.dtype)
     array_low = data & np.uint8(0x0F)
     array_high = data & np.uint8(0xF0)
