@@ -514,6 +514,14 @@ def _get_field(proto: Any, field: str) -> Any:
 def deserialize_opset_import(
     protos: Sequence[onnx.OperatorSetIdProto],
 ) -> dict[str, int]:
+    """Deserialize a sequence of OperatorSetIdProto to opset imports mapping.
+
+    Args:
+        protos: The sequence of ONNX OperatorSetIdProto objects.
+
+    Returns:
+        A dictionary mapping domain strings to version integers.
+    """
     return {opset.domain: opset.version for opset in protos}
 
 
@@ -547,6 +555,14 @@ def _parse_experimental_function_value_info_name(
 
 
 def deserialize_model(proto: onnx.ModelProto) -> _core.Model:
+    """Deserialize an ONNX ModelProto into an IR Model.
+
+    Args:
+        proto: The ONNX ModelProto to deserialize.
+
+    Returns:
+        An IR Model object representing the ONNX model.
+    """
     graph = _deserialize_graph(proto.graph, [])
     graph.opset_imports.update(deserialize_opset_import(proto.opset_import))
 
@@ -751,6 +767,14 @@ def _deserialize_graph(
 
 @_capture_errors(lambda proto: proto.name)
 def deserialize_function(proto: onnx.FunctionProto) -> _core.Function:
+    """Deserialize an ONNX FunctionProto into an IR Function.
+
+    Args:
+        proto: The ONNX FunctionProto to deserialize.
+
+    Returns:
+        An IR Function object representing the ONNX function.
+    """
     inputs = [_core.Input(name) for name in proto.input]
     values: dict[str, _core.Value] = {v.name: v for v in inputs}  # type: ignore[misc]
     value_info = {info.name: info for info in getattr(proto, "value_info", [])}
@@ -793,6 +817,15 @@ def deserialize_function(proto: onnx.FunctionProto) -> _core.Function:
 def deserialize_value_info_proto(
     proto: onnx.ValueInfoProto, value: _core.Value | None
 ) -> _core.Value:
+    """Deserialize an ONNX ValueInfoProto into an IR Value.
+
+    Args:
+        proto: The ONNX ValueInfoProto to deserialize.
+        value: An existing Value to update, or None to create a new one.
+
+    Returns:
+        An IR Value object with type and shape information populated from the proto.
+    """
     if value is None:
         value = _core.Value(name=proto.name)
     value.shape = deserialize_type_proto_for_shape(proto.type)
@@ -819,6 +852,14 @@ def _deserialize_quantization_annotation(
 
 @_capture_errors(str)
 def deserialize_tensor_shape(proto: onnx.TensorShapeProto) -> _core.Shape:
+    """Deserialize an ONNX TensorShapeProto into an IR Shape.
+
+    Args:
+        proto: The ONNX TensorShapeProto to deserialize.
+
+    Returns:
+        An IR Shape object representing the tensor shape.
+    """
     # This logic handles when the shape is [] as well
     dim_protos = proto.dim
     deserialized_dim_denotations = [
@@ -831,6 +872,14 @@ def deserialize_tensor_shape(proto: onnx.TensorShapeProto) -> _core.Shape:
 
 @_capture_errors(str)
 def deserialize_type_proto_for_shape(proto: onnx.TypeProto) -> _core.Shape | None:
+    """Extract and deserialize shape information from an ONNX TypeProto.
+
+    Args:
+        proto: The ONNX TypeProto to extract shape from.
+
+    Returns:
+        An IR Shape object if shape information is present, None otherwise.
+    """
     if proto.HasField("tensor_type"):
         if (shape_proto := _get_field(proto.tensor_type, "shape")) is None:
             return None
@@ -858,6 +907,14 @@ def deserialize_type_proto_for_shape(proto: onnx.TypeProto) -> _core.Shape | Non
 def deserialize_type_proto_for_type(
     proto: onnx.TypeProto,
 ) -> _protocols.TypeProtocol | None:
+    """Extract and deserialize type information from an ONNX TypeProto.
+
+    Args:
+        proto: The ONNX TypeProto to extract type from.
+
+    Returns:
+        An IR type object (TensorType, SequenceType, etc.) if type information is present, None otherwise.
+    """
     denotation = _get_field(proto, "denotation")
     if proto.HasField("tensor_type"):
         if (elem_type := _get_field(proto.tensor_type, "elem_type")) is None:
@@ -958,6 +1015,14 @@ _deserialize_string_string_maps = deserialize_metadata_props
 
 
 def deserialize_attribute(proto: onnx.AttributeProto) -> _core.Attr:
+    """Deserialize an ONNX AttributeProto into an IR Attribute.
+
+    Args:
+        proto: The ONNX AttributeProto to deserialize.
+
+    Returns:
+        An IR Attribute object representing the ONNX attribute.
+    """
     return _deserialize_attribute(proto, [])
 
 
@@ -1031,6 +1096,14 @@ def _deserialize_attribute(
 
 
 def deserialize_node(proto: onnx.NodeProto) -> _core.Node:
+    """Deserialize an ONNX NodeProto into an IR Node.
+
+    Args:
+        proto: The ONNX NodeProto to deserialize.
+
+    Returns:
+        An IR Node object representing the ONNX node.
+    """
     return _deserialize_node(
         proto, scoped_values=[{}], value_info={}, quantization_annotations={}
     )
@@ -1149,6 +1222,14 @@ def _deserialize_node(
 
 
 def serialize_model(model: _protocols.ModelProtocol) -> onnx.ModelProto:
+    """Serialize an IR Model to an ONNX ModelProto.
+
+    Args:
+        model: The IR Model to serialize.
+
+    Returns:
+        The serialized ONNX ModelProto object.
+    """
     return serialize_model_into(onnx.ModelProto(), from_=model)
 
 
@@ -1470,6 +1551,14 @@ def serialize_function_into(
 
 
 def serialize_node(node: _protocols.NodeProtocol) -> onnx.NodeProto:
+    """Serialize an IR Node to an ONNX NodeProto.
+
+    Args:
+        node: The IR Node to serialize.
+
+    Returns:
+        The serialized ONNX NodeProto object.
+    """
     node_proto = onnx.NodeProto()
     serialize_node_into(node_proto, from_=node)
     return node_proto
@@ -1524,6 +1613,14 @@ def serialize_node_into(node_proto: onnx.NodeProto, from_: _protocols.NodeProtoc
 
 
 def serialize_tensor(tensor: _protocols.TensorProtocol) -> onnx.TensorProto:
+    """Serialize an IR Tensor to an ONNX TensorProto.
+
+    Args:
+        tensor: The IR Tensor to serialize.
+
+    Returns:
+        The serialized ONNX TensorProto object.
+    """
     tensor_proto = onnx.TensorProto()
     serialize_tensor_into(tensor_proto, from_=tensor)
     return tensor_proto
@@ -1566,6 +1663,14 @@ def serialize_tensor_into(
 
 
 def serialize_attribute(attribute: _protocols.AttributeProtocol) -> onnx.AttributeProto:
+    """Serialize an IR Attribute to an ONNX AttributeProto.
+
+    Args:
+        attribute: The IR Attribute to serialize.
+
+    Returns:
+        The serialized ONNX AttributeProto object.
+    """
     attribute_proto = onnx.AttributeProto()
     serialize_attribute_into(attribute_proto, from_=attribute)
     return attribute_proto
@@ -1730,6 +1835,14 @@ def serialize_type_into(type_proto: onnx.TypeProto, from_: _protocols.TypeProtoc
 
 
 def serialize_type(type_protocol: _protocols.TypeProtocol) -> onnx.TypeProto:
+    """Serialize an IR Type to an ONNX TypeProto.
+
+    Args:
+        type_protocol: The IR Type to serialize.
+
+    Returns:
+        The serialized ONNX TypeProto object.
+    """
     type_proto = onnx.TypeProto()
     serialize_type_into(type_proto, from_=type_protocol)
     return type_proto

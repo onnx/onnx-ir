@@ -963,7 +963,11 @@ class LazyTensor(TensorBase, _protocols.TensorProtocol):  # pylint: disable=too-
 
 
 class SymbolicDim(_protocols.SymbolicDimProtocol, _display.PrettyPrintable):
-    """Immutable symbolic dimension that can be shared across multiple shapes."""
+    """Immutable symbolic dimension that can be shared across multiple shapes.
+
+    SymbolicDim is used to represent a symbolic (non-integer) dimension in a tensor shape.
+    It is immutable and can be compared or hashed.
+    """
 
     __slots__ = ("_value",)
 
@@ -972,6 +976,9 @@ class SymbolicDim(_protocols.SymbolicDimProtocol, _display.PrettyPrintable):
 
         Args:
             value: The value of the dimension. It should not be an int.
+
+        Raises:
+            TypeError: If value is an int.
         """
         if isinstance(value, int):
             raise TypeError(
@@ -981,15 +988,18 @@ class SymbolicDim(_protocols.SymbolicDimProtocol, _display.PrettyPrintable):
         self._value = value
 
     def __eq__(self, other: object) -> bool:
+        """Check equality with another SymbolicDim or string/None."""
         if not isinstance(other, SymbolicDim):
             return self.value == other
         return self.value == other.value
 
     def __hash__(self) -> int:
+        """Return the hash of the symbolic dimension value."""
         return hash(self.value)
 
     @property
     def value(self) -> str | None:
+        """The value of the symbolic dimension (string or None)."""
         return self._value
 
     def __str__(self) -> str:
@@ -1000,7 +1010,14 @@ class SymbolicDim(_protocols.SymbolicDimProtocol, _display.PrettyPrintable):
 
 
 def _is_int_compatible(value: object) -> TypeIs[SupportsInt]:
-    """Return True if the value is int compatible."""
+    """Check if the value is compatible with int (i.e., can be safely cast to int).
+
+    Args:
+        value: The value to check.
+
+    Returns:
+        True if the value is an int or has an __int__ method, False otherwise.
+    """
     if isinstance(value, int):
         return True
     if hasattr(value, "__int__"):
@@ -1012,7 +1029,17 @@ def _is_int_compatible(value: object) -> TypeIs[SupportsInt]:
 def _maybe_convert_to_symbolic_dim(
     dim: int | SupportsInt | SymbolicDim | str | None,
 ) -> SymbolicDim | int:
-    """Convert the value to a SymbolicDim if it is not an int."""
+    """Convert the value to a SymbolicDim if it is not an int.
+
+    Args:
+        dim: The dimension value, which can be int, str, None, or SymbolicDim.
+
+    Returns:
+        An int or SymbolicDim instance.
+
+    Raises:
+        TypeError: If the value is not int, str, None, or SymbolicDim.
+    """
     if dim is None or isinstance(dim, str):
         return SymbolicDim(dim)
     if _is_int_compatible(dim):
@@ -1025,12 +1052,11 @@ def _maybe_convert_to_symbolic_dim(
 
 
 class Shape(_protocols.ShapeProtocol, _display.PrettyPrintable):
-    """The shape of a tensor, including its dimensions and optional denotations.
+    """Represents the shape of a tensor, including its dimensions and optional denotations.
 
-    The :class:`Shape` stores the dimensions of a tensor, which can be integers, None (unknown), or
-    symbolic dimensions.
-
-    A shape can be compared to another shape or plain Python list.
+    The :class:`Shape` class stores the dimensions of a tensor, which can be integers, None (unknown), or
+    symbolic dimensions. It provides methods for querying and manipulating the shape, as well as for comparing
+    shapes to other shapes or plain Python lists.
 
     A shape can be frozen (made immutable). When the shape is frozen, it cannot be
     unfrozen, making it suitable to be shared across tensors or values.
@@ -1067,7 +1093,7 @@ class Shape(_protocols.ShapeProtocol, _display.PrettyPrintable):
 
     Attributes:
         dims: A tuple of dimensions representing the shape.
-            Each dimension can be an integer, None or a :class:`SymbolicDim`.
+            Each dimension can be an integer, None, or a :class:`SymbolicDim`.
         frozen: Indicates whether the shape is immutable. When frozen, the shape
             cannot be modified or unfrozen.
     """
@@ -1291,22 +1317,23 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
     """IR Node.
 
     .. tip::
-        For a more convenient way to create a node that supports Python objects
-        as attributes, use the :func:`onnx_ir.node` constructor.
+        For a more convenient way (that supports Python objects
+        as attributes) to create a node, use the :func:`onnx_ir.node` constructor.
 
-    If the ``graph`` is provided, the node will be added to the graph. Otherwise,
-    user is responsible to call ``graph.append(node)`` (or other mutation methods
+    If ``graph`` is provided, the node will be added to the graph. Otherwise,
+    the user is responsible for calling ``graph.append(node)`` (or other mutation methods
     in :class:`Graph`) to add the node to the graph.
 
-    After the node is initialized, it will add itself as a user of the input values.
+    After the node is initialized, it will add itself as a user of its input values.
 
     The output values of the node are created during node initialization and are immutable.
-    To change the output values, create a new node and replace the each of the inputs of ``output.uses()`` with
-    the new output values by calling :meth:`replace_input_with` on the using nodes
-    of this node's outputs.
+    To change the output values, create a new node and, for each use of the old outputs (``output.uses()``),
+    replace the input in the consuming node by calling :meth:`replace_input_with`.
+    You can also use the :func:`~onnx_ir.convenience.replace_all_uses_with` method
+    to replace all uses of the output values.
 
     .. note::
-        When the ``domain`` is `"ai.onnx"`, it is normalized to `""`.
+        When the ``domain`` is ``"ai.onnx"``, it is normalized to ``""``.
     """
 
     __slots__ = (
@@ -1344,7 +1371,7 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
 
         Args:
             domain: The domain of the operator. For onnx operators, this is an empty string.
-                When it is `"ai.onnx"`, it is normalized to `""`.
+                When it is ``"ai.onnx"``, it is normalized to ``""``.
             op_type: The name of the operator.
             inputs: The input values. When an input is ``None``, it is an empty input.
             attributes: The attributes. RefAttr can be used only when the node is defined in a Function.
