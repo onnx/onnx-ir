@@ -62,6 +62,7 @@
 
     onnx_ir._graph_containers.GraphInitializers
     onnx_ir._graph_containers.Attributes
+    onnx_ir._metadata.MetadataStore
 ```
 
 ## Enums
