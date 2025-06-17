@@ -37,6 +37,10 @@ def tensor(
 
     ``value`` can be a numpy array, a plain Python object, or a TensorProto.
 
+    .. warning::
+        For 4bit dtypes, the value must be unpacked. Use :class:`~onnx_ir.PackedTensor`
+        to create a tensor with packed data.
+
     Example::
 
         >>> import onnx_ir as ir
@@ -67,7 +71,6 @@ def tensor(
         ValueError: If the dtype does not match the value when value is not a plain Python
             object like ``list[int]``.
     """
-    # TODO(justinchuby): Handle packed tensors
     if isinstance(value, _protocols.TensorProtocol):
         if dtype is not None and dtype != value.dtype:
             raise ValueError(
