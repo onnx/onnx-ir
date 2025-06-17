@@ -67,8 +67,8 @@ from collections.abc import Iterable, Mapping, Sequence
 from typing import Any, Callable
 
 import numpy as np
-import onnx
-import onnx.external_data_helper
+import onnx  # noqa: TID251
+import onnx.external_data_helper  # noqa: TID251
 
 from onnx_ir import _convenience, _core, _enums, _protocols, _type_casting
 
