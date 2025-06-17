@@ -12,12 +12,11 @@ import ml_dtypes
 import numpy as np
 import onnx
 import onnx.external_data_helper
-from onnx_ir import _type_casting
 import parameterized
 import torch
 
 import onnx_ir as ir
-from onnx_ir import _core
+from onnx_ir import _core, _type_casting
 
 
 class TensorTest(unittest.TestCase):
@@ -2051,12 +2050,28 @@ class PackedTensorTest(unittest.TestCase):
 
     @parameterized.parameterized.expand(
         [
+            ("INT4", ir.DataType.INT4),
+            ("UINT4", ir.DataType.UINT4),
+            ("FLOAT4E2M1", ir.DataType.FLOAT4E2M1),
+        ]
+    )
+    def test_initialize_raises_when_shape_is_incorrect(self, _: str, dtype: ir.DataType):
+        """Test initializing PackedTensor with pre-packed uint8 data."""
+        # Create packed data - 4 elements packed into 2 uint8 values
+        packed_data = np.array([0x21, 0x43], dtype=np.uint8)  # [1,2] and [3,4] packed
+        shape = _core.Shape([42])  # Incorrect shape
+
+        with self.assertRaisesRegex(ValueError, "Expected the packed array to be 21 bytes"):
+            _core.PackedTensor(packed_data, dtype=dtype, shape=shape, name="test_packed")
+
+    @parameterized.parameterized.expand(
+        [
             ("INT4", ir.DataType.INT4, ml_dtypes.int4),
             ("UINT4", ir.DataType.UINT4, ml_dtypes.uint4),
             ("FLOAT4E2M1", ir.DataType.FLOAT4E2M1, ml_dtypes.float4_e2m1fn),
         ]
     )
-    def test_initialize_with_ml_dtypes(self, _: str, dtype: ir.DataType, np_dtype):
+    def test_initialize_with_ml_dtypes_raises(self, _: str, dtype: ir.DataType, np_dtype):
         """Test initializing PackedTensor with ml_dtypes arrays."""
         # Create array with ml_dtypes - these will be automatically packed
         if dtype == ir.DataType.INT4:
@@ -2065,12 +2080,8 @@ class PackedTensorTest(unittest.TestCase):
             array = np.array([0, 1, 2, 7, 15, 8], dtype=np_dtype)
         shape = _core.Shape(array.shape)
 
-        tensor = _core.PackedTensor(array, dtype=dtype, shape=shape)
-
-        self.assertEqual(tensor.dtype, dtype)
-        self.assertEqual(tensor.shape, shape)
-        # The raw data should be packed into uint8
-        self.assertEqual(tensor.raw.dtype, np.uint8)
+        with self.assertRaisesRegex(TypeError, "PackedTensor expects the value to be packed"):
+            _core.PackedTensor(array, dtype=dtype, shape=shape)
 
     def test_initialize_raises_when_dtype_not_4bit(self):
         """Test that PackedTensor raises error for non-4bit data types."""
@@ -2091,10 +2102,18 @@ class PackedTensorTest(unittest.TestCase):
         [
             ("INT4", ir.DataType.INT4, ml_dtypes.int4, [-8, -1, 0, 1], [0xF8, 0x10]),
             ("UINT4", ir.DataType.UINT4, ml_dtypes.uint4, [0, 1, 2, 7], [0x10, 0x72]),
-            ("FLOAT4E2M1", ir.DataType.FLOAT4E2M1, ml_dtypes.float4_e2m1fn, [0, 1, 2, 3], None),
+            (
+                "FLOAT4E2M1",
+                ir.DataType.FLOAT4E2M1,
+                ml_dtypes.float4_e2m1fn,
+                [0, 1, 2, 3],
+                None,
+            ),
         ]
     )
-    def test_numpy_returns_unpacked_data_for_all_types(self, _: str, dtype: ir.DataType, np_dtype, values, packed_bytes):
+    def test_numpy_returns_unpacked_data_for_all_types(
+        self, _: str, dtype: ir.DataType, np_dtype, values, packed_bytes
+    ):
         """Test that numpy() returns unpacked data for all 4-bit types."""
         values_array = np.array(values, dtype=np_dtype)
 
@@ -2121,7 +2140,6 @@ class PackedTensorTest(unittest.TestCase):
     )
     def test_tobytes_for_all_types(self, _: str, dtype: ir.DataType, np_dtype):
         """Test that tobytes() works correctly for all 4-bit types."""
-        # TODO: Test unpacked inputs too
         if dtype == ir.DataType.INT4:
             values = [-8, -1, 0, 1]
         else:
@@ -2133,7 +2151,6 @@ class PackedTensorTest(unittest.TestCase):
 
         tensor = _core.PackedTensor(packed_data, dtype=dtype, shape=shape)
         result_bytes = tensor.tobytes()
-        print(packed_data.tobytes())
         expected_bytes = packed_data.tobytes()
 
         self.assertEqual(result_bytes, expected_bytes)
@@ -2225,19 +2242,6 @@ class PackedTensorTest(unittest.TestCase):
         self.assertEqual(tensor.nbytes, 2)  # 4 elements * 0.5 bytes each = 2 bytes
         self.assertTrue(tensor.shape.frozen)
         np.testing.assert_array_equal(tensor.raw, packed_data)
-
-    def test_numpy_raises_when_dlpack_data_not_uint8(self):
-        """Test that numpy() raises error when DLPack data is not uint8."""
-        # Create a torch tensor that's not uint8
-        torch_tensor = torch.tensor([1, 2, 3, 4], dtype=torch.float32)
-        shape = _core.Shape([4])
-
-        tensor = _core.PackedTensor(torch_tensor, dtype=ir.DataType.UINT4, shape=shape)
-
-        with self.assertRaises(TypeError) as cm:
-            tensor.numpy()
-
-        self.assertIn("Expected an array with dtype uint8", str(cm.exception))
 
     def test_array_method_returns_unpacked_numpy_array(self):
         """Test that __array__ method returns unpacked numpy array."""

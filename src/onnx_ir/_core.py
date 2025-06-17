@@ -986,8 +986,7 @@ class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatib
 
         Args:
             value: The backing data of the tensor. It can be a numpy array compatible object or a DLPack compatible object.
-                The value MUST be in ``uint8`` packed format, or in one of the ml_dtypes dtypes, which
-                will be packed when constructing the tensor.
+                The value MUST be packed in an integer dtype.
             dtype: The data type of the tensor. Must be one of INT4, UINT4, FLOAT4E2M1.
             shape: The shape of the tensor.
             name: The name of the tensor.
@@ -1008,14 +1007,25 @@ class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatib
                 f"PackedTensor only supports INT4, UINT4, FLOAT4E2M1, but got {dtype}"
             )
         self._dtype = dtype
-
-        if isinstance(value, np.ndarray):
-            if value.dtype == ml_dtypes.float4_e2m1fn or value.dtype == ml_dtypes.uint4 or value.dtype == ml_dtypes.int4:
-                # Pack the array into uint8
-                value = _type_casting.pack_4bitx2(value)
         self._raw = value
 
-    def __array__(self, dtype: Any = None) -> np.ndarray:
+        if isinstance(value, np.ndarray):
+            if (
+                value.dtype == ml_dtypes.float4_e2m1fn
+                or value.dtype == ml_dtypes.uint4
+                or value.dtype == ml_dtypes.int4
+            ):
+                raise TypeError(
+                    f"PackedTensor expects the value to be packed, but got {value.dtype} which is not packed. "
+                    "Please pack the value or use `onnx_ir.Tensor`."
+                )
+            # Check after shape and dtype is set
+            if value.size != self.nbytes:
+                raise ValueError(
+                    f"Expected the packed array to be {self.nbytes} bytes (from shape {self.shape}), but got {value.nbytes} bytes"
+                )
+
+    def __array__(self, dtype: Any = None, copy: bool = False) -> np.ndarray:
         return self.numpy()
 
     def __dlpack__(self, *, stream: Any = None) -> Any:
@@ -1053,17 +1063,7 @@ class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatib
         package are used. The values can be reinterpreted as bit representations
         using the ``.view()`` method.
         """
-        if isinstance(self._raw, np.ndarray) or _compatible_with_numpy(self._raw):
-            array = self._raw.__array__(self.dtype.numpy())
-        assert _compatible_with_dlpack(self._raw), (
-            f"Bug: Expected DLPack or Numpy compatible objects, got {type(self._raw)}"
-        )
-        array = np.from_dlpack(self._raw)
-        if array.dtype != np.uint8:
-            raise TypeError(
-                f"Expected an array with dtype uint8, but got {array.dtype}. "
-                "Please ensure the value is packed in uint8 format."
-            )
+        array = self.numpy_packed()
         # ONNX IR returns the unpacked arrays
         if self.dtype == _enums.DataType.INT4:
             return _type_casting.unpack_int4(array, self.shape.numpy())
@@ -1077,7 +1077,17 @@ class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatib
 
     def numpy_packed(self) -> npt.NDArray[np.uint8]:
         """Return the tensor as a packed array."""
-        return np.asarray(self._raw, dtype=np.uint8)
+        if isinstance(self._raw, np.ndarray) or _compatible_with_numpy(self._raw):
+            return np.asarray(self._raw, dtype=np.uint8)
+        assert _compatible_with_dlpack(self._raw), (
+            f"Bug: Expected DLPack or Numpy compatible objects, got {type(self._raw)}"
+        )
+        array = np.from_dlpack(self._raw)
+        if array.nbytes != self.nbytes:
+            raise ValueError(
+                f"Expected the packed array to be {self.nbytes} bytes (from shape {self.shape}), but got {array.nbytes} bytes"
+            )
+        return array.view(np.uint8)
 
     def tobytes(self) -> bytes:
         """Returns the value as bytes encoded in little endian.
@@ -1085,7 +1095,7 @@ class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatib
         Override this method for more efficient serialization when the raw
         value is not a numpy array.
         """
-        array = self.numpy()
+        array = self.numpy_packed()
         if not _IS_LITTLE_ENDIAN:
             array = array.view(array.dtype.newbyteorder("<"))
         return array.tobytes()
