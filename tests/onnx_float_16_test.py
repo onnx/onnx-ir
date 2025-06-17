@@ -1,3 +1,11 @@
+# Portions of this file are derived from work by Microsoft Corporation under the MIT License. This was modified by bjeffrey92 for use in ir-py.
+# See below for original license and copyright.
+
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See LICENSES/MIT.txt in the project root for
+# license information.
+# Original source: https://github.com/microsoft/onnxconverter-common/blob/209a47e18e6a4c3474273a0b2a5e8f1fda481643/tests/test_float16.py
+
 import os
 import typing
 
