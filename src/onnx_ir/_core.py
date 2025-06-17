@@ -504,7 +504,7 @@ class Tensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatible]): 
             _enums.DataType.FLOAT4E2M1,
         }:
             # Pack the array into int4
-            array = _type_casting.pack_int4(array)
+            array = _type_casting.pack_4bitx2(array)
         else:
             assert self.dtype.itemsize == array.itemsize, "Bug: The itemsize should match"
         if not _IS_LITTLE_ENDIAN:
@@ -1012,7 +1012,7 @@ class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatib
         if isinstance(value, np.ndarray):
             if value.dtype == ml_dtypes.float4_e2m1fn or value.dtype == ml_dtypes.uint4 or value.dtype == ml_dtypes.int4:
                 # Pack the array into uint8
-                value = _type_casting.pack_int4(value)
+                value = _type_casting.pack_4bitx2(value)
         self._raw = value
 
     def __array__(self, dtype: Any = None) -> np.ndarray:

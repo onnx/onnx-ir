@@ -15,7 +15,7 @@ if typing.TYPE_CHECKING:
     import numpy.typing as npt
 
 
-def pack_int4(array: np.ndarray) -> npt.NDArray[np.uint8]:
+def pack_4bitx2(array: np.ndarray) -> npt.NDArray[np.uint8]:
     """Convert a numpy array to flatten, packed int4/uint4. Elements must be in the correct range."""
     # Create a 1D copy
     array_flat = array.ravel().view(np.uint8).copy()
