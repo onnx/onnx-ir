@@ -19,7 +19,7 @@ __all__ = [
 from collections.abc import Mapping, Sequence
 from typing import Union
 
-import onnx
+import onnx  # noqa: TID251
 
 from onnx_ir import _core, _enums, _protocols, serde, traversal
 
