@@ -287,14 +287,12 @@ def convert_float_to_float16(
                                 if attr.name == "to" and attr.i == 1:
                                     attr.i = 10
                                     break
-                        for attr in n.attribute:
-                            next_level.append(attr)
+                        next_level.extend(list(n.attribute))
             # if q is model.graph.node.attribute, push q.g and q.graphs (GraphProto)
             # and process node.attribute.t and node.attribute.tensors (TensorProto)
             if isinstance(q, onnx_proto.AttributeProto):
                 next_level.append(q.g)
-                for n in q.graphs:
-                    next_level.append(n)
+                next_level.extend(list(q.graphs))
                 q.t.CopyFrom(
                     convert_tensor_float_to_float16(q.t, min_positive_val, max_finite_val)
                 )
