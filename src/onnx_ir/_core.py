@@ -1316,22 +1316,23 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
     """IR Node.
 
     .. tip::
-        For a more convenient way to create a node that supports Python objects
-        as attributes, use the :func:`onnx_ir.node` constructor.
+        For a more convenient way (that supports Python objects
+        as attributes) to create a node , use the :func:`onnx_ir.node` constructor.
 
-    If the ``graph`` is provided, the node will be added to the graph. Otherwise,
-    user is responsible to call ``graph.append(node)`` (or other mutation methods
+    If ``graph`` is provided, the node will be added to the graph. Otherwise,
+    the user is responsible for calling ``graph.append(node)`` (or other mutation methods
     in :class:`Graph`) to add the node to the graph.
 
-    After the node is initialized, it will add itself as a user of the input values.
+    After the node is initialized, it will add itself as a user of its input values.
 
     The output values of the node are created during node initialization and are immutable.
-    To change the output values, create a new node and replace the each of the inputs of ``output.uses()`` with
-    the new output values by calling :meth:`replace_input_with` on the using nodes
-    of this node's outputs.
+    To change the output values, create a new node and, for each use of the old outputs (``output.uses()``),
+    replace the input in the consuming node by calling :meth:`replace_input_with`.
+    You can also use the :func:`~onnx_ir.convenience.replace_all_uses_with` method
+    to replace all uses of the output values.
 
     .. note::
-        When the ``domain`` is `"ai.onnx"`, it is normalized to `""`.
+        When the ``domain`` is ``"ai.onnx"``, it is normalized to ``""``.
     """
 
     __slots__ = (
