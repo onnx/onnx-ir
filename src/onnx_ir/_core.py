@@ -1370,7 +1370,7 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
 
         Args:
             domain: The domain of the operator. For onnx operators, this is an empty string.
-                When it is `"ai.onnx"`, it is normalized to `""`.
+                When it is ``"ai.onnx"``, it is normalized to ``""``.
             op_type: The name of the operator.
             inputs: The input values. When an input is ``None``, it is an empty input.
             attributes: The attributes. RefAttr can be used only when the node is defined in a Function.
