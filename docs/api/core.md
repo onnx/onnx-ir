@@ -49,6 +49,7 @@
     onnx_ir.ExternalTensor
     onnx_ir.StringTensor
     onnx_ir.LazyTensor
+    onnx_ir.PackedTensor
 ```
 
 ### Internal Containers
