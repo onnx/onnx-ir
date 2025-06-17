@@ -52,6 +52,18 @@
     onnx_ir.PackedTensor
 ```
 
+## Enums
+
+```{eval-rst}
+.. autosummary::
+    :toctree: generated
+    :template: classtemplate.rst
+    :nosignatures:
+
+    onnx_ir.DataType
+    onnx_ir.AttributeType
+```
+
 ### Internal Containers
 
 ```{eval-rst}
@@ -63,16 +75,4 @@
     onnx_ir._graph_containers.GraphInitializers
     onnx_ir._graph_containers.Attributes
     onnx_ir._metadata.MetadataStore
-```
-
-## Enums
-
-```{eval-rst}
-.. autosummary::
-    :toctree: generated
-    :template: classtemplate.rst
-    :nosignatures:
-
-    onnx_ir.DataType
-    onnx_ir.AttributeType
 ```
