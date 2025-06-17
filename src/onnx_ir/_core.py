@@ -1059,6 +1059,11 @@ class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatib
             f"Bug: Expected DLPack or Numpy compatible objects, got {type(self._raw)}"
         )
         array = np.from_dlpack(self._raw)
+        if array.dtype != np.uint8:
+            raise TypeError(
+                f"Expected an array with dtype uint8, but got {array.dtype}. "
+                "Please ensure the value is packed in uint8 format."
+            )
         # ONNX IR returns the unpacked arrays
         if self.dtype == _enums.DataType.INT4:
             return _type_casting.unpack_int4(array, self.shape.numpy())

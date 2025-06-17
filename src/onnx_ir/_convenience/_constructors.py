@@ -67,6 +67,7 @@ def tensor(
         ValueError: If the dtype does not match the value when value is not a plain Python
             object like ``list[int]``.
     """
+    # TODO(justinchuby): Handle packed tensors
     if isinstance(value, _protocols.TensorProtocol):
         if dtype is not None and dtype != value.dtype:
             raise ValueError(
