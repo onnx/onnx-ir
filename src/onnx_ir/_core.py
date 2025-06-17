@@ -977,7 +977,7 @@ class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatib
         value: TArrayCompatible,
         dtype: _enums.DataType,
         *,
-        shape: Shape,
+        shape: Shape | Sequence[int],
         name: str | None = None,
         doc_string: str | None = None,
         metadata_props: dict[str, str] | None = None,
@@ -1000,7 +1000,7 @@ class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatib
         super().__init__(name=name, doc_string=doc_string, metadata_props=metadata_props)
         if not _compatible_with_numpy(value) and not _compatible_with_dlpack(value):
             raise TypeError(f"Expected an array compatible object, got {type(value)}")
-        self._shape = shape
+        self._shape = Shape(shape)
         self._shape.freeze()
         if dtype.bitwidth != 4:
             raise TypeError(
