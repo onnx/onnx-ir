@@ -214,7 +214,7 @@ class TestCommonSubexpressionEliminationPass(unittest.TestCase):
         model_proto = test_model.to_model_proto()
         model = ir.serde.deserialize_model(model_proto)
         self.check_graph(
-            model, [np.random.rand(2, 2), np.random.rand(2, 2)], delta_nodes=[0, 0, 0, 0, 0]
+            model, [np.random.rand(2, 2), np.random.rand(2, 2)], delta_nodes=[3, 0, 0, 0, 0]
         )
 
     def test_the_nodes_following_control_flow_ops_are_csed(self):
