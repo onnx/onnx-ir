@@ -251,11 +251,11 @@ def _check_numpy_representation_type(array: np.ndarray, dtype: _enums.DataType) 
     or corresponding dtypes from the ``ml_dtype`` package.
     """
     if dtype in _NON_NUMPY_NATIVE_TYPES:
-        if dtype.itemsize == 2 and array.dtype not in (np.uint16, ml_dtypes.bfloat16):
+        if dtype.bitwidth == 16 and array.dtype not in (np.uint16, ml_dtypes.bfloat16):
             raise TypeError(
                 f"The numpy array dtype must be uint16 or ml_dtypes.bfloat16 (not {array.dtype}) for IR data type {dtype}."
             )
-        if dtype.itemsize == 1 and array.dtype not in (
+        if dtype.bitwidth == 8 and array.dtype not in (
             np.uint8,
             ml_dtypes.float8_e4m3fnuz,
             ml_dtypes.float8_e4m3fn,
@@ -1002,7 +1002,7 @@ class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatib
             raise TypeError(f"Expected an array compatible object, got {type(value)}")
         self._shape = shape
         self._shape.freeze()
-        if dtype.itemsize != 0.5:
+        if dtype.bitwidth != 4:
             raise TypeError(
                 f"PackedTensor only supports INT4, UINT4, FLOAT4E2M1, but got {dtype}"
             )
