@@ -114,7 +114,18 @@ class DataType(enum.IntEnum):
     @property
     def itemsize(self) -> float:
         """Returns the size of the data type in bytes."""
-        return _ITEMSIZE_MAP[self]
+        return self.bitwidth / 8
+
+    @property
+    def bitwidth(self) -> int:
+        """Returns the bit width of the data type.
+
+        Raises:
+            TypeError: If the data type is not supported.
+        """
+        if self not in _BITWIDTH_MAP:
+            raise TypeError(f"Bitwidth not available for ONNX data type: {self}")
+        return _BITWIDTH_MAP[self]
 
     def numpy(self) -> np.dtype:
         """Returns the numpy dtype for the ONNX data type.
@@ -163,30 +174,29 @@ class DataType(enum.IntEnum):
         return self.__repr__()
 
 
-_ITEMSIZE_MAP = {
-    DataType.FLOAT: 4,
-    DataType.UINT8: 1,
-    DataType.INT8: 1,
-    DataType.UINT16: 2,
-    DataType.INT16: 2,
-    DataType.INT32: 4,
-    DataType.INT64: 8,
-    DataType.STRING: 1,
-    DataType.BOOL: 1,
-    DataType.FLOAT16: 2,
-    DataType.DOUBLE: 8,
-    DataType.UINT32: 4,
-    DataType.UINT64: 8,
-    DataType.COMPLEX64: 8,
-    DataType.COMPLEX128: 16,
-    DataType.BFLOAT16: 2,
-    DataType.FLOAT8E4M3FN: 1,
-    DataType.FLOAT8E4M3FNUZ: 1,
-    DataType.FLOAT8E5M2: 1,
-    DataType.FLOAT8E5M2FNUZ: 1,
-    DataType.UINT4: 0.5,
-    DataType.INT4: 0.5,
-    DataType.FLOAT4E2M1: 0.5,
+_BITWIDTH_MAP = {
+    DataType.FLOAT: 32,
+    DataType.UINT8: 8,
+    DataType.INT8: 8,
+    DataType.UINT16: 16,
+    DataType.INT16: 16,
+    DataType.INT32: 32,
+    DataType.INT64: 64,
+    DataType.BOOL: 8,
+    DataType.FLOAT16: 16,
+    DataType.DOUBLE: 64,
+    DataType.UINT32: 32,
+    DataType.UINT64: 64,
+    DataType.COMPLEX64: 64,  # 2 * 32
+    DataType.COMPLEX128: 128,  # 2 * 64
+    DataType.BFLOAT16: 16,
+    DataType.FLOAT8E4M3FN: 8,
+    DataType.FLOAT8E4M3FNUZ: 8,
+    DataType.FLOAT8E5M2: 8,
+    DataType.FLOAT8E5M2FNUZ: 8,
+    DataType.UINT4: 4,
+    DataType.INT4: 4,
+    DataType.FLOAT4E2M1: 4,
 }
 
 
