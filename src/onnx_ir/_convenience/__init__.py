@@ -394,7 +394,7 @@ def replace_nodes_and_values(
 
 
 def get_const_tensor(
-    value: _protocols.ValueProtocol, propagate_shape_type: bool = False
+    value: _core.Value, propagate_shape_type: bool = False
 ) -> _protocols.TensorProtocol | None:
     """Get the constant tensor from a value, if it exists.
 
@@ -423,16 +423,20 @@ def get_const_tensor(
             return None
         if node.op_type != "Constant" or node.domain != "":
             return None
+        if len(node.outputs) != 1:
+            # Invalid Constant node
+            return None
         if len(node.attributes) != 1:
             return None
+
         attr_name, attr_value = next(iter(node.attributes.items()))
-        if len(node.outputs) != 1:
+
+        if attr_value.is_ref():
+            # TODO: Make it easier to resolve a reference attribute.
+            # For now we just return None
             return None
+
         ir_value = node.outputs[0]
-
-        if attr_value is None or not isinstance(attr_value, _core.Attr):
-            return None
-
         if attr_name in {"value_float", "value_floats"}:
             tensor = _core.Tensor(
                 np.array(attr_value.value, dtype=np.float32), name=ir_value.name
