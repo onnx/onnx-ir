@@ -2087,69 +2087,144 @@ class PackedTensorTest(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, "Expected an array compatible object"):
             _core.PackedTensor(42, dtype=ir.DataType.INT4, shape=_core.Shape([1]))
 
-    def test_numpy_returns_unpacked_data_int4(self):
-        """Test that numpy() returns unpacked INT4 data."""
-        # Create packed data: [-8,-1] and [0,1] packed
-        packed_data = np.array([0xF8, 0x10], dtype=np.uint8)
-        shape = _core.Shape([4])
+    @parameterized.parameterized.expand(
+        [
+            ("INT4", ir.DataType.INT4, ml_dtypes.int4, [-8, -1, 0, 1], [0xF8, 0x10]),
+            ("UINT4", ir.DataType.UINT4, ml_dtypes.uint4, [0, 1, 2, 7], [0x10, 0x72]),
+            ("FLOAT4E2M1", ir.DataType.FLOAT4E2M1, ml_dtypes.float4_e2m1fn, [0, 1, 2, 3], None),
+        ]
+    )
+    def test_numpy_returns_unpacked_data_for_all_types(self, _: str, dtype: ir.DataType, np_dtype, values, packed_bytes):
+        """Test that numpy() returns unpacked data for all 4-bit types."""
+        values_array = np.array(values, dtype=np_dtype)
 
-        tensor = _core.PackedTensor(packed_data, dtype=ir.DataType.INT4, shape=shape)
+        if packed_bytes is not None:
+            # Use pre-computed packed bytes for INT4 and UINT4
+            packed_data = np.array(packed_bytes, dtype=np.uint8)
+        else:
+            # Use type casting for FLOAT4E2M1
+            packed_data = _type_casting.pack_4bitx2(values_array)
+
+        shape = _core.Shape([len(values)])
+        tensor = _core.PackedTensor(packed_data, dtype=dtype, shape=shape)
         result = tensor.numpy()
 
-        expected = np.array([-8, -1, 0, 1], dtype=ml_dtypes.int4)
-        np.testing.assert_array_equal(result, expected)
-        self.assertEqual(result.dtype, ml_dtypes.int4)
+        np.testing.assert_array_equal(result, values_array)
+        self.assertEqual(result.dtype, np_dtype)
 
-    def test_numpy_returns_unpacked_data_uint4(self):
-        """Test that numpy() returns unpacked UINT4 data."""
-        # Create packed data: [0,1] and [2,7] packed
-        packed_data = np.array([0x10, 0x72], dtype=np.uint8)
-        shape = _core.Shape([4])
+    @parameterized.parameterized.expand(
+        [
+            ("INT4", ir.DataType.INT4, ml_dtypes.int4),
+            ("UINT4", ir.DataType.UINT4, ml_dtypes.uint4),
+            ("FLOAT4E2M1", ir.DataType.FLOAT4E2M1, ml_dtypes.float4_e2m1fn),
+        ]
+    )
+    def test_tobytes_for_all_types(self, _: str, dtype: ir.DataType, np_dtype):
+        """Test that tobytes() works correctly for all 4-bit types."""
+        # TODO: Test unpacked inputs too
+        if dtype == ir.DataType.INT4:
+            values = [-8, -1, 0, 1]
+        else:
+            values = [0, 1, 2, 3]
 
-        tensor = _core.PackedTensor(packed_data, dtype=ir.DataType.UINT4, shape=shape)
+        values_array = np.array(values, dtype=np_dtype)
+        packed_data = _type_casting.pack_4bitx2(values_array)
+        shape = _core.Shape([len(values)])
+
+        tensor = _core.PackedTensor(packed_data, dtype=dtype, shape=shape)
+        result_bytes = tensor.tobytes()
+        print(packed_data.tobytes())
+        expected_bytes = packed_data.tobytes()
+
+        self.assertEqual(result_bytes, expected_bytes)
+
+    @parameterized.parameterized.expand(
+        [
+            ("INT4", ir.DataType.INT4, ml_dtypes.int4),
+            ("UINT4", ir.DataType.UINT4, ml_dtypes.uint4),
+            ("FLOAT4E2M1", ir.DataType.FLOAT4E2M1, ml_dtypes.float4_e2m1fn),
+        ]
+    )
+    def test_odd_sized_arrays_for_all_types(self, _: str, dtype: ir.DataType, np_dtype):
+        """Test odd-sized arrays work correctly for all 4-bit types."""
+        if dtype == ir.DataType.INT4:
+            values = [-8, -1, 0, 1, 2]  # 5 elements
+        else:
+            values = [0, 1, 2, 3, 4]  # 5 elements
+
+        values_array = np.array(values, dtype=np_dtype)
+        packed_data = _type_casting.pack_4bitx2(values_array)
+        shape = _core.Shape([len(values)])
+
+        tensor = _core.PackedTensor(packed_data, dtype=dtype, shape=shape)
         result = tensor.numpy()
 
-        expected = np.array([0, 1, 2, 7], dtype=ml_dtypes.uint4)
-        np.testing.assert_array_equal(result, expected)
-        self.assertEqual(result.dtype, ml_dtypes.uint4)
+        np.testing.assert_array_equal(result, values_array)
+        self.assertEqual(result.dtype, np_dtype)
 
-    def test_numpy_returns_unpacked_data_float4e2m1(self):
-        """Test that numpy() returns unpacked FLOAT4E2M1 data."""
-        # Create packed data: [0,1] and [2,7] packed
-        packed_data = _type_casting.pack_4bitx2(np.array([0, 1, 2, 7], dtype=ml_dtypes.float4_e2m1fn))
-        shape = _core.Shape([4])
-
-        tensor = _core.PackedTensor(packed_data, dtype=ir.DataType.FLOAT4E2M1, shape=shape)
-        result = tensor.numpy()
-
-        expected = np.array([0, 1, 2, 7], dtype=ml_dtypes.float4_e2m1fn)
-        np.testing.assert_array_equal(result, expected)
-        self.assertEqual(result.dtype, ml_dtypes.float4_e2m1fn)
-
-    def test_numpy_handles_odd_sized_arrays(self):
-        """Test that numpy() correctly handles odd-sized arrays."""
-        # Test with 5 elements (odd), should have padding
-        packed_data = np.array(
-            [0x21, 0x43, 0x05], dtype=np.uint8
-        )  # [1,2], [3,4], [5,0] with padding
-        shape = _core.Shape([5])
-
-        tensor = _core.PackedTensor(packed_data, dtype=ir.DataType.UINT4, shape=shape)
-        result = tensor.numpy()
-
-        expected = np.array([1, 2, 3, 4, 5], dtype=ml_dtypes.uint4)
-        np.testing.assert_array_equal(result, expected)
-
-    def test_numpy_packed_returns_raw_data(self):
-        """Test that numpy_packed() returns the raw packed data."""
+    @parameterized.parameterized.expand(
+        [
+            ("INT4", ir.DataType.INT4),
+            ("UINT4", ir.DataType.UINT4),
+            ("FLOAT4E2M1", ir.DataType.FLOAT4E2M1),
+        ]
+    )
+    def test_numpy_packed_for_all_types(self, _: str, dtype: ir.DataType):
+        """Test that numpy_packed() returns raw packed data for all types."""
         packed_data = np.array([0x21, 0x43], dtype=np.uint8)
         shape = _core.Shape([4])
 
-        tensor = _core.PackedTensor(packed_data, dtype=ir.DataType.UINT4, shape=shape)
+        tensor = _core.PackedTensor(packed_data, dtype=dtype, shape=shape)
         result = tensor.numpy_packed()
 
         np.testing.assert_array_equal(result, packed_data)
         self.assertEqual(result.dtype, np.uint8)
+
+    @parameterized.parameterized.expand(
+        [
+            ("INT4", ir.DataType.INT4),
+            ("UINT4", ir.DataType.UINT4),
+            ("FLOAT4E2M1", ir.DataType.FLOAT4E2M1),
+        ]
+    )
+    def test_dlpack_methods_for_all_types(self, _: str, dtype: ir.DataType):
+        """Test DLPack methods work for all 4-bit types."""
+        packed_data = np.array([0x21, 0x43], dtype=np.uint8)
+        shape = _core.Shape([4])
+
+        tensor = _core.PackedTensor(packed_data, dtype=dtype, shape=shape)
+
+        # Should be able to get DLPack representation
+        dlpack_tensor = tensor.__dlpack__()
+        self.assertIsNotNone(dlpack_tensor)
+
+        # Should be able to get device info
+        device_info = tensor.__dlpack_device__()
+        self.assertIsInstance(device_info, tuple)
+        self.assertEqual(len(device_info), 2)
+
+    @parameterized.parameterized.expand(
+        [
+            ("INT4", ir.DataType.INT4),
+            ("UINT4", ir.DataType.UINT4),
+            ("FLOAT4E2M1", ir.DataType.FLOAT4E2M1),
+        ]
+    )
+    def test_properties_for_all_types(self, _: str, dtype: ir.DataType):
+        """Test that properties work correctly for all 4-bit types."""
+        packed_data = np.array([0x21, 0x43], dtype=np.uint8)
+        shape = _core.Shape([4])
+
+        tensor = _core.PackedTensor(packed_data, dtype=dtype, shape=shape, name="test")
+
+        # Test basic properties
+        self.assertEqual(tensor.dtype, dtype)
+        self.assertEqual(tensor.shape, shape)
+        self.assertEqual(tensor.name, "test")
+        self.assertEqual(tensor.size, 4)
+        self.assertEqual(tensor.nbytes, 2)  # 4 elements * 0.5 bytes each = 2 bytes
+        self.assertTrue(tensor.shape.frozen)
+        np.testing.assert_array_equal(tensor.raw, packed_data)
 
     def test_numpy_raises_when_dlpack_data_not_uint8(self):
         """Test that numpy() raises error when DLPack data is not uint8."""
@@ -2164,19 +2239,6 @@ class PackedTensorTest(unittest.TestCase):
 
         self.assertIn("Expected an array with dtype uint8", str(cm.exception))
 
-    def test_tobytes_returns_packed_data(self):
-        """Test that tobytes() returns the data in packed format."""
-        packed_data = np.array([0x21, 0x43], dtype=np.uint8)
-        shape = _core.Shape([4])
-
-        tensor = _core.PackedTensor(packed_data, dtype=ir.DataType.UINT4, shape=shape)
-        result = tensor.tobytes()
-
-        # Should return the unpacked data as bytes
-        expected_unpacked = np.array([1, 2, 3, 4], dtype=ml_dtypes.uint4)
-        expected_bytes = expected_unpacked.tobytes()
-        self.assertEqual(result, expected_bytes)
-
     def test_array_method_returns_unpacked_numpy_array(self):
         """Test that __array__ method returns unpacked numpy array."""
         packed_data = np.array([0x21, 0x43], dtype=np.uint8)
@@ -2187,36 +2249,6 @@ class PackedTensorTest(unittest.TestCase):
 
         expected = np.array([1, 2, 3, 4], dtype=ml_dtypes.uint4)
         np.testing.assert_array_equal(result, expected)
-
-    def test_dlpack_methods_with_numpy_array(self):
-        """Test DLPack methods work with numpy arrays."""
-        packed_data = np.array([0x21, 0x43], dtype=np.uint8)
-        shape = _core.Shape([4])
-
-        tensor = _core.PackedTensor(packed_data, dtype=ir.DataType.UINT4, shape=shape)
-
-        # Should be able to get DLPack representation
-        dlpack_tensor = tensor.__dlpack__()
-        self.assertIsNotNone(dlpack_tensor)
-
-        # Should be able to get device info
-        device_info = tensor.__dlpack_device__()
-        self.assertIsInstance(device_info, tuple)
-        self.assertEqual(len(device_info), 2)
-
-    def test_dlpack_methods_with_dlpack_compatible_input(self):
-        """Test DLPack methods work when input is DLPack compatible."""
-        torch_tensor = torch.tensor([0x21, 0x43], dtype=torch.uint8)
-        shape = _core.Shape([4])
-
-        tensor = _core.PackedTensor(torch_tensor, dtype=ir.DataType.UINT4, shape=shape)
-
-        # Should delegate to the raw tensor's DLPack methods
-        dlpack_tensor = tensor.__dlpack__()
-        self.assertIsNotNone(dlpack_tensor)
-
-        device_info = tensor.__dlpack_device__()
-        self.assertIsInstance(device_info, tuple)
 
     def test_repr_returns_string_representation(self):
         """Test that __repr__ returns a meaningful string representation."""
