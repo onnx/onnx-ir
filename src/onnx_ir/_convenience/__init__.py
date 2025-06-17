@@ -17,6 +17,7 @@ __all__ = [
     "get_const_tensor",
 ]
 
+import logging
 from collections.abc import Mapping, Sequence
 from typing import Union
 
@@ -42,6 +43,9 @@ SupportedAttrTypes = Union[
     Sequence[_protocols.TypeProtocol],
     None,
 ]
+
+
+logger = logging.getLogger(__name__)
 
 
 def _infer_attribute_type(attr: SupportedAttrTypes) -> _enums.AttributeType:
@@ -413,6 +417,10 @@ def get_const_tensor(
 
     Returns:
         The constant tensor if it exists, otherwise None.
+
+    Raises:
+        ValueError: If the Constant node does not have exactly one output or
+            one attribute.
     """
     tensor = None
     if value.const_value is not None:
@@ -420,14 +428,21 @@ def get_const_tensor(
     else:
         node = value.producer()
         if node is None:
+            # Potentially a graph input
             return None
         if node.op_type != "Constant" or node.domain != "":
+            # Not a Constant node or not in the ONNX domain
             return None
         if len(node.outputs) != 1:
-            # Invalid Constant node
-            return None
+            raise ValueError(
+                f"Constant node '{node.name}' must have exactly one output, "
+                f"but has {len(node.outputs)} outputs."
+            )
         if len(node.attributes) != 1:
-            return None
+            raise ValueError(
+                f"Constant node '{node.name}' must have exactly one attribute, "
+                f"but has {len(node.attributes)} attributes."
+            )
 
         attr_name, attr_value = next(iter(node.attributes.items()))
 
@@ -452,10 +467,32 @@ def get_const_tensor(
         elif attr_name == "value":
             tensor = attr_value.as_tensor()
         else:
-            return None
-    tensor.name = value.name
+            raise ValueError(
+                f"Unsupported attribute '{attr_name}' in Constant node '{node.name}'. "
+                "Expected one of 'value_float', 'value_floats', 'value_int', "
+                "'value_ints', 'value_string', 'value_strings', or 'value'."
+            )
+        # Assign the name of the constant value to the tensor
+        tensor.name = value.name
     if tensor is not None and propagate_shape_type:
         # Propagate the shape and type of the tensor to the value
+        if value.shape is not None and value.shape != tensor.shape:
+            logger.warning(
+                "Value '%s' has a shape %s that differs from "
+                "the constant tensor's shape %s. The value's shape will be updated.",
+                value,
+                value.shape,
+                tensor.shape,
+            )
         value.shape = tensor.shape  # type: ignore[assignment]
-        value.type = _core.TensorType(tensor.dtype)
+        new_value_type = _core.TensorType(tensor.dtype)
+        if value.type is not None and value.type != new_value_type:
+            logger.warning(
+                "Value '%s' has a type '%s' that differs from "
+                "the constant tensor's type '%s'. The value's type will be updated.",
+                value,
+                value.type,
+                new_value_type,
+            )
+        value.type = new_value_type
     return tensor
