@@ -968,6 +968,7 @@ class SymbolicDim(_protocols.SymbolicDimProtocol, _display.PrettyPrintable):
     SymbolicDim is used to represent a symbolic (non-integer) dimension in a tensor shape.
     It is immutable and can be compared or hashed.
     """
+
     __slots__ = ("_value",)
 
     def __init__(self, value: str | None) -> None:
@@ -1317,7 +1318,7 @@ class Node(_protocols.NodeProtocol, _display.PrettyPrintable):
 
     .. tip::
         For a more convenient way (that supports Python objects
-        as attributes) to create a node , use the :func:`onnx_ir.node` constructor.
+        as attributes) to create a node, use the :func:`onnx_ir.node` constructor.
 
     If ``graph`` is provided, the node will be added to the graph. Otherwise,
     the user is responsible for calling ``graph.append(node)`` (or other mutation methods
