@@ -751,6 +751,14 @@ def _deserialize_graph(
 
 @_capture_errors(lambda proto: proto.name)
 def deserialize_function(proto: onnx.FunctionProto) -> _core.Function:
+    """Deserialize an ONNX FunctionProto into an IR Function.
+
+    Args:
+        proto: The ONNX FunctionProto to deserialize.
+
+    Returns:
+        An IR Function object representing the ONNX function.
+    """
     inputs = [_core.Input(name) for name in proto.input]
     values: dict[str, _core.Value] = {v.name: v for v in inputs}  # type: ignore[misc]
     value_info = {info.name: info for info in getattr(proto, "value_info", [])}
