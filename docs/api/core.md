@@ -49,18 +49,7 @@
     onnx_ir.ExternalTensor
     onnx_ir.StringTensor
     onnx_ir.LazyTensor
-```
-
-### Internal Containers
-
-```{eval-rst}
-.. autosummary::
-    :toctree: generated
-    :template: classtemplate_inherited.rst
-    :nosignatures:
-
-    onnx_ir._graph_containers.GraphInitializers
-    onnx_ir._graph_containers.Attributes
+    onnx_ir.PackedTensor
 ```
 
 ## Enums
@@ -73,4 +62,17 @@
 
     onnx_ir.DataType
     onnx_ir.AttributeType
+```
+
+### Internal Containers
+
+```{eval-rst}
+.. autosummary::
+    :toctree: generated
+    :template: classtemplate_inherited.rst
+    :nosignatures:
+
+    onnx_ir._graph_containers.GraphInitializers
+    onnx_ir._graph_containers.Attributes
+    onnx_ir._metadata.MetadataStore
 ```
