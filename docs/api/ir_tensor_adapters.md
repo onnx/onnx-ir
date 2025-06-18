@@ -4,7 +4,7 @@
 .. automodule:: onnx_ir.tensor_adapters
 ```
 
-## Adaptors for PyTorch
+## Adapters for PyTorch
 
 ```{eval-rst}
 .. autosummary::
