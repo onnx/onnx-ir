@@ -81,11 +81,12 @@ class CommonSubexpressionEliminationPass(ir.passes.InPlacePass):
                     # to ensure they are hashable.
                     value = tuple(value)
                 elif v.type is ir.AttributeType.TENSOR:
-                    np_value = value.numpy()
-                    if np_value.nbytes > self.size_limit:
+                    if value.size > self.size_limit:
                         # If the tensor is larger than the size limit, we skip it.
                         large_tensor = True
                         break
+                    np_value = value.numpy()
+
                     value = (np_value.shape, str(np_value.dtype), np_value.tobytes())
                 attributes[k] = value
 
