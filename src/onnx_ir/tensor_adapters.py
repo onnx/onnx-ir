@@ -29,9 +29,9 @@ Example::
 from __future__ import annotations
 
 __all__ = [
-    "TorchTensor",
     "from_torch_dtype",
     "to_torch_dtype",
+    "TorchTensor",
 ]
 
 import ctypes
@@ -46,30 +46,37 @@ if TYPE_CHECKING:
     import torch
 
 
-def from_torch_dtype(dtype: torch.dtype) -> ir.DataType:
-    import torch
+_TORCH_DTYPE_TO_ONNX: dict[torch.dtype, ir.DataType] | None = None
+_ONNX_DTYPE_TO_TORCH: dict[ir.DataType, torch.dtype] | None = None
 
-    _TORCH_DTYPE_TO_ONNX: dict[torch.dtype, ir.DataType] = {
-        torch.bfloat16: ir.DataType.BFLOAT16,
-        torch.bool: ir.DataType.BOOL,
-        torch.complex128: ir.DataType.COMPLEX128,
-        torch.complex64: ir.DataType.COMPLEX64,
-        torch.float16: ir.DataType.FLOAT16,
-        torch.float32: ir.DataType.FLOAT,
-        torch.float64: ir.DataType.DOUBLE,
-        torch.float8_e4m3fn: ir.DataType.FLOAT8E4M3FN,
-        torch.float8_e4m3fnuz: ir.DataType.FLOAT8E4M3FNUZ,
-        torch.float8_e5m2: ir.DataType.FLOAT8E5M2,
-        torch.float8_e5m2fnuz: ir.DataType.FLOAT8E5M2FNUZ,
-        torch.int16: ir.DataType.INT16,
-        torch.int32: ir.DataType.INT32,
-        torch.int64: ir.DataType.INT64,
-        torch.int8: ir.DataType.INT8,
-        torch.uint8: ir.DataType.UINT8,
-        torch.uint16: ir.DataType.UINT16,
-        torch.uint32: ir.DataType.UINT32,
-        torch.uint64: ir.DataType.UINT64,
-    }
+
+def from_torch_dtype(dtype: torch.dtype) -> ir.DataType:
+    """Convert a PyTorch dtype to an ONNX IR DataType."""
+    global _TORCH_DTYPE_TO_ONNX
+    if _TORCH_DTYPE_TO_ONNX is None:
+        import torch
+
+        _TORCH_DTYPE_TO_ONNX: dict[torch.dtype, ir.DataType] = {
+            torch.bfloat16: ir.DataType.BFLOAT16,
+            torch.bool: ir.DataType.BOOL,
+            torch.complex128: ir.DataType.COMPLEX128,
+            torch.complex64: ir.DataType.COMPLEX64,
+            torch.float16: ir.DataType.FLOAT16,
+            torch.float32: ir.DataType.FLOAT,
+            torch.float64: ir.DataType.DOUBLE,
+            torch.float8_e4m3fn: ir.DataType.FLOAT8E4M3FN,
+            torch.float8_e4m3fnuz: ir.DataType.FLOAT8E4M3FNUZ,
+            torch.float8_e5m2: ir.DataType.FLOAT8E5M2,
+            torch.float8_e5m2fnuz: ir.DataType.FLOAT8E5M2FNUZ,
+            torch.int16: ir.DataType.INT16,
+            torch.int32: ir.DataType.INT32,
+            torch.int64: ir.DataType.INT64,
+            torch.int8: ir.DataType.INT8,
+            torch.uint8: ir.DataType.UINT8,
+            torch.uint16: ir.DataType.UINT16,
+            torch.uint32: ir.DataType.UINT32,
+            torch.uint64: ir.DataType.UINT64,
+        }
     if dtype not in _TORCH_DTYPE_TO_ONNX:
         raise TypeError(
             f"Unsupported PyTorch dtype '{dtype}'. "
@@ -80,29 +87,32 @@ def from_torch_dtype(dtype: torch.dtype) -> ir.DataType:
 
 
 def to_torch_dtype(dtype: ir.DataType) -> torch.dtype:
-    import torch
+    """Convert an ONNX IR DataType to a PyTorch dtype."""
+    global _ONNX_DTYPE_TO_TORCH
+    if _ONNX_DTYPE_TO_TORCH is None:
+        import torch
 
-    _ONNX_DTYPE_TO_TORCH: dict[ir.DataType, torch.dtype] = {
-        ir.DataType.BFLOAT16: torch.bfloat16,
-        ir.DataType.BOOL: torch.bool,
-        ir.DataType.COMPLEX128: torch.complex128,
-        ir.DataType.COMPLEX64: torch.complex64,
-        ir.DataType.FLOAT16: torch.float16,
-        ir.DataType.FLOAT: torch.float32,
-        ir.DataType.DOUBLE: torch.float64,
-        ir.DataType.FLOAT8E4M3FN: torch.float8_e4m3fn,
-        ir.DataType.FLOAT8E4M3FNUZ: torch.float8_e4m3fnuz,
-        ir.DataType.FLOAT8E5M2: torch.float8_e5m2,
-        ir.DataType.FLOAT8E5M2FNUZ: torch.float8_e5m2fnuz,
-        ir.DataType.INT16: torch.int16,
-        ir.DataType.INT32: torch.int32,
-        ir.DataType.INT64: torch.int64,
-        ir.DataType.INT8: torch.int8,
-        ir.DataType.UINT8: torch.uint8,
-        ir.DataType.UINT16: torch.uint16,
-        ir.DataType.UINT32: torch.uint32,
-        ir.DataType.UINT64: torch.uint64,
-    }
+        _ONNX_DTYPE_TO_TORCH: dict[ir.DataType, torch.dtype] = {
+            ir.DataType.BFLOAT16: torch.bfloat16,
+            ir.DataType.BOOL: torch.bool,
+            ir.DataType.COMPLEX128: torch.complex128,
+            ir.DataType.COMPLEX64: torch.complex64,
+            ir.DataType.FLOAT16: torch.float16,
+            ir.DataType.FLOAT: torch.float32,
+            ir.DataType.DOUBLE: torch.float64,
+            ir.DataType.FLOAT8E4M3FN: torch.float8_e4m3fn,
+            ir.DataType.FLOAT8E4M3FNUZ: torch.float8_e4m3fnuz,
+            ir.DataType.FLOAT8E5M2: torch.float8_e5m2,
+            ir.DataType.FLOAT8E5M2FNUZ: torch.float8_e5m2fnuz,
+            ir.DataType.INT16: torch.int16,
+            ir.DataType.INT32: torch.int32,
+            ir.DataType.INT64: torch.int64,
+            ir.DataType.INT8: torch.int8,
+            ir.DataType.UINT8: torch.uint8,
+            ir.DataType.UINT16: torch.uint16,
+            ir.DataType.UINT32: torch.uint32,
+            ir.DataType.UINT64: torch.uint64,
+        }
     if dtype not in _ONNX_DTYPE_TO_TORCH:
         raise TypeError(
             f"Unsupported conversion from ONNX dtype '{dtype}' to torch. "
