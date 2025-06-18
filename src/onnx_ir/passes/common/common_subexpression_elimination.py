@@ -21,7 +21,7 @@ class CommonSubexpressionEliminationPass(ir.passes.InPlacePass):
 
     Attributes:
         size_limit: The minimum size of the tensor to be csed. If the tensor contains
-            number of elements larger than size_limit, it will not be csed. Default is 1024.
+            number of elements larger than size_limit, it will not be cse'd. Default is 1024.
 
     """
 
