@@ -356,18 +356,18 @@ class TestCommonSubexpressionEliminationPass(unittest.TestCase):
         """Test if the constant nodes with the tensors larger than size limit are not CSEd.
 
         def f(x):
-            a = x + [1, 2]
-            b = x + [1, 2]
+            a = x + [1, 2, 3, 4]
+            b = x + [1, 2, 3, 4]
             return a + b
         """
 
         @script()
-        def test_model(x: FLOAT[2, 2]) -> FLOAT[2, 2]:
-            a = op.Add(x, op.Constant(value=np.array([1.0, 2.0], dtype=np.float32)))
-            b = op.Add(x, op.Constant(value=np.array([1.0, 2.0], dtype=np.float32)))
+        def test_model(x: FLOAT[4, 4]) -> FLOAT[4, 4]:
+            a = op.Add(x, op.Constant(value=np.array([1.0, 2.0, 3.0, 4.0], dtype=np.float32)))
+            b = op.Add(x, op.Constant(value=np.array([1.0, 2.0, 3.0, 4.0], dtype=np.float32)))
             return a + b
 
         model_proto = test_model.to_model_proto()
         model = ir.serde.deserialize_model(model_proto)
         # Add and Constant nodes should not be CSEd
-        self.check_graph(model, [np.random.rand(2, 2)], delta_nodes=[0], size_limit=4)
+        self.check_graph(model, [np.random.rand(4, 4)], delta_nodes=[0], size_limit=3)
