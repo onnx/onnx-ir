@@ -30,6 +30,8 @@ from __future__ import annotations
 
 __all__ = [
     "TorchTensor",
+    "from_torch_dtype",
+    "to_torch_dtype",
 ]
 
 import ctypes
@@ -44,36 +46,79 @@ if TYPE_CHECKING:
     import torch
 
 
+def from_torch_dtype(dtype: torch.dtype) -> ir.DataType:
+    import torch
+
+    _TORCH_DTYPE_TO_ONNX: dict[torch.dtype, ir.DataType] = {
+        torch.bfloat16: ir.DataType.BFLOAT16,
+        torch.bool: ir.DataType.BOOL,
+        torch.complex128: ir.DataType.COMPLEX128,
+        torch.complex64: ir.DataType.COMPLEX64,
+        torch.float16: ir.DataType.FLOAT16,
+        torch.float32: ir.DataType.FLOAT,
+        torch.float64: ir.DataType.DOUBLE,
+        torch.float8_e4m3fn: ir.DataType.FLOAT8E4M3FN,
+        torch.float8_e4m3fnuz: ir.DataType.FLOAT8E4M3FNUZ,
+        torch.float8_e5m2: ir.DataType.FLOAT8E5M2,
+        torch.float8_e5m2fnuz: ir.DataType.FLOAT8E5M2FNUZ,
+        torch.int16: ir.DataType.INT16,
+        torch.int32: ir.DataType.INT32,
+        torch.int64: ir.DataType.INT64,
+        torch.int8: ir.DataType.INT8,
+        torch.uint8: ir.DataType.UINT8,
+        torch.uint16: ir.DataType.UINT16,
+        torch.uint32: ir.DataType.UINT32,
+        torch.uint64: ir.DataType.UINT64,
+    }
+    if dtype not in _TORCH_DTYPE_TO_ONNX:
+        raise TypeError(
+            f"Unsupported PyTorch dtype '{dtype}'. "
+            "Please use a supported dtype from the list: "
+            f"{list(_TORCH_DTYPE_TO_ONNX.keys())}"
+        )
+    return _TORCH_DTYPE_TO_ONNX[dtype]
+
+
+def to_torch_dtype(dtype: ir.DataType) -> torch.dtype:
+    import torch
+
+    _ONNX_DTYPE_TO_TORCH: dict[ir.DataType, torch.dtype] = {
+        ir.DataType.BFLOAT16: torch.bfloat16,
+        ir.DataType.BOOL: torch.bool,
+        ir.DataType.COMPLEX128: torch.complex128,
+        ir.DataType.COMPLEX64: torch.complex64,
+        ir.DataType.FLOAT16: torch.float16,
+        ir.DataType.FLOAT: torch.float32,
+        ir.DataType.DOUBLE: torch.float64,
+        ir.DataType.FLOAT8E4M3FN: torch.float8_e4m3fn,
+        ir.DataType.FLOAT8E4M3FNUZ: torch.float8_e4m3fnuz,
+        ir.DataType.FLOAT8E5M2: torch.float8_e5m2,
+        ir.DataType.FLOAT8E5M2FNUZ: torch.float8_e5m2fnuz,
+        ir.DataType.INT16: torch.int16,
+        ir.DataType.INT32: torch.int32,
+        ir.DataType.INT64: torch.int64,
+        ir.DataType.INT8: torch.int8,
+        ir.DataType.UINT8: torch.uint8,
+        ir.DataType.UINT16: torch.uint16,
+        ir.DataType.UINT32: torch.uint32,
+        ir.DataType.UINT64: torch.uint64,
+    }
+    if dtype not in _ONNX_DTYPE_TO_TORCH:
+        raise TypeError(
+            f"Unsupported conversion from ONNX dtype '{dtype}' to torch. "
+            "Please use a supported dtype from the list: "
+            f"{list(_ONNX_DTYPE_TO_TORCH.keys())}"
+        )
+    return _ONNX_DTYPE_TO_TORCH[dtype]
+
+
 class TorchTensor(_core.Tensor):
     def __init__(
         self, tensor: torch.Tensor, name: str | None = None, doc_string: str | None = None
     ):
         # Pass the tensor as the raw data to ir.Tensor's constructor
-        import torch
-
-        _TORCH_DTYPE_TO_ONNX: dict[torch.dtype, ir.DataType] = {
-            torch.bfloat16: ir.DataType.BFLOAT16,
-            torch.bool: ir.DataType.BOOL,
-            torch.complex128: ir.DataType.COMPLEX128,
-            torch.complex64: ir.DataType.COMPLEX64,
-            torch.float16: ir.DataType.FLOAT16,
-            torch.float32: ir.DataType.FLOAT,
-            torch.float64: ir.DataType.DOUBLE,
-            torch.float8_e4m3fn: ir.DataType.FLOAT8E4M3FN,
-            torch.float8_e4m3fnuz: ir.DataType.FLOAT8E4M3FNUZ,
-            torch.float8_e5m2: ir.DataType.FLOAT8E5M2,
-            torch.float8_e5m2fnuz: ir.DataType.FLOAT8E5M2FNUZ,
-            torch.int16: ir.DataType.INT16,
-            torch.int32: ir.DataType.INT32,
-            torch.int64: ir.DataType.INT64,
-            torch.int8: ir.DataType.INT8,
-            torch.uint8: ir.DataType.UINT8,
-            torch.uint16: ir.DataType.UINT16,
-            torch.uint32: ir.DataType.UINT32,
-            torch.uint64: ir.DataType.UINT64,
-        }
         super().__init__(
-            tensor, dtype=_TORCH_DTYPE_TO_ONNX[tensor.dtype], name=name, doc_string=doc_string
+            tensor, dtype=from_torch_dtype(tensor.dtype), name=name, doc_string=doc_string
         )
 
     def numpy(self) -> npt.NDArray:
