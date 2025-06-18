@@ -56,7 +56,7 @@ def from_torch_dtype(dtype: torch.dtype) -> ir.DataType:
     if _TORCH_DTYPE_TO_ONNX is None:
         import torch
 
-        _TORCH_DTYPE_TO_ONNX: dict[torch.dtype, ir.DataType] = {
+        _TORCH_DTYPE_TO_ONNX = {
             torch.bfloat16: ir.DataType.BFLOAT16,
             torch.bool: ir.DataType.BOOL,
             torch.complex128: ir.DataType.COMPLEX128,
@@ -92,7 +92,7 @@ def to_torch_dtype(dtype: ir.DataType) -> torch.dtype:
     if _ONNX_DTYPE_TO_TORCH is None:
         import torch
 
-        _ONNX_DTYPE_TO_TORCH: dict[ir.DataType, torch.dtype] = {
+        _ONNX_DTYPE_TO_TORCH = {
             ir.DataType.BFLOAT16: torch.bfloat16,
             ir.DataType.BOOL: torch.bool,
             ir.DataType.COMPLEX128: torch.complex128,
