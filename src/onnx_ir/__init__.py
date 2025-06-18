@@ -167,4 +167,4 @@ def __set_module() -> None:
 
 
 __set_module()
-__version__ = "0.1.2"
+__version__ = "0.1.3"
