@@ -47,5 +47,7 @@ class DeduplicateInitializersPass(ir.passes.InPlacePass):
                 modified = True
                 ir.convenience.replace_all_uses_with(initializer, initializers[key])
                 graph.initializers.pop(initializer.name)
+            else:
+                initializers[key] = initializer
 
         return ir.passes.PassResult(model=model, modified=modified)
