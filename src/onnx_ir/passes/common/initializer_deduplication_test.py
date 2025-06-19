@@ -34,7 +34,7 @@ class DeduplicateInitializersTest(unittest.TestCase):
             """
             <ir_version: 10, opset_import: ["" : 17]>
             agraph () => ()
-            <float[2] w1 = {1.0, 2.0}, float[[2]] w2 = {1.0, 2.0}> {
+            <float[2] w1 = {1.0, 2.0}, float[1,2] w2 = {1.0, 2.0}> {
                 sum = Add(w1, w2)
             }
             """
