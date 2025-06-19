@@ -28,7 +28,7 @@ class DeduplicateInitializersPass(ir.passes.InPlacePass):
 
     def call(self, model: ir.Model) -> ir.passes.PassResult:
         graph = model.graph
-        initializers: dict[ir.DataType, tuple[int, ...], bytes] = {}
+        initializers: dict[tuple[ir.DataType, tuple[int, ...], bytes], ir.Value] = {}
         modified = False
 
         for initializer in tuple(graph.initializers.values()):
