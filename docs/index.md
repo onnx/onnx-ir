@@ -1,6 +1,10 @@
 # ONNX IR
 
-An in-memory IR that supports the full ONNX spec, designed for graph construction, analysis and transformation.
+A- **No protobuf dependency**: The IR does not require protobuf once the model is converted to the IR representation, decoupling from the serialization format.
+
+## Migration from onnx.helper
+
+If you're currently using `onnx.helper` to build ONNX models, check out our [migration guide](migration_guide.md) to learn how to transition to the more modern and Pythonic `onnx_ir` API. in-memory IR that supports the full ONNX spec, designed for graph construction, analysis and transformation.
 
 ## Features ✨
 
@@ -19,6 +23,7 @@ An in-memory IR that supports the full ONNX spec, designed for graph constructio
 
 Overview <self>
 getting_started
+migration_guide
 tensors
 api/index
 ```
