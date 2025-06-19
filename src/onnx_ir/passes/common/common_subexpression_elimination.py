@@ -20,12 +20,12 @@ class CommonSubexpressionEliminationPass(ir.passes.InPlacePass):
     """Eliminate common subexpression in ONNX graphs.
 
     Attributes:
-        size_limit: The minimum size of the tensor to be csed. If the tensor contains
-            number of elements larger than size_limit, it will not be cse'd. Default is 1024.
+        size_limit: The maximum size of the tensor to be csed. If the tensor contains
+            number of elements larger than size_limit, it will not be cse'd. Default is 10.
 
     """
 
-    def __init__(self, size_limit: int = 1024):
+    def __init__(self, size_limit: int = 10):
         """Initialize the CommonSubexpressionEliminationPass."""
         super().__init__()
         self.size_limit = size_limit

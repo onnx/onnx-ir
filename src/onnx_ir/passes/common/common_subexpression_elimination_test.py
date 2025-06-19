@@ -19,7 +19,7 @@ class TestCommonSubexpressionEliminationPass(unittest.TestCase):
         model: ir.Model,
         inputs: list[ir.Value],
         delta_nodes: list[int],
-        size_limit: int = 1024,
+        size_limit: int = 10,
     ):
         """Check if the model applied the CSE pass correctly.
 
@@ -29,7 +29,7 @@ class TestCommonSubexpressionEliminationPass(unittest.TestCase):
             delta_nodes: The expected change in the number of nodes in the model.
                          The length of this list should match the number of graphs
                          in the model. (to support subgraphs in the future)
-            size_limit: The minimum size of the tensor to be csed. If the tensor contains
+            size_limit: The maximum size of the tensor to be csed. If the tensor contains
                         number of elements larger than size_limit, it will not be csed.
 
         Raises:
