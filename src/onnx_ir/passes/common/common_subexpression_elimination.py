@@ -32,18 +32,17 @@ class CommonSubexpressionEliminationPass(ir.passes.InPlacePass):
 
     def call(self, model: ir.Model) -> ir.passes.PassResult:
         """Return the same ir.Model but with CSE applied to the graph."""
-        modified = False
         graph = model.graph
-
-        modified = self._eliminate_common_subexpression(graph, modified)
+        modified = self._eliminate_common_subexpression(graph)
 
         return ir.passes.PassResult(
             model,
             modified=modified,
         )
 
-    def _eliminate_common_subexpression(self, graph: ir.Graph, modified: bool) -> bool:
+    def _eliminate_common_subexpression(self, graph: ir.Graph) -> bool:
         """Eliminate common subexpression in ONNX graphs."""
+        modified: bool = False
         # node to node identifier, length of outputs, inputs, and attributes
         existing_node_info_to_the_node: dict[
             tuple[
