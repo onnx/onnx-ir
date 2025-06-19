@@ -6,6 +6,7 @@ __all__ = [
     "CheckerPass",
     "ClearMetadataAndDocStringPass",
     "CommonSubexpressionEliminationPass",
+    "DeduplicateInitializersPass",
     "InlinePass",
     "LiftConstantsToInitializersPass",
     "LiftSubgraphInitializersToMainGraphPass",
@@ -28,6 +29,9 @@ from onnx_ir.passes.common.constant_manipulation import (
     LiftConstantsToInitializersPass,
     LiftSubgraphInitializersToMainGraphPass,
     RemoveInitializersFromInputsPass,
+)
+from onnx_ir.passes.common.initializer_deduplication import (
+    DeduplicateInitializersPass,
 )
 from onnx_ir.passes.common.inliner import InlinePass
 from onnx_ir.passes.common.onnx_checker import CheckerPass
