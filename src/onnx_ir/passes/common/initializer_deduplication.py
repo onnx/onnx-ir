@@ -45,10 +45,10 @@ class DeduplicateInitializersPass(ir.passes.InPlacePass):
             key = (const_val.dtype, tuple(const_val.shape), const_val.tobytes())
             if key in initializers:
                 modified = True
-                ir.convenience.replace_all_uses_with(initializer, initializers[key])
+                ir.convenience.replace_all_uses_with(initializer, initializers[key])  # type: ignore[index]
                 assert initializer.name is not None
                 graph.initializers.pop(initializer.name)
             else:
-                initializers[key] = initializer
+                initializers[key] = initializer  # type: ignore[index]
 
         return ir.passes.PassResult(model=model, modified=modified)
