@@ -46,6 +46,7 @@ class DeduplicateInitializersPass(ir.passes.InPlacePass):
             if key in initializers:
                 modified = True
                 ir.convenience.replace_all_uses_with(initializer, initializers[key])
+                assert initializer.name is not None
                 graph.initializers.pop(initializer.name)
             else:
                 initializers[key] = initializer
