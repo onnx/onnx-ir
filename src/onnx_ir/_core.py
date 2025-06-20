@@ -417,6 +417,9 @@ class Tensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatible]): 
         else:
             self._shape = shape
             self._shape.freeze()
+        if isinstance(value, np.generic):
+            # Turn numpy scalar into a numpy array
+            value = np.array(value)
         if dtype is None:
             if isinstance(value, np.ndarray):
                 self._dtype = _enums.DataType.from_numpy(value.dtype)
