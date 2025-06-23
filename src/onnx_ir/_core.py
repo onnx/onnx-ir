@@ -964,7 +964,10 @@ class LazyTensor(TensorBase, _protocols.TensorProtocol):  # pylint: disable=too-
 
 
 class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatible]):  # pylint: disable=too-many-ancestors
-    """A tensor that stores 4bit datatypes in packed format."""
+    """A tensor that stores 4bit datatypes in packed format.
+
+    .. versionadded:: 0.1.2
+    """
 
     __slots__ = (
         "_dtype",
@@ -2335,6 +2338,12 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
     seen as a Sequence of nodes and should be used as such. For example, to obtain
     all nodes as a list, call ``list(graph)``.
 
+    .. versionchanged:: 0.1.1
+        Values with non-none producers will be rejected as graph inputs or initializers.
+
+    .. versionadded:: 0.1.1
+        Added ``add`` method to initializers and attributes.
+
     Attributes:
         name: The name of the graph.
         inputs: The input values of the graph.
@@ -2545,12 +2554,17 @@ class Graph(_protocols.GraphProtocol, Sequence[Node], _display.PrettyPrintable):
         Consider using
         :class:`onnx_ir.traversal.RecursiveGraphIterator` for more advanced
         traversals on nodes.
+
+        .. versionadded:: 0.1.2
         """
         # NOTE: This is a method specific to Graph, not required by the protocol unless proven
         return onnx_ir.traversal.RecursiveGraphIterator(self)
 
     def subgraphs(self) -> Iterator[Graph]:
-        """Get all subgraphs in the graph in O(#nodes + #attributes) time."""
+        """Get all subgraphs in the graph in O(#nodes + #attributes) time.
+
+        .. versionadded:: 0.1.2
+        """
         seen_graphs: set[Graph] = set()
         for node in onnx_ir.traversal.RecursiveGraphIterator(self):
             graph = node.graph
@@ -3216,12 +3230,17 @@ class Function(_protocols.FunctionProtocol, Sequence[Node], _display.PrettyPrint
         Consider using
         :class:`onnx_ir.traversal.RecursiveGraphIterator` for more advanced
         traversals on nodes.
+
+        .. versionadded:: 0.1.2
         """
         # NOTE: This is a method specific to Graph, not required by the protocol unless proven
         return onnx_ir.traversal.RecursiveGraphIterator(self)
 
     def subgraphs(self) -> Iterator[Graph]:
-        """Get all subgraphs in the function in O(#nodes + #attributes) time."""
+        """Get all subgraphs in the function in O(#nodes + #attributes) time.
+
+        .. versionadded:: 0.1.2
+        """
         seen_graphs: set[Graph] = set()
         for node in onnx_ir.traversal.RecursiveGraphIterator(self):
             graph = node.graph

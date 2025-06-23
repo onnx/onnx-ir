@@ -20,6 +20,8 @@ class DeduplicateInitializersPass(ir.passes.InPlacePass):
 
     To deduplicate initializers from subgraphs, use :class:`~onnx_ir.passes.common.LiftSubgraphInitializersToMainGraphPass`
     to lift the initializers to the main graph first before running pass.
+
+    .. versionadded:: 0.1.3
     """
 
     def __init__(self, size_limit: int = 1024):
