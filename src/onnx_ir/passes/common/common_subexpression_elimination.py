@@ -21,6 +21,9 @@ class CommonSubexpressionEliminationPass(ir.passes.InPlacePass):
 
     .. versionadded:: 0.1.1
 
+    .. versionchanged:: 0.1.3
+        Constant nodes with values smaller than ``size_limit`` will be CSE'd.
+
     Attributes:
         size_limit: The maximum size of the tensor to be csed. If the tensor contains
             number of elements larger than size_limit, it will not be cse'd. Default is 10.
