@@ -200,6 +200,9 @@ def from_onnx_text(
 
     Read more about the textual representation at: https://onnx.ai/onnx/repo-docs/Syntax.html
 
+    .. versionchanged:: 0.1.2
+        Added the ``initializers`` argument.
+
     Args:
         model_text: The ONNX textual representation of the model.
         initializers: Tensors to be added as initializers. If provided, these tensors
@@ -236,6 +239,8 @@ def to_onnx_text(
     model: _protocols.ModelProtocol, /, exclude_initializers: bool = False
 ) -> str:
     """Convert the IR model to the ONNX textual representation.
+
+    .. versionadded:: 0.1.2
 
     Args:
         model: The IR model to convert.

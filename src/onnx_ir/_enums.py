@@ -120,6 +120,8 @@ class DataType(enum.IntEnum):
     def bitwidth(self) -> int:
         """Returns the bit width of the data type.
 
+        .. versionadded:: 0.1.2
+
         Raises:
             TypeError: If the data type is not supported.
         """

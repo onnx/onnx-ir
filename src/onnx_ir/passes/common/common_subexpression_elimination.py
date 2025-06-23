@@ -19,6 +19,8 @@ logger = logging.getLogger(__name__)
 class CommonSubexpressionEliminationPass(ir.passes.InPlacePass):
     """Eliminate common subexpression in ONNX graphs.
 
+    .. versionadded:: 0.1.1
+
     Attributes:
         size_limit: The maximum size of the tensor to be csed. If the tensor contains
             number of elements larger than size_limit, it will not be cse'd. Default is 10.
