@@ -1,6 +1,6 @@
 # Contributing to ONNX IR
 
-Welcome to the ONNX IR project! We appreciate your interest in contributing to this in-memory IR for ONNX that supports the full ONNX spec.
+Welcome to the ONNX IR project! We appreciate your interest in contributing.
 
 ## Code Style and Design Principles
 
@@ -13,7 +13,7 @@ Before contributing, please familiarize yourself with our development guidelines
 
 ### Prerequisites
 
-- Python 3.9 or higher (Python 3.9-3.13 are officially supported)
+- Python 3.9 or higher
 - Git
 
 ### Setting up the Development Environment
@@ -46,7 +46,6 @@ We use [lintrunner](https://github.com/suo/lintrunner) for code quality checks. 
 
 - **RUFF**: Python linter and code formatter
 - **MYPY**: Static type checker  
-- **RUFF-FORMAT**: Code formatter
 - **EDITORCONFIG-CHECKER**: EditorConfig compliance checker
 
 ### Setting up lintrunner
@@ -117,19 +116,6 @@ pytest tests/test_specific.py
 pytest src --doctest-modules
 ```
 
-## Building the Package
-
-To build the package:
-
-```bash
-nox -s build
-```
-
-Or using the build module directly:
-```bash
-python -m build
-```
-
 ## Submitting Contributions
 
 ### Before submitting
@@ -141,10 +127,8 @@ python -m build
 
 2. **Run the test suite**:
    ```bash
-   nox -s test
+   pytest path/to/test.py
    ```
-
-3. **Make sure your changes don't break existing functionality**
 
 ### Pull Request Guidelines
 
@@ -155,11 +139,11 @@ python -m build
 5. **Ensure all CI checks pass**
 6. **Request review** from maintainers
 
-### Commit Message Format
+### Pull Request Description
 
-Use clear and descriptive commit messages:
+Use clear and descriptive PR description:
 ```
-component: brief description of change
+[component] brief description of change
 
 More detailed explanation if needed, including:
 - What was changed
