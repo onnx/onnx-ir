@@ -69,6 +69,17 @@ class TensorTest(unittest.TestCase):
         tensor = _core.Tensor(array)
         np.testing.assert_array_equal(tensor, array)
 
+    @parameterized.parameterized.expand(
+        [
+            ("bfloat16", ml_dtypes.bfloat16(0.5)),
+            ("float32", np.float32(0.5)),
+            ("bool", np.bool(True)),
+        ]
+    )
+    def test_initialize_with_np_number(self, _: str, number: np.generic):
+        tensor = _core.Tensor(number)
+        np.testing.assert_equal(tensor.numpy(), np.array(number), strict=True)
+
     def test_initialize_raises_when_numpy_dtype_doesnt_match(self):
         array = np.random.rand(1, 2).astype(np.float32)
         with self.assertRaises(TypeError):
