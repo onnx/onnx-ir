@@ -323,6 +323,9 @@ def create_value_mapping(graph: _core.Graph) -> dict[str, _core.Value]:
     and the first value with that name is returned. Values with empty names
     are excluded from the mapping.
 
+    .. versionchanged:: 0.1.2
+        Values from subgraphs are now included in the mapping.
+
     Args:
         graph: The graph to extract the mapping from.
 
@@ -409,6 +412,8 @@ def get_const_tensor(
     This function will not alter the ``const_value`` of the value, but
     it will propagate the shape and type of the constant tensor to the value
     if `propagate_shape_type` is set to True.
+
+    .. versionadded:: 0.1.2
 
     Args:
         value: The value to get the constant tensor from.
