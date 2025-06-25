@@ -45,7 +45,7 @@ Before contributing, please familiarize yourself with our development guidelines
 We use [lintrunner](https://github.com/suo/lintrunner) for code quality checks. The project includes several linters:
 
 - **RUFF**: Python linter and code formatter
-- **MYPY**: Static type checker  
+- **MYPY**: Static type checker
 - **EDITORCONFIG-CHECKER**: EditorConfig compliance checker
 
 ### Setting up lintrunner
