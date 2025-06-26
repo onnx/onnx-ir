@@ -170,7 +170,10 @@ class DataType(enum.IntEnum):
         }
 
     def is_integer(self) -> bool:
-        """Returns True if the data type is an integer."""
+        """Returns True if the data type is an integer.
+
+        .. versionadded:: 0.1.4
+        """
         return self in {
             DataType.UINT8,
             DataType.INT8,
@@ -185,7 +188,10 @@ class DataType(enum.IntEnum):
         }
 
     def is_signed(self) -> bool:
-        """Returns True if the data type is a signed type."""
+        """Returns True if the data type is a signed type.
+
+        .. versionadded:: 0.1.4
+        """
         return self in {
             DataType.FLOAT,
             DataType.INT8,
