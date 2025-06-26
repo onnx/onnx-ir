@@ -169,6 +169,42 @@ class DataType(enum.IntEnum):
             DataType.FLOAT4E2M1,
         }
 
+    def is_integer(self) -> bool:
+        """Returns True if the data type is an integer."""
+        return self in {
+            DataType.UINT8,
+            DataType.INT8,
+            DataType.UINT16,
+            DataType.INT16,
+            DataType.INT32,
+            DataType.INT64,
+            DataType.UINT32,
+            DataType.UINT64,
+            DataType.UINT4,
+            DataType.INT4,
+        }
+
+    def is_signed(self) -> bool:
+        """Returns True if the data type is a signed type."""
+        return self in {
+            DataType.FLOAT,
+            DataType.INT8,
+            DataType.INT16,
+            DataType.INT32,
+            DataType.INT64,
+            DataType.FLOAT16,
+            DataType.DOUBLE,
+            DataType.COMPLEX64,
+            DataType.COMPLEX128,
+            DataType.BFLOAT16,
+            DataType.FLOAT8E4M3FN,
+            DataType.FLOAT8E4M3FNUZ,
+            DataType.FLOAT8E5M2,
+            DataType.FLOAT8E5M2FNUZ,
+            DataType.INT4,
+            DataType.FLOAT4E2M1,
+        }
+
     def __repr__(self) -> str:
         return self.name
 
