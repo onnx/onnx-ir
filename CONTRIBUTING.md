@@ -133,7 +133,7 @@ pytest src --doctest-modules
 ### Pull Request Guidelines
 
 1. **Fork the repository** and create a feature branch from `main`
-2. **Write clear, descriptive commit messages**
+2. **Write clear, descriptive commit messages**. Be sure to [signoff](https://github.com/apps/dco) your commits.
 3. **Add tests** for new functionality
 4. **Update documentation** if needed
 5. **Ensure all CI checks pass**
