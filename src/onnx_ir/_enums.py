@@ -170,7 +170,7 @@ class DataType(enum.IntEnum):
         }
 
     def is_integer(self) -> bool:
-        """Returns True if the data type is an integer"""
+        """Returns True if the data type is an integer."""
         return self in {
             DataType.UINT8,
             DataType.INT8,
