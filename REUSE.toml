@@ -20,7 +20,7 @@ path = [
     "**/*.yml",
     "CODEOWNERS",
     "MANIFEST.in",
-    "py.typed",
+    "src/onnx_ir/py.typed",
     "requirements*.txt",
     "requirements/**/*.txt",
 ]
