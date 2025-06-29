@@ -48,3 +48,6 @@ def set_expr(shape: ir.Shape, index: int, expr: sympy.Expr | int) -> None:
         shape[index] = as_int(expr)
         return
     shape[index] = ir.SymbolicDim(str(expr), expr=expr)
+
+
+class NodeInferencer:
