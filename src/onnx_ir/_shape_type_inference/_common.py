@@ -1,7 +1,9 @@
 """Symbolic shape inference for ONNX IR."""
+from __future__ import annotations
 
 import abc
 from collections.abc import Collection, Sequence
+import dataclasses
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -52,18 +54,24 @@ def set_expr(shape: ir.Shape, index: int, expr: sympy.Expr | int) -> None:
     shape[index] = ir.SymbolicDim(str(expr), expr=expr)
 
 
-class NodeInferencer(abc.ABC):
-    """Base class for node inferencers.
+@dataclasses.dataclass
+class InferenceResult:
+    values: Sequence[ir.Value] | None = None
+    failure: str | None = None
 
-    This class provides a common interface for all node inferencers.
+
+class NodeInferrer(abc.ABC):
+    """Base class for node inferrers.
+
+    This class provides a common interface for all node inferrers.
     """
 
     def __init__(self, op_type: str, opsets: Collection[int], domain: str = "") -> None:
-        """Initialize the node inferencer.
+        """Initialize the node inferrer.
 
         Args:
             op_type: The type of the operation.
-            opsets: A collection of ONNX opset versions supported by this inferencer.
+            opsets: A collection of ONNX opset versions supported by this inferrer.
             domain: The domain of the operation, default is an empty string.
         """
         self.op_type = op_type
@@ -71,12 +79,7 @@ class NodeInferencer(abc.ABC):
         self.domain = domain
 
     @abc.abstractmethod
-    def check(self, node: ir.Node) -> None:
-        """Check if the node is valid for this inferencer."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def infer(self, node: ir.Node) -> Sequence[ir.Value]:
+    def infer(self, node: ir.Node) -> InferenceResult:
         """Infer the shape for the node.
 
         Args:
