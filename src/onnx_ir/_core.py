@@ -62,6 +62,7 @@ from onnx_ir import (
 if typing.TYPE_CHECKING:
     import numpy.typing as npt
     from typing_extensions import TypeGuard
+    import sympy
 
 TArrayCompatible = typing.TypeVar(
     "TArrayCompatible",
@@ -1115,13 +1116,14 @@ class SymbolicDim(_protocols.SymbolicDimProtocol, _display.PrettyPrintable):
     It is immutable and can be compared or hashed.
     """
 
-    __slots__ = ("_value",)
+    __slots__ = ("_expr", "_value")
 
-    def __init__(self, value: str | None) -> None:
+    def __init__(self, value: str | None, /, expr: sympy.Expr | None) -> None:
         """Initialize a symbolic dimension.
 
         Args:
             value: The value of the dimension. It should not be an int.
+            expr: An optional sympy expression representing the dimension.
 
         Raises:
             TypeError: If value is an int.
@@ -1132,6 +1134,7 @@ class SymbolicDim(_protocols.SymbolicDimProtocol, _display.PrettyPrintable):
                 "If you are creating a Shape, use int directly instead of SymbolicDim."
             )
         self._value = value
+        self._expr: sympy.Expr | None = None
 
     def __eq__(self, other: object) -> bool:
         """Check equality with another SymbolicDim or string/None."""
@@ -1148,11 +1151,24 @@ class SymbolicDim(_protocols.SymbolicDimProtocol, _display.PrettyPrintable):
         """The value of the symbolic dimension (string or None)."""
         return self._value
 
+    @property
+    def expr(self) -> sympy.Expr | None:
+        """The sympy expression representing the symbolic dimension."""
+        return self._expr
+
     def __str__(self) -> str:
-        return f"{self._value}"
+        if self._value is not None:
+            return str(self._value)
+        if self._expr is not None:
+            return str(self._expr)
+        return "?"
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self._value})"
+        if self._expr is not None:
+            expr_text = f", expr={self._expr!r}"
+        else:
+            expr_text = ""
+        return f"{self.__class__.__name__}({self._value}{expr_text})"
 
 
 def _is_int_compatible(value: object) -> TypeIs[SupportsInt]:
