@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import sys
-
 import onnx_ir as ir
 from onnx_ir._shape_type_inference import _common
 
@@ -23,7 +21,9 @@ class ConstantInferrer(_common.NodeInferrer):
         assert node.inputs[0] is not None
         tensor = ir.convenience.get_const_tensor(node.inputs[0])
         if tensor is None:
-            return _common.InferenceResult(status="missing_info", msg="Constant tensor cannot be obtained.")
+            return _common.InferenceResult(
+                status="missing_info", msg="Constant tensor cannot be obtained."
+            )
 
         # Create shape from the tensor dimensions
         output_shape = ir.Shape(tensor.shape)

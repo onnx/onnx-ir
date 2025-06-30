@@ -12,7 +12,6 @@ import sympy
 
 import onnx_ir as ir
 
-
 MAX_SUPPORTED_OPSET = 23
 
 
@@ -37,10 +36,11 @@ def get_expr(shape: ir.Shape, index: int) -> sympy.Expr:
 
 
 @enum.unique
-class InferenceStatus(enum.Enum):
+class InferenceStatus(enum.StrEnum):
     """Status of shape inference operation."""
-    SUCCESS = "success"         # Complete inference successful
-    PARTIAL = "partial"         # Partial information available (e.g., type only, rank only)
+
+    SUCCESS = "success"  # Complete inference successful
+    PARTIAL = "partial"  # Partial information available (e.g., type only, rank only)
     MISSING_INFO = "missing_info"  # Missing required input information
     INVALID_NODE = "invalid_node"  # Node is invalid or malformed
 
@@ -127,13 +127,12 @@ def requires_non_none_inputs(
             if len(node.inputs) != count:
                 return InferenceResult(
                     status="invalid_node",
-                    msg=f"{node.op_type} must have {count} inputs, got {len(node.inputs)}."
+                    msg=f"{node.op_type} must have {count} inputs, got {len(node.inputs)}.",
                 )
             for i, inp in enumerate(node.inputs):
                 if inp is None:
                     return InferenceResult(
-                        status="missing_info",
-                        msg=f"{node.op_type} input {i} cannot be None."
+                        status="missing_info", msg=f"{node.op_type} input {i} cannot be None."
                     )
             return func(self, node)
 
@@ -164,7 +163,7 @@ def requires_outputs(
             if len(node.outputs) != count:
                 return InferenceResult(
                     status="invalid_node",
-                    msg=f"{node.op_type} must have {count} outputs, got {len(node.outputs)}."
+                    msg=f"{node.op_type} must have {count} outputs, got {len(node.outputs)}.",
                 )
             return func(self, node)
 

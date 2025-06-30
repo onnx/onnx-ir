@@ -1,6 +1,5 @@
 """MatMul operation inferrer for ONNX IR nodes."""
 
-
 import onnx_ir as ir
 from onnx_ir._shape_type_inference import _common
 from onnx_ir._shape_type_inference.ops.standard_ops import broadcast_shapes_bidirectional
@@ -23,8 +22,7 @@ class MatMulInferrer(_common.NodeInferrer):
         rhs_shape = node.inputs[1].shape
         if lhs_shape is None or rhs_shape is None:
             return _common.InferenceResult(
-                status="missing_info",
-                msg="MatMul input shapes cannot be None."
+                status="missing_info", msg="MatMul input shapes cannot be None."
             )
 
         lhs_rank = len(lhs_shape)
@@ -32,8 +30,7 @@ class MatMulInferrer(_common.NodeInferrer):
 
         if lhs_rank == 0 or rhs_rank == 0:
             return _common.InferenceResult(
-                status="invalid_node",
-                msg="MatMul inputs cannot be scalars."
+                status="invalid_node", msg="MatMul inputs cannot be scalars."
             )
 
         # Compute output shape based on matrix multiplication rules

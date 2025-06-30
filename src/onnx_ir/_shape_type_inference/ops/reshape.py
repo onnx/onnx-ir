@@ -1,7 +1,5 @@
 """Reshape operation inferrer for ONNX IR nodes."""
 
-import sys
-
 import sympy
 
 import onnx_ir as ir
@@ -21,17 +19,16 @@ class ReshapeInferrer(_common.NodeInferrer):
         if len(node.inputs) != 2:
             return _common.InferenceResult(
                 status="invalid_node",
-                msg=f"Reshape operation must have exactly two inputs, got {len(node.inputs)}."
+                msg=f"Reshape operation must have exactly two inputs, got {len(node.inputs)}.",
             )
         if node.inputs[0] is None or node.inputs[1] is None:
             return _common.InferenceResult(
-                status="missing_info",
-                msg="Reshape operation inputs cannot be None."
+                status="missing_info", msg="Reshape operation inputs cannot be None."
             )
         if len(node.outputs) != 1:
             return _common.InferenceResult(
                 status="invalid_node",
-                msg=f"Reshape operation must have exactly one output, got {len(node.outputs)}."
+                msg=f"Reshape operation must have exactly one output, got {len(node.outputs)}.",
             )
 
         input_shape = node.inputs[0].shape
@@ -39,8 +36,7 @@ class ReshapeInferrer(_common.NodeInferrer):
 
         if input_shape is None:
             return _common.InferenceResult(
-                status="missing_info",
-                msg="Reshape input shape cannot be None."
+                status="missing_info", msg="Reshape input shape cannot be None."
             )
 
         # Try to get the shape values from the second input
@@ -48,8 +44,7 @@ class ReshapeInferrer(_common.NodeInferrer):
         shape = ir.convenience.get_const_tensor(shape_input)
         if shape is None:
             return _common.InferenceResult(
-                status="missing_info",
-                msg="Reshape shape input is not known."
+                status="missing_info", msg="Reshape shape input is not known."
             )
 
         shape_values = shape.numpy().tolist()
@@ -68,8 +63,7 @@ class ReshapeInferrer(_common.NodeInferrer):
             if dim_value == -1:
                 if deferred_dim_idx != -1:
                     return _common.InferenceResult(
-                        status="invalid_node",
-                        msg="Reshape can have at most one -1 dimension."
+                        status="invalid_node", msg="Reshape can have at most one -1 dimension."
                     )
                 deferred_dim_idx = i
                 output_dims.append(None)  # Placeholder
@@ -78,7 +72,7 @@ class ReshapeInferrer(_common.NodeInferrer):
                 if i >= len(input_shape):
                     return _common.InferenceResult(
                         status="invalid_node",
-                        msg=f"Cannot copy dimension {i} from input shape of rank {len(input_shape)}."
+                        msg=f"Cannot copy dimension {i} from input shape of rank {len(input_shape)}.",
                     )
                 dim_expr = _common.get_expr(input_shape, i)
                 output_dims.append(dim_expr)

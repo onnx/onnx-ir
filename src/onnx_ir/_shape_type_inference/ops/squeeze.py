@@ -66,7 +66,9 @@ class Squeeze12Inferrer(_common.NodeInferrer):
         assert input is not None
         input_shape = input.shape
         if input_shape is None:
-            return _common.InferenceResult(status="missing_info", msg="Squeeze input shape is not known.")
+            return _common.InferenceResult(
+                status="missing_info", msg="Squeeze input shape is not known."
+            )
 
         rank = len(input_shape)
 
@@ -103,7 +105,9 @@ class Squeeze13Inferrer(_common.NodeInferrer):
 
         input_shape = node.inputs[0].shape
         if input_shape is None:
-            return _common.InferenceResult(status="missing_info", msg="Squeeze input shape is not known.")
+            return _common.InferenceResult(
+                status="missing_info", msg="Squeeze input shape is not known."
+            )
 
         rank = len(input_shape)
 
@@ -118,7 +122,8 @@ class Squeeze13Inferrer(_common.NodeInferrer):
             axes_shape = node.inputs[1].shape
             if axes_shape is None or axes_shape.is_dynamic():
                 return _common.InferenceResult(
-                    status="missing_info", msg="Squeeze axes input shape is not known or is dynamic"
+                    status="missing_info",
+                    msg="Squeeze axes input shape is not known or is dynamic",
                 )
             removed_axes_count = axes_shape[0]
             assert isinstance(removed_axes_count, int)

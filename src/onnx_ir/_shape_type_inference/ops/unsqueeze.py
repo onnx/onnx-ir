@@ -69,7 +69,9 @@ class Unsqueeze12Inferrer(_common.NodeInferrer):
         assert input is not None
         input_shape = input.shape
         if input_shape is None:
-            return _common.InferenceResult(status="missing_info", msg="Unsqueeze input shape is not known.")
+            return _common.InferenceResult(
+                status="missing_info", msg="Unsqueeze input shape is not known."
+            )
 
         input_rank = len(input_shape)
 
@@ -111,7 +113,9 @@ class Unsqueeze13Inferrer(_common.NodeInferrer):
 
         input_shape = node.inputs[0].shape
         if input_shape is None:
-            return _common.InferenceResult(status="missing_info", msg="Unsqueeze input shape is not known.")
+            return _common.InferenceResult(
+                status="missing_info", msg="Unsqueeze input shape is not known."
+            )
 
         input_rank = len(input_shape)
 
@@ -134,7 +138,8 @@ class Unsqueeze13Inferrer(_common.NodeInferrer):
             axes_shape = node.inputs[1].shape
             if axes_shape is None or axes_shape.is_dynamic():
                 return _common.InferenceResult(
-                    status="missing_info", msg="Unsqueeze axes input shape is not known or is dynamic"
+                    status="missing_info",
+                    msg="Unsqueeze axes input shape is not known or is dynamic",
                 )
 
             # We know the number of axes to insert but not their positions

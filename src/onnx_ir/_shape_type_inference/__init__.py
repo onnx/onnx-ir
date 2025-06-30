@@ -9,7 +9,11 @@ __all__ = [
 ]
 
 
-from onnx_ir._shape_type_inference._common import InferenceResult, InferenceStatus, NodeInferrer
+from onnx_ir._shape_type_inference._common import (
+    InferenceResult,
+    InferenceStatus,
+    NodeInferrer,
+)
 from onnx_ir._shape_type_inference._engine import (
     InferenceError,
     SymbolicInferenceEngine,

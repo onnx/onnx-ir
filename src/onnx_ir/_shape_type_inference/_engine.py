@@ -68,8 +68,8 @@ class SymbolicInferenceEngine:
                 self._infer_node(node, model)
                 logger.debug(f"Successfully inferred node {i}: {node.op_type}")
             except Exception as e:
-                error_msg = f"Failed to infer node {i} ({node.op_type}): {str(e)}"
-                logger.error(error_msg)
+                error_msg = f"Failed to infer node {i} ({node.op_type}): {e!s}"
+                logger.exception(error_msg)
                 raise InferenceError(error_msg) from e
 
         logger.info("Model inference completed successfully")
