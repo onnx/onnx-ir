@@ -407,8 +407,9 @@ class SymbolicShapeInference:
                     if self.auto_merge_:
                         self._add_suggested_merge([dim1, dim2], apply=True)
                     else:
+                        # TODO(justinchuby): Error?
                         logger.warning(
-                            f"unsupported broadcast between {str(dim1)} {str(dim2)}"
+                            "unsupported broadcast between %s %s", dim1, dim2
                         )
             new_shape = [new_dim, *new_shape]
         return new_shape
@@ -627,7 +628,7 @@ class SymbolicShapeInference:
             self.auto_merge_,
             self.guess_output_rank_,
             self.verbose_,
-            prefix=f"{self.prefix_}_{str(self.subgraph_id_)}",
+            prefix=f"{self.prefix_}_{self.subgraph_id_!s}",
         )
         if inc_subgraph_id:
             self.subgraph_id_ += 1
@@ -2202,7 +2203,7 @@ class SymbolicShapeInference:
         # handle sympy_data if needed, for slice in shape computation
         if (
             node.input[0] in self.sympy_data_
-            and [0] == axes
+            and axes == [0]
             and starts is not None
             and len(starts) == 1
             and ends is not None
@@ -3197,7 +3198,7 @@ class SymbolicShapeInference:
                 )
                 if self.verbose_ > 2:
                     logger.debug(
-                        f"  {node.output[i_o]}: {str(out_shape)} {onnx.TensorProto.DataType.Name(vi.type.tensor_type.elem_type)}"
+                        f"  {node.output[i_o]}: {out_shape!s} {onnx.TensorProto.DataType.Name(vi.type.tensor_type.elem_type)}"
                     )
                     if node.output[i_o] in self.sympy_data_:
                         logger.debug(
@@ -3326,7 +3327,7 @@ class SymbolicShapeInference:
                                     )
                                 if self.verbose_ > 2:
                                     logger.debug(
-                                        f"  {node.output[i_o]}: {str(new_shape)} {vi.type.tensor_type.elem_type}"
+                                        f"  {node.output[i_o]}: {new_shape!s} {vi.type.tensor_type.elem_type}"
                                     )
                             self.run_ = True
                             continue  # continue the inference after guess, no need to stop as no merge is needed

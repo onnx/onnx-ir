@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import abc
 import dataclasses
-from collections.abc import Collection, Sequence
 import functools
-from typing import Any, TypeVar, Callable
-import numpy as np
+from collections.abc import Collection, Sequence
+from typing import Any, Callable
+
 import sympy
 
 import onnx_ir as ir

@@ -20,21 +20,11 @@ class ElementwiseInferrer(_common.NodeInferrer):
             opsets = range(sys.maxsize)
         super().__init__(op_type, opsets=opsets)
 
+    @_common.requires_non_none_inputs(1)
+    @_common.requires_outputs(1)
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for elementwise operations."""
-        if len(node.inputs) != 1:
-            return _common.InferenceResult(
-                failure=f"Elementwise operation must have exactly one input, got {len(node.inputs)}."
-            )
-        if node.inputs[0] is None:
-            return _common.InferenceResult(
-                failure="Elementwise operation input cannot be None."
-            )
-        if len(node.outputs) != 1:
-            return _common.InferenceResult(
-                failure=f"Elementwise operation must have exactly one output, got {len(node.outputs)}."
-            )
-
+        assert node.inputs[0] is not None
         return _common.InferenceResult(
             (ir.Value(shape=node.inputs[0].shape, type=node.inputs[0].type),)
         )
@@ -89,18 +79,12 @@ class BinaryInferrer(_common.NodeInferrer):
         """Initialize the binary inferrer with the operation type."""
         super().__init__(op_type, opsets=range(sys.maxsize))
 
+    @_common.requires_non_none_inputs(2)
+    @_common.requires_outputs(1)
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for binary operations."""
-        if len(node.inputs) != 2:
-            return _common.InferenceResult(
-                failure=f"Binary operation must have exactly two inputs, got {len(node.inputs)}."
-            )
-        if node.inputs[0] is None or node.inputs[1] is None:
-            return _common.InferenceResult(failure="Binary operation inputs cannot be None.")
-        if len(node.outputs) != 1:
-            return _common.InferenceResult(
-                failure=f"Binary operation must have exactly one output, got {len(node.outputs)}."
-            )
+        assert node.inputs[0] is not None
+        assert node.inputs[1] is not None
         first_type = node.inputs[0].type
         second_type = node.inputs[1].type
         if first_type is not None and second_type is not None and first_type != second_type:

@@ -13,19 +13,11 @@ class TransposeInferrer(_common.NodeInferrer):
         """Initialize the Transpose inferrer."""
         super().__init__("Transpose", opsets=range(sys.maxsize))
 
+    @_common.requires_non_none_inputs(1)
+    @_common.requires_outputs(1)
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for Transpose operations."""
-        if len(node.inputs) != 1:
-            return _common.InferenceResult(
-                failure=f"Transpose operation must have exactly one input, got {len(node.inputs)}."
-            )
-        if node.inputs[0] is None:
-            return _common.InferenceResult(failure="Transpose operation input cannot be None.")
-        if len(node.outputs) != 1:
-            return _common.InferenceResult(
-                failure=f"Transpose operation must have exactly one output, got {len(node.outputs)}."
-            )
-
+        assert node.inputs[0] is not None
         input_shape = node.inputs[0].shape
         if input_shape is None:
             return _common.InferenceResult(failure="Transpose input shape cannot be None.")
