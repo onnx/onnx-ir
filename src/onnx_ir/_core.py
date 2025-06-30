@@ -1357,7 +1357,9 @@ class Shape(_protocols.ShapeProtocol, _display.PrettyPrintable):
     def __getitem__(self, index):
         return tuple(self._dims)[index]
 
-    def __setitem__(self, index: int, value: int | SymbolicDim | str | sympy.Expr | None) -> None:
+    def __setitem__(
+        self, index: int, value: int | SymbolicDim | str | sympy.Expr | None
+    ) -> None:
         """Set the dimension at the index.
 
         Args:

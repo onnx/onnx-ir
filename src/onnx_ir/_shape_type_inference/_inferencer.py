@@ -949,9 +949,7 @@ class SymbolicShapeInference:
         funcs = {
             "Add": lambda l: l[0] + l[1],
             "Div": lambda l: (
-                int(l[0] // l[1])
-                if isinstance(l[0] // l[1], float)
-                else l[0] // l[1]
+                int(l[0] // l[1]) if isinstance(l[0] // l[1], float) else l[0] // l[1]
             ),  # integer div in sympy
             "Equal": lambda l: l[0] == l[1],
             "Floor": lambda l: sympy.floor(l[0]),

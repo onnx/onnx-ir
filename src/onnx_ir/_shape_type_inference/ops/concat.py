@@ -75,4 +75,6 @@ class ConcatInferrer(_common.NodeInferrer):
 
         # Set the concat dimension in output shape
         output_dims[axis] = concat_dim_size
-        return _common.InferenceResult(values=(ir.Value(shape=ir.Shape(output_dims), type=first_type),))
+        return _common.InferenceResult(
+            values=(ir.Value(shape=ir.Shape(output_dims), type=first_type),)
+        )

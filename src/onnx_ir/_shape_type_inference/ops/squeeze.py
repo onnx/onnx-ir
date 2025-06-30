@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-import sys
 import logging
+import sys
 from collections.abc import Sequence
+
 import onnx_ir as ir
 from onnx_ir._shape_type_inference import _common
 

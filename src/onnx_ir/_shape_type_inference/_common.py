@@ -27,6 +27,8 @@ def get_expr(shape: ir.Shape, index: int) -> sympy.Expr:
     if isinstance(dim, ir.SymbolicDim):
         if dim.expr is not None:
             return dim.expr
+        if dim.value is None:
+            return sympy.Symbol("__unknown__")
         return sympy.Symbol(dim.value)
     return sympy.Integer(dim)
 
@@ -70,7 +72,9 @@ class NodeInferrer(abc.ABC):
 
 def requires_non_none_inputs(
     count: int, /
-) -> Callable[[Callable[[Any, ir.Node], InferenceResult]], Callable[[Any, ir.Node], InferenceResult]]:
+) -> Callable[
+    [Callable[[Any, ir.Node], InferenceResult]], Callable[[Any, ir.Node], InferenceResult]
+]:
     """Ensure that the node has a specific number of non-None inputs.
 
     Args:
@@ -101,7 +105,9 @@ def requires_non_none_inputs(
 
 def requires_outputs(
     count: int, /
-) -> Callable[[Callable[[Any, ir.Node], InferenceResult]], Callable[[Any, ir.Node], InferenceResult]]:
+) -> Callable[
+    [Callable[[Any, ir.Node], InferenceResult]], Callable[[Any, ir.Node], InferenceResult]
+]:
     """Ensure that the node has a specific number of outputs.
 
     Args:
