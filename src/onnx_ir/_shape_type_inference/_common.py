@@ -5,7 +5,8 @@ from __future__ import annotations
 import abc
 import dataclasses
 from collections.abc import Collection, Sequence
-
+import functools
+from typing import Any, TypeVar, Callable
 import numpy as np
 import sympy
 
@@ -65,3 +66,62 @@ class NodeInferrer(abc.ABC):
             A sequence of ONNX values containing the inferred shapes.
         """
         raise NotImplementedError
+
+
+def requires_non_none_inputs(
+    count: int, /
+) -> Callable[[Callable[[Any, ir.Node], InferenceResult]], Callable[[Any, ir.Node], InferenceResult]]:
+    """Ensure that the node has a specific number of non-None inputs.
+
+    Args:
+        count: The exact number of non-None inputs required for the node.
+
+    Returns:
+        A decorator that checks the number of inputs and their non-None status.
+    """
+
+    def decorator(
+        func: Callable[[Any, ir.Node], InferenceResult],
+    ) -> Callable[[Any, ir.Node], InferenceResult]:
+        @functools.wraps(func)
+        def wrapper(self, node: ir.Node) -> InferenceResult:
+            if len(node.inputs) != count:
+                return InferenceResult(
+                    failure=f"[{node.op_type} must have {count} inputs, got {len(node.inputs)}."
+                )
+            for i, inp in enumerate(node.inputs):
+                if inp is None:
+                    return InferenceResult(failure=f"{node.op_type} input {i} cannot be None.")
+            return func(self, node)
+
+        return wrapper
+
+    return decorator
+
+
+def requires_outputs(
+    count: int, /
+) -> Callable[[Callable[[Any, ir.Node], InferenceResult]], Callable[[Any, ir.Node], InferenceResult]]:
+    """Ensure that the node has a specific number of outputs.
+
+    Args:
+        count: The exact number of outputs required for the node.
+
+    Returns:
+        A decorator that checks the number of outputs.
+    """
+
+    def decorator(
+        func: Callable[[Any, ir.Node], InferenceResult],
+    ) -> Callable[[Any, ir.Node], InferenceResult]:
+        @functools.wraps(func)
+        def wrapper(self, node: ir.Node) -> InferenceResult:
+            if len(node.outputs) != count:
+                return InferenceResult(
+                    failure=f"[{node.op_type} must have {count} outputs, got {len(node.outputs)}."
+                )
+            return func(self, node)
+
+        return wrapper
+
+    return decorator

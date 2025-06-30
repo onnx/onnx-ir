@@ -14,18 +14,11 @@ class MatMulInferrer(_common.NodeInferrer):
         """Initialize the MatMul inferrer."""
         super().__init__("MatMul", opsets=range(sys.maxsize))
 
+    @_common.requires_non_none_inputs(2)
+    @_common.requires_outputs(1)
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for MatMul operations."""
-        if len(node.inputs) != 2:
-            return _common.InferenceResult(
-                failure=f"MatMul operation must have exactly two inputs, got {len(node.inputs)}."
-            )
-        if node.inputs[0] is None or node.inputs[1] is None:
-            return _common.InferenceResult(failure="MatMul operation inputs cannot be None.")
-        if len(node.outputs) != 1:
-            return _common.InferenceResult(
-                failure=f"MatMul operation must have exactly one output, got {len(node.outputs)}."
-            )
+        assert node.inputs[0] is not None and node.inputs[1] is not None
 
         lhs_shape = node.inputs[0].shape
         rhs_shape = node.inputs[1].shape
@@ -44,7 +37,7 @@ class MatMulInferrer(_common.NodeInferrer):
             output_shape = ir.Shape([])
         elif lhs_rank == 1:
             # Matrix-vector: (n,) x (..., n, k) -> (..., k)
-            output_dims = list(rhs_shape.dims[:-2]) + [rhs_shape.dims[-1]]
+            output_dims = [*rhs_shape.dims[:-2], rhs_shape.dims[-1]]
             output_shape = ir.Shape(output_dims)
         elif rhs_rank == 1:
             # Vector-matrix: (..., m, n) x (n,) -> (..., m)
@@ -56,23 +49,21 @@ class MatMulInferrer(_common.NodeInferrer):
             lhs_batch = lhs_shape.dims[:-2]
             rhs_batch = rhs_shape.dims[:-2]
             if lhs_batch and rhs_batch:
+                # TODO(justinchuby): Ensure this is correct
                 batch_shape = broadcast_shapes_bidirectional(
                     ir.Shape(lhs_batch), ir.Shape(rhs_batch)
                 )
-                output_dims = list(batch_shape.dims) + [lhs_shape.dims[-2], rhs_shape.dims[-1]]
+                output_dims = [*batch_shape.dims, lhs_shape.dims[-2], rhs_shape.dims[-1]]
                 output_shape = ir.Shape(output_dims)
             elif lhs_batch:
-                output_dims = list(lhs_batch) + [lhs_shape.dims[-2], rhs_shape.dims[-1]]
+                output_dims = [*lhs_batch, lhs_shape.dims[-2], rhs_shape.dims[-1]]
                 output_shape = ir.Shape(output_dims)
             elif rhs_batch:
-                output_dims = list(rhs_batch) + [lhs_shape.dims[-2], rhs_shape.dims[-1]]
+                output_dims = [*rhs_batch, lhs_shape.dims[-2], rhs_shape.dims[-1]]
                 output_shape = ir.Shape(output_dims)
             else:
                 output_dims = [lhs_shape.dims[-2], rhs_shape.dims[-1]]
                 output_shape = ir.Shape(output_dims)
-
-        # For symbolic inference, we assume dimensions are compatible
-        # In practice, this would need runtime verification
 
         output_type = node.inputs[0].type
         return _common.InferenceResult(
