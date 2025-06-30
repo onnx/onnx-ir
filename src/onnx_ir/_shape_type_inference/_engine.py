@@ -12,7 +12,7 @@ from onnx_ir._shape_type_inference import _common
 logger = logging.getLogger(__name__)
 
 
-class ReconciliationPolicy(enum.StrEnum):
+class ReconciliationPolicy(enum.Enum):
     """Policy for reconciling inferred shapes/types with existing values."""
 
     OVERWRITE = "overwrite"  # Always use inferred values

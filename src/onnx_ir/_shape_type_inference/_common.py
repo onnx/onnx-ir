@@ -36,7 +36,7 @@ def get_expr(shape: ir.Shape, index: int) -> sympy.Expr:
 
 
 @enum.unique
-class InferenceStatus(enum.StrEnum):
+class InferenceStatus(enum.Enum):
     """Status of shape inference operation."""
 
     SUCCESS = "success"  # Complete inference successful
