@@ -94,8 +94,18 @@ class SymbolicInferenceEngine:
         # Perform inference
         result = inferrer.infer(node)
 
-        if result.failure is not None:
-            raise InferenceError(f"Inference failed: {result.failure}")
+        if result.status == _common.InferenceStatus.INVALID_NODE:
+            raise InferenceError(f"Invalid node: {result.msg}")
+
+        if result.status == _common.InferenceStatus.MISSING_INFO:
+            logger.warning(f"Missing info for node {node.op_type}: {result.msg}")
+            # Continue with partial inference or skip
+            if result.values is None:
+                return  # Skip this node
+
+        if result.status == _common.InferenceStatus.PARTIAL:
+            logger.info(f"Partial inference for node {node.op_type}: {result.msg}")
+            # Continue with partial results
 
         if result.values is None:
             raise InferenceError("Inference returned no values")

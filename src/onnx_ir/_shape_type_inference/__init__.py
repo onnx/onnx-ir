@@ -5,10 +5,11 @@ __all__ = [
     "InferenceError",
     "NodeInferrer",
     "InferenceResult",
+    "InferenceStatus",
 ]
 
 
-from onnx_ir._shape_type_inference._common import InferenceResult, NodeInferrer
+from onnx_ir._shape_type_inference._common import InferenceResult, InferenceStatus, NodeInferrer
 from onnx_ir._shape_type_inference._engine import (
     InferenceError,
     SymbolicInferenceEngine,

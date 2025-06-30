@@ -12,7 +12,8 @@ The inference engine performs forward propagation through ONNX models to determi
 
 - **`SymbolicInferenceEngine`**: Main orchestrator that processes models and applies inference
 - **`NodeInferrer`**: Base class for operation-specific inference logic
-- **`InferenceResult`**: Container for inference results or failure information
+- **`InferenceResult`**: Container for inference results with status and optional message
+- **`InferenceStatus`**: Enum for inference operation status (SUCCESS, PARTIAL, MISSING_INFO, INVALID_NODE)
 
 ### Reconciliation Policies
 
@@ -22,6 +23,36 @@ The engine supports different strategies for handling conflicts between inferred
 - **`IGNORE`**: Keep existing values if they exist
 - **`RECONCILE`**: Merge inferred and existing values intelligently
 - **`STRICT`**: Fail if inferred values don't match existing ones
+
+### Inference Status System
+
+The `InferenceResult` uses a status-based approach for granular error handling:
+
+- **`SUCCESS`**: Complete inference successful with full shape/type information
+- **`PARTIAL`**: Partial information available (e.g., type only, rank only)
+- **`MISSING_INFO`**: Missing required input information (shapes, types)
+- **`INVALID_NODE`**: Node is invalid or malformed
+
+```python
+# Example usage in inferrers
+def infer(self, node: ir.Node) -> InferenceResult:
+    if node.inputs[0].shape is None:
+        return InferenceResult(
+            status="missing_info",
+            msg="Input shape is required"
+        )
+
+    # Partial inference - only type available
+    if can_infer_type_only():
+        return InferenceResult(
+            values=[ir.Value(type=inferred_type)],
+            status="partial",
+            msg="Shape unavailable, type only"
+        )
+
+    # Full inference (status defaults to "success")
+    return InferenceResult(values=[full_value])
+```
 
 ## Architecture
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import abc
-import dataclasses
+import enum
 import functools
 from collections.abc import Collection, Sequence
 from typing import Any, Callable
@@ -36,10 +36,38 @@ def get_expr(shape: ir.Shape, index: int) -> sympy.Expr:
     return sympy.Integer(dim)
 
 
-@dataclasses.dataclass
+@enum.unique
+class InferenceStatus(enum.Enum):
+    """Status of shape inference operation."""
+    SUCCESS = "success"         # Complete inference successful
+    PARTIAL = "partial"         # Partial information available (e.g., type only, rank only)
+    MISSING_INFO = "missing_info"  # Missing required input information
+    INVALID_NODE = "invalid_node"  # Node is invalid or malformed
+
+
 class InferenceResult:
-    values: Sequence[ir.Value] | None = None
-    failure: str | None = None
+    """Container for inference results with status and optional message."""
+
+    def __init__(
+        self,
+        values: Sequence[ir.Value] | None = None,
+        status: str | InferenceStatus = "success",
+        msg: str | None = None,
+    ) -> None:
+        """Initialize inference result.
+
+        Args:
+            values: Sequence of inferred values.
+            status: Status of inference operation (string or enum).
+            msg: Optional message for context.
+        """
+        self.values = values
+        self.status = InferenceStatus(status)
+        self.msg = msg
+
+    def __repr__(self) -> str:
+        """Return string representation of the result."""
+        return f"InferenceResult(values={self.values}, status={self.status.value}, msg={self.msg!r})"
 
 
 class NodeInferrer(abc.ABC):
@@ -98,11 +126,15 @@ def requires_non_none_inputs(
         def wrapper(self, node: ir.Node) -> InferenceResult:
             if len(node.inputs) != count:
                 return InferenceResult(
-                    failure=f"[{node.op_type} must have {count} inputs, got {len(node.inputs)}."
+                    status="invalid_node",
+                    msg=f"{node.op_type} must have {count} inputs, got {len(node.inputs)}."
                 )
             for i, inp in enumerate(node.inputs):
                 if inp is None:
-                    return InferenceResult(failure=f"{node.op_type} input {i} cannot be None.")
+                    return InferenceResult(
+                        status="missing_info",
+                        msg=f"{node.op_type} input {i} cannot be None."
+                    )
             return func(self, node)
 
         return wrapper
@@ -131,7 +163,8 @@ def requires_outputs(
         def wrapper(self, node: ir.Node) -> InferenceResult:
             if len(node.outputs) != count:
                 return InferenceResult(
-                    failure=f"[{node.op_type} must have {count} outputs, got {len(node.outputs)}."
+                    status="invalid_node",
+                    msg=f"{node.op_type} must have {count} outputs, got {len(node.outputs)}."
                 )
             return func(self, node)
 

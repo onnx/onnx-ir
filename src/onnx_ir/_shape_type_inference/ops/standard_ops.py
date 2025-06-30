@@ -88,14 +88,18 @@ class BinaryInferrer(_common.NodeInferrer):
         second_type = node.inputs[1].type
         if first_type is not None and second_type is not None and first_type != second_type:
             return _common.InferenceResult(
-                failure=f"Input types do not match: {first_type} vs {second_type}."
+                status="invalid_node",
+                msg=f"Input types do not match: {first_type} vs {second_type}."
             )
 
         # Broadcast the input shapes
         first_shape = node.inputs[0].shape
         second_shape = node.inputs[1].shape
         if first_shape is None or second_shape is None:
-            return _common.InferenceResult(failure="Input shapes cannot be None.")
+            return _common.InferenceResult(
+                status="missing_info",
+                msg="Input shapes cannot be None."
+            )
 
         output_shape = broadcast_shapes_bidirectional(first_shape, second_shape)
         output_type = first_type if first_type is not None else second_type
