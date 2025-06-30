@@ -49,7 +49,7 @@ class SymbolicInferenceEngine:
                 self._inferrer_registry[key] = []
             self._inferrer_registry[key].append(inferrer)
 
-        logger.info(f"Initialized inference engine with {len(node_inferrers)} inferrers")
+        logger.info("Initialized inference engine with %s inferrers", len(node_inferrers))
 
     def infer_model(self, model: ir.Model) -> None:
         """Perform shape and type inference on an entire model.
@@ -60,15 +60,15 @@ class SymbolicInferenceEngine:
         Raises:
             InferenceError: If inference fails for any node.
         """
-        logger.info(f"Starting inference on model with {len(model.graph.nodes)} nodes")
+        logger.info("Starting inference on model with %s nodes", len(model.graph.nodes))
 
         # Process nodes in topological order
         for i, node in enumerate(model.graph.nodes):
             try:
                 self._infer_node(node, model)
-                logger.debug(f"Successfully inferred node {i}: {node.op_type}")
+                logger.debug("Successfully inferred node %s: %s", i, node.op_type)
             except Exception as e:
-                error_msg = f"Failed to infer node {i} ({node.op_type}): {e!s}"
+                error_msg = f"Failed to infer node {i} ({node.op_type}): {e}"
                 logger.exception(error_msg)
                 raise InferenceError(error_msg) from e
 
@@ -98,13 +98,13 @@ class SymbolicInferenceEngine:
             raise InferenceError(f"Invalid node: {result.msg}")
 
         if result.status == _common.InferenceStatus.MISSING_INFO:
-            logger.warning(f"Missing info for node {node.op_type}: {result.msg}")
+            logger.warning("Missing info for node %s: %s", node.op_type, result.msg)
             # Continue with partial inference or skip
             if result.values is None:
                 return  # Skip this node
 
         if result.status == _common.InferenceStatus.PARTIAL:
-            logger.info(f"Partial inference for node {node.op_type}: {result.msg}")
+            logger.info("Partial inference for node %s: %s", node.op_type, result.msg)
             # Continue with partial results
 
         if result.values is None:
@@ -139,8 +139,8 @@ class SymbolicInferenceEngine:
 
         if not suitable_inferrers:
             logger.warning(
-                f"No inferrer supports opset {opset_version} for {node.op_type} "
-                f"(domain: {node.domain})"
+                "No inferrer supports opset %s for %s (domain: %s)",
+                opset_version, node.op_type, node.domain
             )
             return None
 
@@ -251,7 +251,8 @@ class SymbolicInferenceEngine:
         """
         if len(shape1) != len(shape2):
             logger.warning(
-                f"Shape rank mismatch: {len(shape1)} vs {len(shape2)}. Using first shape."
+                "Shape rank mismatch: %s vs %s. Using first shape.",
+                len(shape1), len(shape2)
             )
             return shape1
 
