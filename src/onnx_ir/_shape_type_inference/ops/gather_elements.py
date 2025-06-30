@@ -30,22 +30,30 @@ class GatherElementsInferrer(_common.NodeInferrer):
         """Infer the output shape and type for GatherElements operations."""
         assert node.inputs[0] is not None  # data
         assert node.inputs[1] is not None  # indices
-        
+
         data_shape = node.inputs[0].shape
         indices_shape = node.inputs[1].shape
-        
+
         if data_shape is None:
-            return _common.InferenceResult(failure="GatherElements data input shape is not known.")
+            return _common.InferenceResult(
+                failure="GatherElements data input shape is not known."
+            )
         if indices_shape is None:
-            return _common.InferenceResult(failure="GatherElements indices input shape is not known.")
+            return _common.InferenceResult(
+                failure="GatherElements indices input shape is not known."
+            )
 
         data_rank = len(data_shape)
         indices_rank = len(indices_shape)
-        
+
         if data_rank == 0:
-            return _common.InferenceResult(failure="GatherElements data input cannot be a scalar.")
+            return _common.InferenceResult(
+                failure="GatherElements data input cannot be a scalar."
+            )
         if indices_rank == 0:
-            return _common.InferenceResult(failure="GatherElements indices input cannot be a scalar.")
+            return _common.InferenceResult(
+                failure="GatherElements indices input cannot be a scalar."
+            )
 
         # Data and indices must have the same rank
         if data_rank != indices_rank:
@@ -55,7 +63,7 @@ class GatherElementsInferrer(_common.NodeInferrer):
 
         # Get axis attribute (default is 0)
         axis = node.attributes.get_int("axis", 0)
-        
+
         try:
             axis = _handle_negative_axis(axis, data_rank)
         except ValueError as e:

@@ -31,24 +31,32 @@ class ScatterElementsInferrer(_common.NodeInferrer):
         assert node.inputs[0] is not None  # data
         assert node.inputs[1] is not None  # indices
         assert node.inputs[2] is not None  # updates
-        
+
         data_shape = node.inputs[0].shape
         indices_shape = node.inputs[1].shape
         updates_shape = node.inputs[2].shape
-        
+
         if data_shape is None:
-            return _common.InferenceResult(failure="ScatterElements data input shape is not known.")
+            return _common.InferenceResult(
+                failure="ScatterElements data input shape is not known."
+            )
         if indices_shape is None:
-            return _common.InferenceResult(failure="ScatterElements indices input shape is not known.")
+            return _common.InferenceResult(
+                failure="ScatterElements indices input shape is not known."
+            )
         if updates_shape is None:
-            return _common.InferenceResult(failure="ScatterElements updates input shape is not known.")
+            return _common.InferenceResult(
+                failure="ScatterElements updates input shape is not known."
+            )
 
         data_rank = len(data_shape)
         indices_rank = len(indices_shape)
         updates_rank = len(updates_shape)
-        
+
         if data_rank == 0:
-            return _common.InferenceResult(failure="ScatterElements data input cannot be a scalar.")
+            return _common.InferenceResult(
+                failure="ScatterElements data input cannot be a scalar."
+            )
 
         # Indices and updates must have the same shape
         if indices_rank != updates_rank:
@@ -65,7 +73,7 @@ class ScatterElementsInferrer(_common.NodeInferrer):
 
         # Get axis attribute (default is 0)
         axis = node.attributes.get_int("axis", 0)
-        
+
         try:
             axis = _handle_negative_axis(axis, data_rank)
         except ValueError as e:

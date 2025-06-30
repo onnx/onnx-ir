@@ -21,7 +21,7 @@ class TileInferrer(_common.NodeInferrer):
         """Infer the output shape and type for Tile operations."""
         assert node.inputs[0] is not None
         assert node.inputs[1] is not None
-        
+
         input_shape = node.inputs[0].shape
         if input_shape is None:
             return _common.InferenceResult(failure="Tile input shape is not known.")
@@ -32,13 +32,13 @@ class TileInferrer(_common.NodeInferrer):
             repeats = repeats_tensor.numpy().tolist()
             if not isinstance(repeats, list):
                 repeats = [repeats]
-            
+
             rank = len(input_shape)
             if len(repeats) != rank:
                 return _common.InferenceResult(
                     failure=f"Repeats length {len(repeats)} does not match input rank {rank}."
                 )
-            
+
             # Calculate output dimensions by multiplying input dims with repeats
             output_dims = []
             for i, repeat in enumerate(repeats):
@@ -49,10 +49,11 @@ class TileInferrer(_common.NodeInferrer):
                 else:
                     # Symbolic dimension
                     import sympy
+
                     input_expr = _common.get_expr(input_shape, i)
                     output_expr = input_expr * sympy.Integer(repeat)
                     output_dims.append(output_expr)
-            
+
             output_shape = ir.Shape(output_dims)
         else:
             # Repeats are not constant
@@ -61,18 +62,18 @@ class TileInferrer(_common.NodeInferrer):
                 return _common.InferenceResult(
                     failure="Tile repeats input must be a 1D tensor with known shape."
                 )
-            
+
             repeats_length = repeats_shape[0]
             if not isinstance(repeats_length, int):
                 return _common.InferenceResult(
                     failure="Tile repeats length must be statically known."
                 )
-            
+
             if repeats_length != len(input_shape):
                 return _common.InferenceResult(
                     failure=f"Repeats length {repeats_length} does not match input rank {len(input_shape)}."
                 )
-            
+
             # Create output shape with unknown dimensions
             output_shape = ir.Shape([None] * len(input_shape))
 

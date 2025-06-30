@@ -21,10 +21,10 @@ class CumSumInferrer(_common.NodeInferrer):
         """Infer the output shape and type for CumSum operations."""
         assert node.inputs[0] is not None  # input
         assert node.inputs[1] is not None  # axis
-        
+
         input_shape = node.inputs[0].shape
         axis_shape = node.inputs[1].shape
-        
+
         if input_shape is None:
             return _common.InferenceResult(failure="CumSum input shape is not known.")
         if axis_shape is None:

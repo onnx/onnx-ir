@@ -30,10 +30,10 @@ class GatherInferrer(_common.NodeInferrer):
         """Infer the output shape and type for Gather operations."""
         assert node.inputs[0] is not None
         assert node.inputs[1] is not None
-        
+
         data_shape = node.inputs[0].shape
         indices_shape = node.inputs[1].shape
-        
+
         if data_shape is None:
             return _common.InferenceResult(failure="Gather data input shape is not known.")
         if indices_shape is None:
@@ -45,7 +45,7 @@ class GatherInferrer(_common.NodeInferrer):
 
         # Get axis attribute (default is 0)
         axis = node.attributes.get_int("axis", 0)
-        
+
         try:
             axis = _handle_negative_axis(axis, rank)
         except ValueError as e:
@@ -53,11 +53,11 @@ class GatherInferrer(_common.NodeInferrer):
 
         # Output shape: data_shape[:axis] + indices_shape + data_shape[axis+1:]
         output_dims = (
-            list(data_shape.dims[:axis]) +
-            list(indices_shape.dims) +
-            list(data_shape.dims[axis + 1:])
+            list(data_shape.dims[:axis])
+            + list(indices_shape.dims)
+            + list(data_shape.dims[axis + 1 :])
         )
-        
+
         output_shape = ir.Shape(output_dims)
         output_type = node.inputs[0].type
 

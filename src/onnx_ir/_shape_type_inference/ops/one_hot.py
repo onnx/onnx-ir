@@ -31,11 +31,11 @@ class OneHotInferrer(_common.NodeInferrer):
         assert node.inputs[0] is not None  # indices
         assert node.inputs[1] is not None  # depth
         assert node.inputs[2] is not None  # values
-        
+
         indices_shape = node.inputs[0].shape
         depth_shape = node.inputs[1].shape
         values_shape = node.inputs[2].shape
-        
+
         if indices_shape is None:
             return _common.InferenceResult(failure="OneHot indices input shape is not known.")
         if depth_shape is None:
@@ -46,17 +46,19 @@ class OneHotInferrer(_common.NodeInferrer):
         # Depth should be a scalar
         if len(depth_shape) != 0:
             return _common.InferenceResult(failure="OneHot depth input must be a scalar.")
-        
+
         # Values should be a 1D tensor with 2 elements [off_value, on_value]
         if len(values_shape) != 1 or values_shape[0] != 2:
-            return _common.InferenceResult(failure="OneHot values input must be a 1D tensor with 2 elements.")
+            return _common.InferenceResult(
+                failure="OneHot values input must be a 1D tensor with 2 elements."
+            )
 
         # Get axis attribute (default is -1)
         axis = node.attributes.get_int("axis", -1)
-        
+
         input_rank = len(indices_shape)
         output_rank = input_rank + 1
-        
+
         try:
             axis = _handle_negative_axis(axis, output_rank)
         except ValueError as e:
@@ -73,7 +75,7 @@ class OneHotInferrer(_common.NodeInferrer):
         # Construct output shape by inserting depth dimension at specified axis
         output_dims = list(indices_shape.dims)
         output_dims.insert(axis, depth_value)
-        
+
         output_shape = ir.Shape(output_dims)
         output_type = node.inputs[2].type  # Output type matches values type
 

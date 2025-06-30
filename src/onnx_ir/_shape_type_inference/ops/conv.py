@@ -37,10 +37,10 @@ class ConvInferrer(_common.NodeInferrer):
         """Infer the output shape and type for Conv operations."""
         assert node.inputs[0] is not None  # X
         assert node.inputs[1] is not None  # W
-        
+
         input_shape = node.inputs[0].shape
         weight_shape = node.inputs[1].shape
-        
+
         if input_shape is None:
             return _common.InferenceResult(failure="Conv input shape is not known.")
         if weight_shape is None:
@@ -48,20 +48,24 @@ class ConvInferrer(_common.NodeInferrer):
 
         input_rank = len(input_shape)
         weight_rank = len(weight_shape)
-        
+
         if input_rank < 3:
-            return _common.InferenceResult(failure="Conv input must have at least 3 dimensions.")
+            return _common.InferenceResult(
+                failure="Conv input must have at least 3 dimensions."
+            )
         if weight_rank < 3:
-            return _common.InferenceResult(failure="Conv weight must have at least 3 dimensions.")
+            return _common.InferenceResult(
+                failure="Conv weight must have at least 3 dimensions."
+            )
 
         # Input: [N, C, D1, D2, ..., Dn]
         # Weight: [M, C/group, k1, k2, ..., kn]
         # Output: [N, M, out_d1, out_d2, ..., out_dn]
-        
+
         batch_size = input_shape.dims[0]
         output_channels = weight_shape.dims[0]
         spatial_dims = input_rank - 2
-        
+
         if weight_rank != spatial_dims + 2:
             return _common.InferenceResult(
                 failure=f"Conv weight rank {weight_rank} incompatible with input rank {input_rank}."
@@ -71,7 +75,7 @@ class ConvInferrer(_common.NodeInferrer):
         strides = node.attributes.get_ints("strides", [1] * spatial_dims)
         pads = node.attributes.get_ints("pads", [0] * (2 * spatial_dims))
         dilations = node.attributes.get_ints("dilations", [1] * spatial_dims)
-        
+
         if len(strides) != spatial_dims:
             return _common.InferenceResult(
                 failure=f"Conv strides length {len(strides)} must match spatial dimensions {spatial_dims}."
@@ -94,7 +98,7 @@ class ConvInferrer(_common.NodeInferrer):
             padding_before = pads[i]
             padding_after = pads[i + spatial_dims]
             dilation = dilations[i]
-            
+
             if isinstance(input_dim, int) and isinstance(kernel_dim, int):
                 output_dim = _compute_conv_output_size(
                     input_dim, kernel_dim, padding_before, padding_after, stride, dilation
@@ -102,7 +106,7 @@ class ConvInferrer(_common.NodeInferrer):
             else:
                 # Symbolic dimensions - we can't compute exact size
                 output_dim = None
-            
+
             output_spatial_dims.append(output_dim)
 
         output_dims = [batch_size, output_channels] + output_spatial_dims

@@ -23,11 +23,11 @@ class WhereInferrer(_common.NodeInferrer):
         assert node.inputs[0] is not None  # condition
         assert node.inputs[1] is not None  # x
         assert node.inputs[2] is not None  # y
-        
+
         condition_shape = node.inputs[0].shape
         x_shape = node.inputs[1].shape
         y_shape = node.inputs[2].shape
-        
+
         if condition_shape is None:
             return _common.InferenceResult(failure="Where condition input shape is not known.")
         if x_shape is None:

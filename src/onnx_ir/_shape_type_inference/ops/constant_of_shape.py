@@ -20,16 +20,18 @@ class ConstantOfShapeInferrer(_common.NodeInferrer):
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for ConstantOfShape operations."""
         assert node.inputs[0] is not None
-        
+
         shape_input = node.inputs[0]
         shape_input_shape = shape_input.shape
-        
+
         if shape_input_shape is None:
             return _common.InferenceResult(failure="ConstantOfShape input shape is not known.")
-        
+
         # Input should be a 1D tensor containing the target shape
         if len(shape_input_shape) != 1:
-            return _common.InferenceResult(failure="ConstantOfShape input must be a 1D tensor.")
+            return _common.InferenceResult(
+                failure="ConstantOfShape input must be a 1D tensor."
+            )
 
         # Try to get the shape values if they're constant
         shape_tensor = ir.convenience.get_const_tensor(shape_input)

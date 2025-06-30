@@ -408,9 +408,7 @@ class SymbolicShapeInference:
                         self._add_suggested_merge([dim1, dim2], apply=True)
                     else:
                         # TODO(justinchuby): Error?
-                        logger.warning(
-                            "unsupported broadcast between %s %s", dim1, dim2
-                        )
+                        logger.warning("unsupported broadcast between %s %s", dim1, dim2)
             new_shape = [new_dim, *new_shape]
         return new_shape
 

@@ -20,17 +20,17 @@ class NonZeroInferrer(_common.NodeInferrer):
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for NonZero operations."""
         assert node.inputs[0] is not None
-        
+
         input_shape = node.inputs[0].shape
         if input_shape is None:
             return _common.InferenceResult(failure="NonZero input shape is not known.")
 
         rank = len(input_shape)
-        
+
         # NonZero output shape is [rank, num_nonzero_elements]
         # where num_nonzero_elements is unknown at compile time
         output_shape = ir.Shape([rank, None])
-        
+
         # NonZero always outputs INT64
         output_type = ir.TensorType.INT64
 

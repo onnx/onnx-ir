@@ -22,11 +22,11 @@ class RangeInferrer(_common.NodeInferrer):
         assert node.inputs[0] is not None  # start
         assert node.inputs[1] is not None  # limit
         assert node.inputs[2] is not None  # delta
-        
+
         start_shape = node.inputs[0].shape
         limit_shape = node.inputs[1].shape
         delta_shape = node.inputs[2].shape
-        
+
         # All inputs should be scalars
         if start_shape is None or len(start_shape) != 0:
             return _common.InferenceResult(failure="Range start input must be a scalar.")
@@ -45,16 +45,16 @@ class RangeInferrer(_common.NodeInferrer):
             start_val = start_tensor.numpy().item()
             limit_val = limit_tensor.numpy().item()
             delta_val = delta_tensor.numpy().item()
-            
+
             if delta_val == 0:
                 return _common.InferenceResult(failure="Range delta cannot be zero.")
-            
+
             # Calculate output size
             if delta_val > 0:
                 size = max(0, (limit_val - start_val + delta_val - 1) // delta_val)
             else:
                 size = max(0, (limit_val - start_val + delta_val + 1) // delta_val)
-            
+
             output_shape = ir.Shape([int(size)])
         else:
             # Parameters are not all constant, output size is unknown

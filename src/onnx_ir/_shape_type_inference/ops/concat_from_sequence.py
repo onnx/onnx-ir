@@ -29,15 +29,19 @@ class ConcatFromSequenceInferrer(_common.NodeInferrer):
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for ConcatFromSequence operations."""
         assert node.inputs[0] is not None
-        
+
         sequence_input = node.inputs[0]
         if sequence_input.shape is None:
-            return _common.InferenceResult(failure="ConcatFromSequence input shape is not known.")
+            return _common.InferenceResult(
+                failure="ConcatFromSequence input shape is not known."
+            )
 
         # Get required axis attribute
         axis = node.attributes.get_int("axis")
         if axis is None:
-            return _common.InferenceResult(failure="ConcatFromSequence requires axis attribute.")
+            return _common.InferenceResult(
+                failure="ConcatFromSequence requires axis attribute."
+            )
 
         # Get new_axis attribute (default is 0)
         new_axis = node.attributes.get_int("new_axis", 0) != 0
@@ -45,7 +49,7 @@ class ConcatFromSequenceInferrer(_common.NodeInferrer):
         # For sequence inputs, we need to know the element shape
         # This is challenging in symbolic inference without more type information
         # We'll make some assumptions based on the sequence structure
-        
+
         sequence_shape = sequence_input.shape
         if len(sequence_shape) == 0:
             # Scalar sequence length - we don't know the element shape
@@ -58,7 +62,7 @@ class ConcatFromSequenceInferrer(_common.NodeInferrer):
         else:
             # Sequence has known length - assume elements have some shape
             sequence_length = sequence_shape.dims[0]
-            
+
             # Without knowing the element shape, we'll create a placeholder
             # In a real implementation, this would need sequence type information
             if new_axis:

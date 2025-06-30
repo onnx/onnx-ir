@@ -22,7 +22,7 @@ class ExpandInferrer(_common.NodeInferrer):
         """Infer the output shape and type for Expand operations."""
         assert node.inputs[0] is not None
         assert node.inputs[1] is not None
-        
+
         input_shape = node.inputs[0].shape
         if input_shape is None:
             return _common.InferenceResult(failure="Expand input shape is not known.")
@@ -32,7 +32,7 @@ class ExpandInferrer(_common.NodeInferrer):
         if shape_tensor is not None:
             target_shape_values = shape_tensor.numpy().tolist()
             target_shape = ir.Shape(target_shape_values)
-            
+
             # Use broadcasting logic to compute output shape
             output_shape = broadcast_shapes_bidirectional(input_shape, target_shape)
         else:
@@ -42,13 +42,13 @@ class ExpandInferrer(_common.NodeInferrer):
                 return _common.InferenceResult(
                     failure="Expand shape input must be a 1D tensor with known shape."
                 )
-            
+
             target_rank = shape_input_shape[0]
             if not isinstance(target_rank, int):
                 return _common.InferenceResult(
                     failure="Expand target rank must be statically known."
                 )
-            
+
             # Create output shape with unknown dimensions
             output_shape = ir.Shape([None] * target_rank)
 

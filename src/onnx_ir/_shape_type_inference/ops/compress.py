@@ -30,17 +30,17 @@ class CompressInferrer(_common.NodeInferrer):
         """Infer the output shape and type for Compress operations."""
         assert node.inputs[0] is not None  # input
         assert node.inputs[1] is not None  # condition
-        
+
         input_shape = node.inputs[0].shape
         condition_shape = node.inputs[1].shape
-        
+
         if input_shape is None:
             return _common.InferenceResult(failure="Compress input shape is not known.")
         if condition_shape is None:
             return _common.InferenceResult(failure="Compress condition shape is not known.")
 
         input_rank = len(input_shape)
-        
+
         if input_rank == 0:
             return _common.InferenceResult(failure="Compress input cannot be a scalar.")
 
@@ -50,21 +50,21 @@ class CompressInferrer(_common.NodeInferrer):
 
         # Get axis attribute (default is None, meaning flatten first)
         axis = node.attributes.get_int("axis")
-        
+
         if axis is not None:
             try:
                 axis = _handle_negative_axis(axis, input_rank)
             except ValueError as e:
                 return _common.InferenceResult(failure=str(e))
-            
+
             # The condition length should match the size of the axis dimension
             condition_length = condition_shape.dims[0]
             axis_length = input_shape.dims[axis]
             # For symbolic inference, we assume they match
-            
+
             # Output shape: same as input but compressed dimension has unknown size
             output_dims = list(input_shape.dims)
-            
+
             # Try to compute compressed size if condition is constant
             condition_tensor = ir.convenience.get_const_tensor(node.inputs[1])
             if condition_tensor is not None:
@@ -74,7 +74,7 @@ class CompressInferrer(_common.NodeInferrer):
             else:
                 # Condition is not constant, compressed size is unknown
                 output_dims[axis] = None
-            
+
             output_shape = ir.Shape(output_dims)
         else:
             # axis is None - flatten input first, then compress

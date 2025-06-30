@@ -20,7 +20,7 @@ class ShapeInferrer(_common.NodeInferrer):
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for Shape operations."""
         assert node.inputs[0] is not None
-        
+
         input_shape = node.inputs[0].shape
         if input_shape is None:
             return _common.InferenceResult(failure="Shape input shape is not known.")
@@ -28,7 +28,7 @@ class ShapeInferrer(_common.NodeInferrer):
         # The output is a 1D tensor with length equal to the rank of the input
         rank = len(input_shape)
         output_shape = ir.Shape([rank])
-        
+
         # Shape always outputs INT64
         output_type = ir.TensorType.INT64
 

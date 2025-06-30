@@ -27,7 +27,7 @@ class SliceInferrer(_common.NodeInferrer):
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for Slice operations."""
         assert node.inputs[0] is not None
-        
+
         input_shape = node.inputs[0].shape
         if input_shape is None:
             return _common.InferenceResult(failure="Slice input shape is not known.")
@@ -39,13 +39,13 @@ class SliceInferrer(_common.NodeInferrer):
         # For symbolic inference, we'll create an output shape with the same rank
         # but potentially different dimensions (unknown sizes due to slicing)
         output_dims = []
-        
+
         # Try to get slice parameters if they're constant
         starts_tensor = None
         ends_tensor = None
         axes_tensor = None
         steps_tensor = None
-        
+
         if len(node.inputs) >= 2 and node.inputs[1] is not None:
             starts_tensor = ir.convenience.get_const_tensor(node.inputs[1])
         if len(node.inputs) >= 3 and node.inputs[2] is not None:
@@ -55,14 +55,15 @@ class SliceInferrer(_common.NodeInferrer):
         if len(node.inputs) >= 5 and node.inputs[4] is not None:
             steps_tensor = ir.convenience.get_const_tensor(node.inputs[4])
 
-        if (starts_tensor is not None and ends_tensor is not None and 
-            axes_tensor is not None):
+        if starts_tensor is not None and ends_tensor is not None and axes_tensor is not None:
             # We have constant slice parameters
             starts = starts_tensor.numpy().tolist()
             ends = ends_tensor.numpy().tolist()
             axes = axes_tensor.numpy().tolist()
-            steps = steps_tensor.numpy().tolist() if steps_tensor is not None else [1] * len(axes)
-            
+            steps = (
+                steps_tensor.numpy().tolist() if steps_tensor is not None else [1] * len(axes)
+            )
+
             if not isinstance(starts, list):
                 starts = [starts]
             if not isinstance(ends, list):
@@ -71,10 +72,10 @@ class SliceInferrer(_common.NodeInferrer):
                 axes = [axes]
             if not isinstance(steps, list):
                 steps = [steps]
-            
+
             # Start with input dimensions
             output_dims = list(input_shape.dims)
-            
+
             # Apply slicing to specified axes
             for i, axis in enumerate(axes):
                 axis = _handle_negative_axis(axis, rank)

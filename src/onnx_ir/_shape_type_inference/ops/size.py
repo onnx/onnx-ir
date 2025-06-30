@@ -20,14 +20,14 @@ class SizeInferrer(_common.NodeInferrer):
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for Size operations."""
         assert node.inputs[0] is not None
-        
+
         input_shape = node.inputs[0].shape
         if input_shape is None:
             return _common.InferenceResult(failure="Size input shape is not known.")
 
         # Size always outputs a scalar (0-D tensor) containing the total number of elements
         output_shape = ir.Shape([])  # Scalar
-        
+
         # Size always outputs INT64
         output_type = ir.TensorType.INT64
 

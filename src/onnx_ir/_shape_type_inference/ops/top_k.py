@@ -30,10 +30,10 @@ class TopKInferrer(_common.NodeInferrer):
         """Infer the output shape and type for TopK operations."""
         assert node.inputs[0] is not None  # X
         assert node.inputs[1] is not None  # K
-        
+
         input_shape = node.inputs[0].shape
         k_shape = node.inputs[1].shape
-        
+
         if input_shape is None:
             return _common.InferenceResult(failure="TopK input shape is not known.")
         if k_shape is None:
@@ -49,7 +49,7 @@ class TopKInferrer(_common.NodeInferrer):
 
         # Get axis attribute (default is -1)
         axis = node.attributes.get_int("axis", -1)
-        
+
         try:
             axis = _handle_negative_axis(axis, rank)
         except ValueError as e:
@@ -68,11 +68,9 @@ class TopKInferrer(_common.NodeInferrer):
         output_dims[axis] = k_value
 
         output_shape = ir.Shape(output_dims)
-        
+
         # TopK has two outputs: values and indices
         values_output = ir.Value(shape=output_shape, type=node.inputs[0].type)
         indices_output = ir.Value(shape=output_shape, type=ir.TensorType.INT64)
 
-        return _common.InferenceResult(
-            values=(values_output, indices_output)
-        )
+        return _common.InferenceResult(values=(values_output, indices_output))

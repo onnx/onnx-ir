@@ -18,16 +18,16 @@ class ConstantInferrer(_common.NodeInferrer):
     @_common.requires_outputs(1)
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for Constant operations."""
-        # Get the value attribute
-        value_attr = node.attributes.get_tensor("value")
-        if value_attr is None:
-            return _common.InferenceResult(failure="Constant operation requires value attribute.")
+        assert node.inputs[0] is not None
+        tensor = ir.convenience.get_const_tensor(node.inputs[0])
+        if tensor is None:
+            return _common.InferenceResult(failure="Constant tensor cannot be obtained.")
 
         # Create shape from the tensor dimensions
-        output_shape = ir.Shape(list(value_attr.shape))
-        
+        output_shape = ir.Shape(tensor.shape)
+
         # Get the data type from the tensor
-        output_type = value_attr.dtype
+        output_type = ir.TensorType(tensor.dtype)
 
         return _common.InferenceResult(
             values=(ir.Value(shape=output_shape, type=output_type),)

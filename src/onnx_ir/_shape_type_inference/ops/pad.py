@@ -20,7 +20,7 @@ class PadInferrer(_common.NodeInferrer):
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for Pad operations."""
         assert node.inputs[0] is not None
-        
+
         input_shape = node.inputs[0].shape
         if input_shape is None:
             return _common.InferenceResult(failure="Pad input shape is not known.")
@@ -42,7 +42,9 @@ class PadInferrer(_common.NodeInferrer):
             if not isinstance(pads, list):
                 pads = [pads]
         else:
-            return _common.InferenceResult(failure="Pad operation requires pads attribute or input.")
+            return _common.InferenceResult(
+                failure="Pad operation requires pads attribute or input."
+            )
 
         # Pads should have length 2 * rank (begin_pads + end_pads)
         if len(pads) != 2 * rank:
@@ -55,7 +57,7 @@ class PadInferrer(_common.NodeInferrer):
         for i in range(rank):
             begin_pad = pads[i]
             end_pad = pads[i + rank]
-            
+
             input_dim = input_shape.dims[i]
             if isinstance(input_dim, int):
                 output_dim = input_dim + begin_pad + end_pad
@@ -63,6 +65,7 @@ class PadInferrer(_common.NodeInferrer):
             else:
                 # Symbolic dimension - create symbolic expression for padding
                 import sympy
+
                 input_expr = _common.get_expr(input_shape, i)
                 output_expr = input_expr + sympy.Integer(begin_pad) + sympy.Integer(end_pad)
                 output_dims.append(output_expr)

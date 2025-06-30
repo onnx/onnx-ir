@@ -28,7 +28,7 @@ class SplitInferrer(_common.NodeInferrer):
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for Split operations."""
         assert node.inputs[0] is not None
-        
+
         input_shape = node.inputs[0].shape
         if input_shape is None:
             return _common.InferenceResult(failure="Split input shape is not known.")
@@ -39,7 +39,7 @@ class SplitInferrer(_common.NodeInferrer):
 
         # Get axis attribute (default is 0)
         axis = node.attributes.get_int("axis", 0)
-        
+
         try:
             axis = _handle_negative_axis(axis, rank)
         except ValueError as e:
@@ -53,40 +53,42 @@ class SplitInferrer(_common.NodeInferrer):
 
         num_outputs = len(node.outputs)
         if num_outputs == 0:
-            return _common.InferenceResult(failure="Split operation must have at least one output.")
+            return _common.InferenceResult(
+                failure="Split operation must have at least one output."
+            )
 
         output_values = []
-        
+
         if split_attr is not None:
             # Split sizes provided as attribute
             if len(split_attr) != num_outputs:
                 return _common.InferenceResult(
                     failure=f"Split attribute length {len(split_attr)} does not match output count {num_outputs}."
                 )
-            
+
             for split_size in split_attr:
                 output_dims = list(input_shape.dims)
                 output_dims[axis] = split_size
                 output_shape = ir.Shape(output_dims)
                 output_values.append(ir.Value(shape=output_shape, type=node.inputs[0].type))
-                
+
         elif split_tensor is not None:
             # Split sizes provided as input tensor
             split_sizes = split_tensor.numpy().tolist()
             if not isinstance(split_sizes, list):
                 split_sizes = [split_sizes]
-            
+
             if len(split_sizes) != num_outputs:
                 return _common.InferenceResult(
                     failure=f"Split sizes length {len(split_sizes)} does not match output count {num_outputs}."
                 )
-            
+
             for split_size in split_sizes:
                 output_dims = list(input_shape.dims)
                 output_dims[axis] = split_size
                 output_shape = ir.Shape(output_dims)
                 output_values.append(ir.Value(shape=output_shape, type=node.inputs[0].type))
-                
+
         else:
             # Equal split (default behavior)
             input_dim = input_shape.dims[axis]
@@ -99,7 +101,7 @@ class SplitInferrer(_common.NodeInferrer):
             else:
                 # Symbolic dimension - assume equal split is possible
                 split_size = None
-            
+
             for _ in range(num_outputs):
                 output_dims = list(input_shape.dims)
                 output_dims[axis] = split_size

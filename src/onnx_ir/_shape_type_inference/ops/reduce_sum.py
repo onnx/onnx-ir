@@ -29,13 +29,13 @@ class ReduceSumInferrer(_common.NodeInferrer):
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for ReduceSum operations."""
         assert node.inputs[0] is not None
-        
+
         input_shape = node.inputs[0].shape
         if input_shape is None:
             return _common.InferenceResult(failure="ReduceSum input shape is not known.")
 
         rank = len(input_shape)
-        
+
         # Get axes to reduce
         axes_attr = node.attributes.get_ints("axes")
         axes_tensor = None

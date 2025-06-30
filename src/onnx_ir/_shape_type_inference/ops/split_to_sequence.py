@@ -29,7 +29,7 @@ class SplitToSequenceInferrer(_common.NodeInferrer):
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for SplitToSequence operations."""
         assert node.inputs[0] is not None
-        
+
         input_shape = node.inputs[0].shape
         if input_shape is None:
             return _common.InferenceResult(failure="SplitToSequence input shape is not known.")
@@ -40,7 +40,7 @@ class SplitToSequenceInferrer(_common.NodeInferrer):
 
         # Get axis attribute (default is 0)
         axis = node.attributes.get_int("axis", 0)
-        
+
         try:
             axis = _handle_negative_axis(axis, rank)
         except ValueError as e:
@@ -56,13 +56,13 @@ class SplitToSequenceInferrer(_common.NodeInferrer):
 
         # For SplitToSequence, the output is a sequence type
         # The shape of the sequence depends on how many splits are made
-        
+
         if split_tensor is not None:
             # Split sizes are specified
             split_sizes = split_tensor.numpy().tolist()
             if not isinstance(split_sizes, list):
                 split_sizes = [split_sizes]
-            
+
             # Number of sequence elements = number of split sizes
             sequence_length = len(split_sizes)
         else:
