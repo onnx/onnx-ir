@@ -78,22 +78,16 @@ def broadcast_shapes_bidirectional(shape1: ir.Shape, shape2: ir.Shape) -> ir.Sha
         # Add to the front to maintain right-to-left processing order
         new_dims.insert(0, new_dim_expr)
 
-    # Create new shape and set dimensions
-    new_shape = ir.Shape([0] * new_rank)
-    for i, expr in enumerate(new_dims):
-        _common.set_expr(new_shape, i, expr)
-
-    return new_shape
+    # Create new shape directly
+    return ir.Shape(new_dims)
 
 
 class BinaryInferrer(_common.NodeInferrer):
     """Base class for binary operation inferrers."""
 
-    def __init__(self, op_type: str, opsets: Collection[int] | None = None) -> None:
+    def __init__(self, op_type: str) -> None:
         """Initialize the binary inferrer with the operation type."""
-        if opsets is None:
-            opsets = range(sys.maxsize)
-        super().__init__(op_type, opsets=opsets)
+        super().__init__(op_type, opsets=range(sys.maxsize))
 
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for binary operations."""

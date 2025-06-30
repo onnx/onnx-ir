@@ -1,7 +1,6 @@
 """Transpose operation inferrer for ONNX IR nodes."""
 
 import sys
-from collections.abc import Collection
 
 import onnx_ir as ir
 from onnx_ir._shape_type_inference import _common
@@ -10,11 +9,9 @@ from onnx_ir._shape_type_inference import _common
 class TransposeInferrer(_common.NodeInferrer):
     """Inferrer for Transpose operations."""
 
-    def __init__(self, opsets: Collection[int] | None = None) -> None:
+    def __init__(self) -> None:
         """Initialize the Transpose inferrer."""
-        if opsets is None:
-            opsets = range(sys.maxsize)
-        super().__init__("Transpose", opsets=opsets)
+        super().__init__("Transpose", opsets=range(sys.maxsize))
 
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for Transpose operations."""
@@ -36,11 +33,7 @@ class TransposeInferrer(_common.NodeInferrer):
         rank = len(input_shape)
 
         # Get permutation from attributes
-        perm = None
-        for attr in node.attributes:
-            if attr.name == "perm":
-                perm = list(attr.value.ints)
-                break
+        perm = node.attributes.get_ints("perm")
 
         # Default permutation is reversed order
         if perm is None:
@@ -58,8 +51,8 @@ class TransposeInferrer(_common.NodeInferrer):
             )
 
         # Apply permutation to create output shape
-        output_shape = ir.Shape([0] * rank)
-        for i, axis in enumerate(perm):
+        output_dims = []
+        for axis in perm:
             # Handle negative axis
             if axis < 0:
                 axis += rank
@@ -70,9 +63,8 @@ class TransposeInferrer(_common.NodeInferrer):
                 )
 
             # Copy dimension from input to output according to permutation
-            input_dim_expr = _common.get_expr(input_shape, axis)
-            _common.set_expr(output_shape, i, input_dim_expr)
+            output_dims.append(input_shape.dims[axis])
 
         return _common.InferenceResult(
-            values=(ir.Value(shape=output_shape, type=node.inputs[0].type),)
+            values=(ir.Value(shape=ir.Shape(output_dims), type=node.inputs[0].type),)
         )
