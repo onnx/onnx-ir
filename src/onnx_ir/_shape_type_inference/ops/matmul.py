@@ -39,32 +39,29 @@ class MatMulInferrer(_common.NodeInferrer):
             output_shape = ir.Shape([])
         elif lhs_rank == 1:
             # Matrix-vector: (n,) x (..., n, k) -> (..., k)
-            output_dims = [*rhs_shape.dims[:-2], rhs_shape.dims[-1]]
+            output_dims = [*rhs_shape[:-2], rhs_shape[-1]]
             output_shape = ir.Shape(output_dims)
         elif rhs_rank == 1:
             # Vector-matrix: (..., m, n) x (n,) -> (..., m)
-            output_dims = list(lhs_shape.dims[:-1])
-            output_shape = ir.Shape(output_dims)
+            output_shape = ir.Shape(lhs_shape[:-1])
         else:
             # Matrix-matrix: (..., m, n) x (..., n, k) -> (..., m, k)
             # Broadcast batch dimensions
-            lhs_batch = lhs_shape.dims[:-2]
-            rhs_batch = rhs_shape.dims[:-2]
+            lhs_batch = lhs_shape[:-2]
+            rhs_batch = rhs_shape[:-2]
             if lhs_batch and rhs_batch:
                 # TODO(justinchuby): Ensure this is correct
-                batch_shape = broadcast_shapes_bidirectional(
-                    ir.Shape(lhs_batch), ir.Shape(rhs_batch)
-                )
-                output_dims = [*batch_shape.dims, lhs_shape.dims[-2], rhs_shape.dims[-1]]
+                batch_shape = broadcast_shapes_bidirectional(ir.Shape(lhs_batch), ir.Shape(rhs_batch))
+                output_dims = [*batch_shape, lhs_shape[-2], rhs_shape[-1]]
                 output_shape = ir.Shape(output_dims)
             elif lhs_batch:
-                output_dims = [*lhs_batch, lhs_shape.dims[-2], rhs_shape.dims[-1]]
+                output_dims = [*lhs_batch, lhs_shape[-2], rhs_shape[-1]]
                 output_shape = ir.Shape(output_dims)
             elif rhs_batch:
-                output_dims = [*rhs_batch, lhs_shape.dims[-2], rhs_shape.dims[-1]]
+                output_dims = [*rhs_batch, lhs_shape[-2], rhs_shape[-1]]
                 output_shape = ir.Shape(output_dims)
             else:
-                output_dims = [lhs_shape.dims[-2], rhs_shape.dims[-1]]
+                output_dims = [lhs_shape[-2], rhs_shape[-1]]
                 output_shape = ir.Shape(output_dims)
 
         output_type = node.inputs[0].type

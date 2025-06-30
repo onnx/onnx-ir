@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def _compute_output_shape_no_axes(input_shape: ir.Shape) -> ir.Shape:
     """Compute output shape when no axes are specified."""
     output_dims = []
-    for dim in input_shape.dims:
+    for dim in input_shape:
         # For symbolic dimensions, we assume they are not 1
         # Only squeeze literal 1s
         if isinstance(dim, int):
@@ -44,7 +44,7 @@ def _normalize_axes(axes: Sequence[int], rank: int) -> set[int]:
 
 def _compute_output_shape_with_axes(input_shape: ir.Shape, axes: set[int]) -> ir.Shape:
     """Compute output shape when axes are specified."""
-    output_dims = [dim for i, dim in enumerate(input_shape.dims) if i not in axes]
+    output_dims = [dim for i, dim in enumerate(input_shape) if i not in axes]
     return ir.Shape(output_dims)
 
 

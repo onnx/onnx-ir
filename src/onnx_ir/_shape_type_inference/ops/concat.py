@@ -59,7 +59,7 @@ class ConcatInferrer(_common.NodeInferrer):
             )
 
         # Check that all inputs have compatible shapes
-        output_dims = list(first_shape.dims)
+        output_dims = list(first_shape)
         concat_dim_size = _common.get_expr(first_shape, axis)
 
         for i, inp in enumerate(node.inputs[1:], 1):

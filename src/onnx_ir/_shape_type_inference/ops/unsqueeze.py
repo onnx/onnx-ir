@@ -44,7 +44,7 @@ def _compute_output_shape(input_shape: ir.Shape, axes: set[int]) -> ir.Shape:
             output_dims.append(1)
         else:
             # Copy dimension from input
-            output_dims.append(input_shape.dims[input_axis])
+            output_dims.append(input_shape[input_axis])
             input_axis += 1
 
     return ir.Shape(output_dims)

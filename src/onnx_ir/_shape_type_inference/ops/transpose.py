@@ -60,7 +60,7 @@ class TransposeInferrer(_common.NodeInferrer):
                 )
 
             # Copy dimension from input to output according to permutation
-            output_dims.append(input_shape.dims[axis])
+            output_dims.append(input_shape[axis])
 
         return _common.InferenceResult(
             values=(ir.Value(shape=ir.Shape(output_dims), type=node.inputs[0].type),)
