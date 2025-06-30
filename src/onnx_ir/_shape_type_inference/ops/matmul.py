@@ -51,7 +51,9 @@ class MatMulInferrer(_common.NodeInferrer):
             rhs_batch = rhs_shape[:-2]
             if lhs_batch and rhs_batch:
                 # TODO(justinchuby): Ensure this is correct
-                batch_shape = broadcast_shapes_bidirectional(ir.Shape(lhs_batch), ir.Shape(rhs_batch))
+                batch_shape = broadcast_shapes_bidirectional(
+                    ir.Shape(lhs_batch), ir.Shape(rhs_batch)
+                )
                 output_dims = [*batch_shape, lhs_shape[-2], rhs_shape[-1]]
                 output_shape = ir.Shape(output_dims)
             elif lhs_batch:

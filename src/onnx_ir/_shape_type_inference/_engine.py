@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import enum
 import logging
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 
 import onnx_ir as ir
 from onnx_ir._shape_type_inference import _common
@@ -30,7 +30,7 @@ class SymbolicInferenceEngine:
 
     def __init__(
         self,
-        node_inferrers: Sequence[_common.NodeInferrer],
+        node_inferrers: Iterable[_common.NodeInferrer],
         reconciliation_policy: str = "reconcile",
     ) -> None:
         """Initialize the symbolic inference engine.
@@ -40,16 +40,12 @@ class SymbolicInferenceEngine:
             reconciliation_policy: Policy for handling conflicts between inferred and existing values.
         """
         self.reconciliation_policy = ReconciliationPolicy(reconciliation_policy)
-        self._inferrer_registry: dict[tuple[str, str], list[_common.NodeInferrer]] = {}
+        self._inferrer_registry: dict[ir.OperatorIdentifier, list[_common.NodeInferrer]] = {}
 
         # Register inferrers by (op_type, domain)
         for inferrer in node_inferrers:
-            key = (inferrer.op_type, inferrer.domain)
-            if key not in self._inferrer_registry:
-                self._inferrer_registry[key] = []
-            self._inferrer_registry[key].append(inferrer)
-
-        logger.info("Initialized inference engine with %s inferrers", len(node_inferrers))
+            key = (inferrer.domain, inferrer.op_type, inferrer.overload)
+            self._inferrer_registry.setdefault(key, []).append(inferrer)
 
     def infer_model(self, model: ir.Model) -> None:
         """Perform shape and type inference on an entire model.
@@ -60,10 +56,10 @@ class SymbolicInferenceEngine:
         Raises:
             InferenceError: If inference fails for any node.
         """
-        logger.info("Starting inference on model with %s nodes", len(model.graph.nodes))
+        logger.info("Starting inference on model with %s nodes", len(model.graph))
 
         # Process nodes in topological order
-        for i, node in enumerate(model.graph.nodes):
+        for i, node in enumerate(model.graph):
             try:
                 self._infer_node(node, model)
                 logger.debug("Successfully inferred node %s: %s", i, node.op_type)
@@ -123,14 +119,24 @@ class SymbolicInferenceEngine:
         Returns:
             The best matching inferrer, or None if no suitable inferrer is found.
         """
-        key = (node.op_type, node.domain)
+        key = (node.domain, node.op_type, node.overload)
         inferrers = self._inferrer_registry.get(key, [])
 
         if not inferrers:
             return None
 
         # Get model opset version for this domain
-        opset_version = self._get_opset_version(model, node.domain)
+        if node.version is not None:
+            opset_version = node.version
+        elif node.graph is not None and node.domain in node.graph.opset_imports:
+            opset_version = node.graph.opset_imports[node.domain]
+        else:
+            # Fallback to model-level opset import
+            if node.domain not in model.opset_imports:
+                raise InferenceError(
+                    f"No opset import found for domain '{node.domain}' in model"
+                )
+            opset_version = model.opset_imports[node.domain]
 
         # Find inferrers that support this opset version
         suitable_inferrers = [
@@ -140,30 +146,14 @@ class SymbolicInferenceEngine:
         if not suitable_inferrers:
             logger.warning(
                 "No inferrer supports opset %s for %s (domain: %s)",
-                opset_version, node.op_type, node.domain
+                opset_version,
+                node.op_type,
+                node.domain,
             )
             return None
 
         # Return the first suitable inferrer (could be enhanced with priority logic)
         return suitable_inferrers[0]
-
-    def _get_opset_version(self, model: ir.Model, domain: str) -> int:
-        """Get the opset version for a given domain in the model.
-
-        Args:
-            model: The model to check.
-            domain: The domain to get the opset version for.
-
-        Returns:
-            The opset version for the domain.
-        """
-        # Look for opset import for this domain
-        for opset_import in model.opset_imports:
-            if opset_import.domain == domain:
-                return opset_import.version
-
-        # Default to a high version if not found
-        return 999
 
     def _reconcile_outputs(self, node: ir.Node, inferred_values: Sequence[ir.Value]) -> None:
         """Reconcile inferred output values with existing node outputs.
@@ -251,8 +241,7 @@ class SymbolicInferenceEngine:
         """
         if len(shape1) != len(shape2):
             logger.warning(
-                "Shape rank mismatch: %s vs %s. Using first shape.",
-                len(shape1), len(shape2)
+                "Shape rank mismatch: %s vs %s. Using first shape.", len(shape1), len(shape2)
             )
             return shape1
 

@@ -76,17 +76,21 @@ class NodeInferrer(abc.ABC):
     This class provides a common interface for all node inferrers.
     """
 
-    def __init__(self, op_type: str, opsets: Collection[int], domain: str = "") -> None:
+    def __init__(
+        self, op_type: str, opsets: Collection[int], domain: str = "", overload: str = ""
+    ) -> None:
         """Initialize the node inferrer.
 
         Args:
             op_type: The type of the operation.
             opsets: A collection of ONNX opset versions supported by this inferrer.
             domain: The domain of the operation, default is an empty string.
+            overload: The overload identifier for the operation, default is an empty string.
         """
         self.op_type = op_type
         self.opsets = opsets
         self.domain = domain
+        self.overload = overload
 
     def __repr__(self) -> str:
         """Return a string representation of the node inferrer."""
