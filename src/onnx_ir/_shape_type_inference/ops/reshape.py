@@ -1,7 +1,8 @@
 """Reshape operation inferrer for ONNX IR nodes."""
 
 import sys
-from collections.abc import Collection
+
+import sympy
 
 import onnx_ir as ir
 from onnx_ir._shape_type_inference import _common
@@ -10,11 +11,8 @@ from onnx_ir._shape_type_inference import _common
 class ReshapeInferrer(_common.NodeInferrer):
     """Inferrer for Reshape operations."""
 
-    def __init__(self, opsets: Collection[int] | None = None) -> None:
-        """Initialize the Reshape inferrer."""
-        if opsets is None:
-            opsets = range(sys.maxsize)
-        super().__init__("Reshape", opsets=opsets)
+    def __init__(self) -> None:
+        super().__init__("Reshape", opsets=range(sys.maxsize))
 
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for Reshape operations."""
@@ -37,51 +35,16 @@ class ReshapeInferrer(_common.NodeInferrer):
 
         # Try to get the shape values from the second input
         # For symbolic inference, we may not have concrete values
-        if (
-            hasattr(shape_input, "initializer_value")
-            and shape_input.initializer_value is not None
-        ):
-            shape_values = shape_input.initializer_value.tolist()
-            return self._infer_with_shape_values(
-                input_shape, shape_values, node.inputs[0].type
-            )
-        else:
-            # Handle symbolic case where shape is not known at compile time
-            shape_shape = shape_input.shape
-            if shape_shape is None or len(shape_shape) != 1:
-                return _common.InferenceResult(
-                    failure="Reshape shape input must be a 1D tensor."
-                )
+        shape = ir.convenience.get_const_tensor(shape_input)
+        if shape is None:
+            return _common.InferenceResult(failure="Reshape shape input is not known.")
 
-            shape_rank = shape_shape[0]
-            if isinstance(shape_rank, int):
-                # Create symbolic dimensions for the output
-                output_shape = ir.Shape([])
-                for i in range(shape_rank):
-                    output_shape.append(ir.SymbolicDim(f"reshape_dim_{i}"))
+        shape_values = shape.numpy().tolist()
 
-                return _common.InferenceResult(
-                    values=(ir.Value(shape=output_shape, type=node.inputs[0].type),)
-                )
-            else:
-                return _common.InferenceResult(
-                    failure="Cannot infer reshape output shape with symbolic rank."
-                )
-
-    def _infer_with_shape_values(
-        self, input_shape: ir.Shape, shape_values: list, input_type
-    ) -> _common.InferenceResult:
-        """Infer output shape when shape values are known."""
         # Calculate total elements in input
         total_elements = sympy.Integer(1)
-        for dim in input_shape:
-            if isinstance(dim, ir.SymbolicDim):
-                if dim.expr is not None:
-                    total_elements *= dim.expr
-                else:
-                    total_elements *= sympy.Symbol(dim.value)
-            else:
-                total_elements *= sympy.Integer(dim)
+        for dim in range(input_shape.rank()):
+            total_elements *= _common.get_expr(input_shape, dim)
 
         # Process shape values
         output_dims = []
@@ -106,7 +69,7 @@ class ReshapeInferrer(_common.NodeInferrer):
                 output_dims.append(dim_expr)
                 non_deferred_size *= dim_expr
             else:
-                output_dims.append(sympy.Integer(dim_value))
+                output_dims.append(dim_value)
                 non_deferred_size *= sympy.Integer(dim_value)
 
         # Calculate deferred dimension
@@ -115,8 +78,6 @@ class ReshapeInferrer(_common.NodeInferrer):
             output_dims[deferred_dim_idx] = deferred_dim
 
         # Create output shape
-        output_shape = ir.Shape([0] * len(output_dims))
-        for i, dim_expr in enumerate(output_dims):
-            _common.set_expr(output_shape, i, dim_expr)
-
-        return _common.InferenceResult(values=(ir.Value(shape=output_shape, type=input_type),))
+        return _common.InferenceResult(
+            values=(ir.Value(shape=ir.Shape(output_dims), type=node.inputs[0].type),)
+        )
