@@ -91,6 +91,7 @@ class SymbolicInferenceEngine:
         result = inferrer.infer(node)
 
         if result.status == _common.InferenceStatus.INVALID_NODE:
+            # TODO: Print the node information
             raise InferenceError(f"Invalid node: {result.msg}")
 
         if result.status == _common.InferenceStatus.MISSING_INFO:
