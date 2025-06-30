@@ -45,6 +45,7 @@ from typing import (
 
 import ml_dtypes
 import numpy as np
+import sympy
 from typing_extensions import TypeIs
 
 import onnx_ir
@@ -58,7 +59,6 @@ from onnx_ir import (
     _protocols,
     _type_casting,
 )
-import sympy
 
 if typing.TYPE_CHECKING:
     import numpy.typing as npt

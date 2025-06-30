@@ -1,14 +1,16 @@
 """Symbolic shape inference for ONNX IR."""
+
 from __future__ import annotations
 
 import abc
-from collections.abc import Collection, Sequence
 import dataclasses
+from collections.abc import Collection, Sequence
 
 import numpy as np
+import sympy
 
 import onnx_ir as ir
-import sympy
+
 
 def get_expr(shape: ir.Shape, index: int) -> sympy.Expr:
     """Get the expression or value at a specific index in the shape.
@@ -37,6 +39,7 @@ def set_expr(shape: ir.Shape, index: int, expr: sympy.Expr | int) -> None:
         expr: The expression or value to set at the specified index.
     """
     from sympy.utilities.misc import as_int
+
     if isinstance(expr, (int, np.integer)):
         shape[index] = int(expr)
         return
