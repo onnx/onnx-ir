@@ -46,6 +46,7 @@ from typing import (
 import ml_dtypes
 import numpy as np
 import sympy
+import sympy.utilities.misc
 from typing_extensions import TypeIs
 
 import onnx_ir
@@ -1118,7 +1119,7 @@ class SymbolicDim(_protocols.SymbolicDimProtocol, _display.PrettyPrintable):
 
     __slots__ = ("_expr", "_value")
 
-    def __init__(self, value: str | None, /, expr: sympy.Expr | None) -> None:
+    def __init__(self, value: str | None, /, expr: sympy.Expr | None = None) -> None:
         """Initialize a symbolic dimension.
 
         Args:
@@ -1134,7 +1135,7 @@ class SymbolicDim(_protocols.SymbolicDimProtocol, _display.PrettyPrintable):
                 "If you are creating a Shape, use int directly instead of SymbolicDim."
             )
         self._value = value
-        self._expr: sympy.Expr | None = None
+        self._expr: sympy.Expr | None = expr
 
     def __eq__(self, other: object) -> bool:
         """Check equality with another SymbolicDim or string/None."""
@@ -1204,15 +1205,18 @@ def _maybe_convert_to_symbolic_dim(
     """
     if dim is None or isinstance(dim, str):
         return SymbolicDim(dim)
-    if isinstance(dim, sympy.Expr):
-        # If the dimension is a sympy expression, we create a SymbolicDim with it
-        return SymbolicDim(str(dim), expr=dim)
     if _is_int_compatible(dim):
         return int(dim)
+    if isinstance(dim, sympy.Expr):
+        # If the dimension is a sympy expression, we create a SymbolicDim with it
+        expr = sympy.sympify(dim)
+        if expr.is_integer:
+            return sympy.utilities.misc.as_int(expr)
+        return SymbolicDim(str(expr), expr=sympy.sympify(expr))
     if isinstance(dim, SymbolicDim):
         return dim
     raise TypeError(
-        f"Expected int, str, None or SymbolicDim, but value {dim!r} has type '{type(dim)}'"
+        f"Expected int, str, sympy.Expr, None or SymbolicDim, but value {dim!r} has type '{type(dim)}'"
     )
 
 
