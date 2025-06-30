@@ -51,7 +51,7 @@ class ConcatInferrer(_common.NodeInferrer):
             )
 
         # Check that all inputs have compatible shapes
-        output_shape = ir.Shape(list(first_shape))
+        output_dims = list(first_shape.dims)
         concat_dim_size = _common.get_expr(first_shape, axis)
 
         for i, inp in enumerate(node.inputs[1:], 1):
@@ -74,5 +74,5 @@ class ConcatInferrer(_common.NodeInferrer):
                 )
 
         # Set the concat dimension in output shape
-        _common.set_expr(output_shape, axis, concat_dim_size)
-        return _common.InferenceResult(values=(ir.Value(shape=output_shape, type=first_type),))
+        output_dims[axis] = concat_dim_size
+        return _common.InferenceResult(values=(ir.Value(shape=ir.Shape(output_dims), type=first_type),))
