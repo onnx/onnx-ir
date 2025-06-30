@@ -20,7 +20,7 @@ class TransposeInferrer(_common.NodeInferrer):
         assert node.inputs[0] is not None
         input_shape = node.inputs[0].shape
         if input_shape is None:
-            return _common.InferenceResult(failure="Transpose input shape cannot be None.")
+            return _common.InferenceResult(status="missing_info", msg="Transpose input shape cannot be None.")
 
         rank = len(input_shape)
 
@@ -34,12 +34,12 @@ class TransposeInferrer(_common.NodeInferrer):
         # Validate permutation
         if len(perm) != rank:
             return _common.InferenceResult(
-                failure=f"Permutation length {len(perm)} does not match input rank {rank}."
+                status="invalid_node", msg=f"Permutation length {len(perm)} does not match input rank {rank}."
             )
 
         if sorted(perm) != list(range(rank)):
             return _common.InferenceResult(
-                failure=f"Invalid permutation {perm}. Must be a permutation of [0, 1, ..., {rank - 1}]."
+                status="invalid_node", msg=f"Invalid permutation {perm}. Must be a permutation of [0, 1, ..., {rank - 1}]."
             )
 
         # Apply permutation to create output shape
@@ -51,7 +51,7 @@ class TransposeInferrer(_common.NodeInferrer):
 
             if axis < 0 or axis >= rank:
                 return _common.InferenceResult(
-                    failure=f"Permutation axis {axis} is out of bounds for rank {rank}."
+                    status="invalid_node", msg=f"Permutation axis {axis} is out of bounds for rank {rank}."
                 )
 
             # Copy dimension from input to output according to permutation

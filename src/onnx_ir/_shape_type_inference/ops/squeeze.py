@@ -66,7 +66,7 @@ class Squeeze12Inferrer(_common.NodeInferrer):
         assert input is not None
         input_shape = input.shape
         if input_shape is None:
-            return _common.InferenceResult(failure="Squeeze input shape is not known.")
+            return _common.InferenceResult(status="missing_info", msg="Squeeze input shape is not known.")
 
         rank = len(input_shape)
 
@@ -79,7 +79,7 @@ class Squeeze12Inferrer(_common.NodeInferrer):
             try:
                 axes = _normalize_axes(axes, rank)
             except ValueError as e:
-                return _common.InferenceResult(failure=str(e))
+                return _common.InferenceResult(status="invalid_node", msg=str(e))
             output_shape = _compute_output_shape_with_axes(input_shape, axes)
         return _common.InferenceResult(values=(ir.Value(shape=output_shape, type=input.type),))
 
@@ -103,7 +103,7 @@ class Squeeze13Inferrer(_common.NodeInferrer):
 
         input_shape = node.inputs[0].shape
         if input_shape is None:
-            return _common.InferenceResult(failure="Squeeze input shape is not known.")
+            return _common.InferenceResult(status="missing_info", msg="Squeeze input shape is not known.")
 
         rank = len(input_shape)
 
@@ -112,13 +112,13 @@ class Squeeze13Inferrer(_common.NodeInferrer):
             try:
                 axes = _normalize_axes(axes_tensor.numpy().tolist(), rank)
             except ValueError as e:
-                return _common.InferenceResult(failure=str(e))
+                return _common.InferenceResult(status="invalid_node", msg=str(e))
             output_shape = _compute_output_shape_with_axes(input_shape, axes)
         else:
             axes_shape = node.inputs[1].shape
             if axes_shape is None or axes_shape.is_dynamic():
                 return _common.InferenceResult(
-                    failure="Squeeze axes input shape is not known or is dynamic"
+                    status="missing_info", msg="Squeeze axes input shape is not known or is dynamic"
                 )
             removed_axes_count = axes_shape[0]
             assert isinstance(removed_axes_count, int)

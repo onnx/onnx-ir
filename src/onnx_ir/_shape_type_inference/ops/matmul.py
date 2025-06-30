@@ -22,13 +22,19 @@ class MatMulInferrer(_common.NodeInferrer):
         lhs_shape = node.inputs[0].shape
         rhs_shape = node.inputs[1].shape
         if lhs_shape is None or rhs_shape is None:
-            return _common.InferenceResult(failure="MatMul input shapes cannot be None.")
+            return _common.InferenceResult(
+                status="missing_info",
+                msg="MatMul input shapes cannot be None."
+            )
 
         lhs_rank = len(lhs_shape)
         rhs_rank = len(rhs_shape)
 
         if lhs_rank == 0 or rhs_rank == 0:
-            return _common.InferenceResult(failure="MatMul inputs cannot be scalars.")
+            return _common.InferenceResult(
+                status="invalid_node",
+                msg="MatMul inputs cannot be scalars."
+            )
 
         # Compute output shape based on matrix multiplication rules
         if lhs_rank == 1 and rhs_rank == 1:
