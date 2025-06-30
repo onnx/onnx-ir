@@ -58,11 +58,11 @@ from onnx_ir import (
     _protocols,
     _type_casting,
 )
+import sympy
 
 if typing.TYPE_CHECKING:
     import numpy.typing as npt
     from typing_extensions import TypeGuard
-    import sympy
 
 TArrayCompatible = typing.TypeVar(
     "TArrayCompatible",
@@ -1204,6 +1204,9 @@ def _maybe_convert_to_symbolic_dim(
     """
     if dim is None or isinstance(dim, str):
         return SymbolicDim(dim)
+    if isinstance(dim, sympy.Expr):
+        # If the dimension is a sympy expression, we create a SymbolicDim with it
+        return SymbolicDim(str(dim), expr=dim)
     if _is_int_compatible(dim):
         return int(dim)
     if isinstance(dim, SymbolicDim):

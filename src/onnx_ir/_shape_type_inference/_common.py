@@ -4,15 +4,11 @@ from __future__ import annotations
 import abc
 from collections.abc import Collection, Sequence
 import dataclasses
-from typing import TYPE_CHECKING
 
 import numpy as np
 
 import onnx_ir as ir
-
-if TYPE_CHECKING:
-    import sympy
-
+import sympy
 
 def get_expr(shape: ir.Shape, index: int) -> sympy.Expr:
     """Get the expression or value at a specific index in the shape.
@@ -24,8 +20,6 @@ def get_expr(shape: ir.Shape, index: int) -> sympy.Expr:
     Returns:
         The expression or value at the specified index.
     """
-    import sympy
-
     dim = shape[index]
     if isinstance(dim, ir.SymbolicDim):
         if dim.expr is not None:
