@@ -12,7 +12,9 @@ class ReshapeInferrer(_common.NodeInferrer):
     """Inferrer for Reshape operations."""
 
     def __init__(self) -> None:
-        super().__init__("Reshape", opsets=range(sys.maxsize))
+        super().__init__(
+            "Reshape", opsets=_common.inclusive_range(_common.MAX_SUPPORTED_OPSET)
+        )
 
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for Reshape operations."""

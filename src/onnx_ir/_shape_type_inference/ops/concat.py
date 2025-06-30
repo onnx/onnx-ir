@@ -1,6 +1,5 @@
 """Concat operation inferrer for ONNX IR nodes."""
 
-import sys
 
 import onnx_ir as ir
 from onnx_ir._shape_type_inference import _common
@@ -11,7 +10,7 @@ class ConcatInferrer(_common.NodeInferrer):
 
     def __init__(self) -> None:
         """Initialize the Concat inferrer."""
-        super().__init__("Concat", opsets=range(sys.maxsize))
+        super().__init__("Concat", opsets=_common.inclusive_range(_common.MAX_SUPPORTED_OPSET))
 
     def infer(self, node: ir.Node) -> _common.InferenceResult:
         """Infer the output shape and type for Concat operations."""

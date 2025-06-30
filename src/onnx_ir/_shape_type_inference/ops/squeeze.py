@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import sys
 from collections.abc import Sequence
 
 import onnx_ir as ir
@@ -93,7 +92,7 @@ class Squeeze13Inferrer(_common.NodeInferrer):
 
     def __init__(self) -> None:
         """Initialize the Squeeze inferrer."""
-        super().__init__("Squeeze", opsets=range(14, sys.maxsize))
+        super().__init__("Squeeze", opsets=range(14, _common.MAX_SUPPORTED_OPSET))
 
     @_common.requires_non_none_inputs(2)
     @_common.requires_outputs(1)

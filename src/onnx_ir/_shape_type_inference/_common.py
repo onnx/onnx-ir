@@ -13,6 +13,9 @@ import sympy
 import onnx_ir as ir
 
 
+MAX_SUPPORTED_OPSET = 23
+
+
 def get_expr(shape: ir.Shape, index: int) -> sympy.Expr:
     """Get the expression or value at a specific index in the shape.
 
@@ -56,6 +59,10 @@ class NodeInferrer(abc.ABC):
         self.op_type = op_type
         self.opsets = opsets
         self.domain = domain
+
+    def __repr__(self) -> str:
+        """Return a string representation of the node inferrer."""
+        return f"{self.__class__.__name__}(op_type={self.op_type}, opsets={self.opsets}, domain={self.domain})"
 
     @abc.abstractmethod
     def infer(self, node: ir.Node) -> InferenceResult:
@@ -131,3 +138,22 @@ def requires_outputs(
         return wrapper
 
     return decorator
+
+
+def inclusive_range(start_or_end: int = 0, end: int | None = None) -> range:
+    """Create an inclusive range from start to end with a given step.
+
+    Args:
+        start_or_end: The starting value of the range.
+        end: The ending value of the range (inclusive).
+
+    Returns:
+        A range object that includes both start and end.
+    """
+    if end is None:
+        end = start_or_end
+        start = 0
+    else:
+        start = start_or_end
+
+    return range(start, end + 1)

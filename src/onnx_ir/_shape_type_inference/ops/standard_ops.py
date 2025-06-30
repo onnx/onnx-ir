@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import sys
 from collections.abc import Collection
 
 import sympy
@@ -17,7 +16,7 @@ class ElementwiseInferrer(_common.NodeInferrer):
     def __init__(self, op_type: str, opsets: Collection[int] | None = None) -> None:
         """Initialize the elementwise inferrer with the operation type."""
         if opsets is None:
-            opsets = range(sys.maxsize)
+            opsets = _common.inclusive_range(_common.MAX_SUPPORTED_OPSET)
         super().__init__(op_type, opsets=opsets)
 
     @_common.requires_non_none_inputs(1)
@@ -77,7 +76,7 @@ class BinaryInferrer(_common.NodeInferrer):
 
     def __init__(self, op_type: str) -> None:
         """Initialize the binary inferrer with the operation type."""
-        super().__init__(op_type, opsets=range(sys.maxsize))
+        super().__init__(op_type, opsets=_common.inclusive_range(_common.MAX_SUPPORTED_OPSET))
 
     @_common.requires_non_none_inputs(2)
     @_common.requires_outputs(1)

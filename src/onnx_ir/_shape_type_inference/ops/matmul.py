@@ -1,6 +1,5 @@
 """MatMul operation inferrer for ONNX IR nodes."""
 
-import sys
 
 import onnx_ir as ir
 from onnx_ir._shape_type_inference import _common
@@ -12,7 +11,7 @@ class MatMulInferrer(_common.NodeInferrer):
 
     def __init__(self) -> None:
         """Initialize the MatMul inferrer."""
-        super().__init__("MatMul", opsets=range(sys.maxsize))
+        super().__init__("MatMul", opsets=_common.inclusive_range(_common.MAX_SUPPORTED_OPSET))
 
     @_common.requires_non_none_inputs(2)
     @_common.requires_outputs(1)
