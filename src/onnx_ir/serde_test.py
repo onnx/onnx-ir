@@ -1,5 +1,6 @@
 # Copyright (c) ONNX Project Contributors
 # SPDX-License-Identifier: Apache-2.0
+import itertools
 import unittest
 
 import google.protobuf.text_format
@@ -348,41 +349,55 @@ class TensorProtoTensorTest(unittest.TestCase):
 
     @parameterized.parameterized.expand(
         [
-            ("FLOAT", ir.DataType.FLOAT),
-            ("UINT8", ir.DataType.UINT8),
-            ("INT8", ir.DataType.INT8),
-            ("UINT16", ir.DataType.UINT16),
-            ("INT16", ir.DataType.INT16),
-            ("INT32", ir.DataType.INT32),
-            ("INT64", ir.DataType.INT64),
-            ("BOOL", ir.DataType.BOOL),
-            ("FLOAT16", ir.DataType.FLOAT16),
-            ("DOUBLE", ir.DataType.DOUBLE),
-            ("UINT32", ir.DataType.UINT32),
-            ("UINT64", ir.DataType.UINT64),
-            ("COMPLEX64", ir.DataType.COMPLEX64),
-            ("COMPLEX128", ir.DataType.COMPLEX128),
-            ("BFLOAT16", ir.DataType.BFLOAT16),
-            ("FLOAT8E4M3FN", ir.DataType.FLOAT8E4M3FN),
-            ("FLOAT8E4M3FNUZ", ir.DataType.FLOAT8E4M3FNUZ),
-            ("FLOAT8E5M2", ir.DataType.FLOAT8E5M2),
-            ("FLOAT8E5M2FNUZ", ir.DataType.FLOAT8E5M2FNUZ),
-            ("UINT4", ir.DataType.UINT4),
-            ("INT4", ir.DataType.INT4),
-            ("FLOAT4E2M1", ir.DataType.FLOAT4E2M1),
+            (name, dtype, array)
+            for (name, dtype), array in itertools.product(
+                [
+                    ("FLOAT", ir.DataType.FLOAT),
+                    ("UINT8", ir.DataType.UINT8),
+                    ("INT8", ir.DataType.INT8),
+                    ("UINT16", ir.DataType.UINT16),
+                    ("INT16", ir.DataType.INT16),
+                    ("INT32", ir.DataType.INT32),
+                    ("INT64", ir.DataType.INT64),
+                    ("BOOL", ir.DataType.BOOL),
+                    ("FLOAT16", ir.DataType.FLOAT16),
+                    ("DOUBLE", ir.DataType.DOUBLE),
+                    ("UINT32", ir.DataType.UINT32),
+                    ("UINT64", ir.DataType.UINT64),
+                    ("COMPLEX64", ir.DataType.COMPLEX64),
+                    ("COMPLEX128", ir.DataType.COMPLEX128),
+                    ("BFLOAT16", ir.DataType.BFLOAT16),
+                    ("FLOAT8E4M3FN", ir.DataType.FLOAT8E4M3FN),
+                    ("FLOAT8E4M3FNUZ", ir.DataType.FLOAT8E4M3FNUZ),
+                    ("FLOAT8E5M2", ir.DataType.FLOAT8E5M2),
+                    ("FLOAT8E5M2FNUZ", ir.DataType.FLOAT8E5M2FNUZ),
+                    ("UINT4", ir.DataType.UINT4),
+                    ("INT4", ir.DataType.INT4),
+                    ("FLOAT4E2M1", ir.DataType.FLOAT4E2M1),
+                ],
+                [
+                    np.array(
+                        [
+                            [-1000, -6, -1, -0.0, +0.0],
+                            [0.1, 0.25, 1, float("inf"), -float("inf")],
+                            [float("NaN"), -float("NaN"), 1000, 6.0, 0.001],
+                        ],
+                    ),
+                    np.array(42),
+                    np.array([]),
+                    np.array([[[], [], []]]),
+                ],
+            )
         ]
     )
-    def test_round_trip_numpy_conversion_from_raw_data(self, _: str, onnx_dtype: ir.DataType):
-        original_array = np.array(
-            [
-                [-1000, -6, -1, -0.0, +0.0],
-                [0.1, 0.25, 1, float("inf"), -float("inf")],
-                [float("NaN"), -float("NaN"), 1000, 6.0, 0.001],
-            ],
-        ).astype(onnx_dtype.numpy())
+    def test_round_trip_numpy_conversion_from_raw_data(
+        self, _: str, onnx_dtype: ir.DataType, original_array: np.ndarray
+    ):
+        original_array = original_array.astype(onnx_dtype.numpy())
         ir_tensor = ir.Tensor(original_array, name="test_tensor")
         proto = serde.to_proto(ir_tensor)
-        self.assertGreater(len(proto.raw_data), 0)
+        if original_array.size > 0:
+            self.assertGreater(len(proto.raw_data), 0)
         # tensor_proto_tensor from raw_data
         tensor_proto_tensor = serde.from_proto(proto)
         roundtrip_array = tensor_proto_tensor.numpy()
