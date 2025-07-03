@@ -388,7 +388,7 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
         if self._proto.HasField("raw_data"):
             array = np.frombuffer(self._proto.raw_data, dtype=dtype.numpy().newbyteorder("<"))
             if dtype.bitwidth == 4:
-                return _type_casting.unpack_4bitx2(array.astype(np.uint8), shape).voew(
+                return _type_casting.unpack_4bitx2(array.astype(np.uint8), shape).view(
                     dtype.numpy()
                 )
             return array.reshape(shape)
