@@ -26,9 +26,7 @@ def pack_4bitx2(array: np.ndarray) -> npt.NDArray[np.uint8]:
     return array_flat[0::2] | array_flat[1::2]  # type: ignore[return-type]
 
 
-def unpack_4bitx2(
-    data: npt.NDArray[np.uint8], dims: Sequence[int]
-) -> npt.NDArray[np.uint8]:
+def unpack_4bitx2(data: npt.NDArray[np.uint8], dims: Sequence[int]) -> npt.NDArray[np.uint8]:
     """Convert a packed uint4 array to unpacked uint4 array represented as uint8.
 
     Args:
