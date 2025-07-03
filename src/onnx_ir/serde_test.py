@@ -346,6 +346,32 @@ class TensorProtoTensorTest(unittest.TestCase):
         # Test dlpack
         np.testing.assert_array_equal(np.from_dlpack(tensor), tensor.numpy())
 
+    @parameterized.parameterized.expand(
+        [
+            ("FLOAT", ir.DataType.FLOAT),
+            ("BOOL", ir.DataType.BOOL),
+            ("FLOAT16", ir.DataType.FLOAT16),
+            ("DOUBLE", ir.DataType.DOUBLE),
+            ("INT32", ir.DataType.INT32),
+            ("INT64", ir.DataType.INT64),
+            ("UINT8", ir.DataType.UINT8),
+        ]
+    )
+    def test_round_trip_numpy_conversion_from_raw_data(self, _: str, onnx_dtype: ir.DataType):
+        original_array = np.array(
+            [
+                [-1000, -6, -1, -0.0, +0.0],
+                [0.1, 0.25, 1, float("inf"), -float("inf")],
+                [float("NaN"), -float("NaN"), 1000, 6.0, 0.001],
+            ], dtype=onnx_dtype.numpy())
+        ir_tensor = ir.Tensor(original_array, name="test_tensor")
+        proto = serde.to_proto(ir_tensor)
+        self.assertGreater(len(proto.raw_data), 0)
+        # tensor_proto_tensor from raw_data
+        tensor_proto_tensor = serde.from_proto(proto)
+        roundtrip_array = tensor_proto_tensor.numpy()
+        np.testing.assert_array_equal(roundtrip_array, original_array, strict=True)
+
 
 class DeserializeGraphTest(unittest.TestCase):
     def test_deserialize_graph_handles_unsorted_graph(self):
