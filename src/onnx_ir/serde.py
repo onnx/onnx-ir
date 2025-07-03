@@ -386,14 +386,15 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
         shape = self._proto.dims
 
         if self._proto.HasField("raw_data"):
-            array = np.frombuffer(self._proto.raw_data, dtype=dtype.numpy().newbyteorder("<"))
             if dtype.bitwidth == 4:
-                return _type_casting.unpack_4bitx2(array.astype(np.uint8), shape).view(
-                    dtype.numpy()
-                )
-            return array.reshape(shape)
+                return _type_casting.unpack_4bitx2(
+                    np.frombuffer(self._proto.raw_data, dtype=np.uint8), shape
+                ).view(dtype.numpy())
+            return np.frombuffer(
+                self._proto.raw_data, dtype=dtype.numpy().newbyteorder("<")
+            ).reshape(shape)
         if dtype == _enums.DataType.STRING:
-            return np.array(self._proto.string_data).reshape(self._proto.dims)
+            return np.array(self._proto.string_data).reshape(shape)
         if self._proto.int32_data:
             assert dtype in {
                 _enums.DataType.INT32,
@@ -419,9 +420,9 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
             if dtype.bitwidth == 8:
                 return array.astype(np.uint8).view(dtype.numpy())
             if dtype.bitwidth == 4:
-                return _type_casting.unpack_4bitx2(
-                    array.astype(np.uint8), self._proto.dims
-                ).view(dtype.numpy())
+                return _type_casting.unpack_4bitx2(array.astype(np.uint8), shape).view(
+                    dtype.numpy()
+                )
             raise ValueError(
                 f"Unsupported dtype {dtype} for int32_data with bitwidth {dtype.bitwidth}"
             )
@@ -463,7 +464,7 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
             # When dims not precent and there is no data, we return an empty array
             return np.array([], dtype=dtype.numpy())
         # Otherwise we return a size 0 array with the correct shape
-        return np.zeros(self._proto.dims, dtype=dtype.numpy())
+        return np.zeros(shape, dtype=dtype.numpy())
 
     def tobytes(self) -> bytes:
         """Return the tensor as a byte string conformed to the ONNX specification, in little endian.
