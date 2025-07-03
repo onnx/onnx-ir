@@ -1071,15 +1071,7 @@ class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatib
         """
         array = self.numpy_packed()
         # ONNX IR returns the unpacked arrays
-        if self.dtype == _enums.DataType.INT4:
-            return _type_casting.unpack_int4(array, self.shape.numpy())
-        if self.dtype == _enums.DataType.UINT4:
-            return _type_casting.unpack_uint4(array, self.shape.numpy())
-        if self.dtype == _enums.DataType.FLOAT4E2M1:
-            return _type_casting.unpack_float4e2m1(array, self.shape.numpy())
-        raise TypeError(
-            f"PackedTensor only supports INT4, UINT4, FLOAT4E2M1, but got {self.dtype}"
-        )
+        return _type_casting.unpack_4bitx2(array, self.shape.numpy()).view(self.dtype.numpy())
 
     def numpy_packed(self) -> npt.NDArray[np.uint8]:
         """Return the tensor as a packed array."""
