@@ -397,19 +397,21 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
             return np.array(self._proto.string_data).reshape(shape)
         if self._proto.int32_data:
             assert dtype in {
-                _enums.DataType.INT32,
-                _enums.DataType.INT16,
-                _enums.DataType.UINT16,
-                _enums.DataType.INT8,
-                _enums.DataType.UINT8,
+                _enums.DataType.BFLOAT16,
                 _enums.DataType.BOOL,
+                _enums.DataType.FLOAT16,
+                _enums.DataType.FLOAT4E2M1,
                 _enums.DataType.FLOAT8E4M3FN,
                 _enums.DataType.FLOAT8E4M3FNUZ,
                 _enums.DataType.FLOAT8E5M2,
                 _enums.DataType.FLOAT8E5M2FNUZ,
+                _enums.DataType.INT16,
+                _enums.DataType.INT32,
                 _enums.DataType.INT4,
+                _enums.DataType.INT8,
+                _enums.DataType.UINT16,
                 _enums.DataType.UINT4,
-                _enums.DataType.FLOAT4E2M1,
+                _enums.DataType.UINT8,
             }, f"Unsupported dtype {dtype} for int32_data"
             array = np.array(self._proto.int32_data, dtype=_little_endian_dtype(np.int32))
             if dtype.bitwidth == 32:
