@@ -415,12 +415,12 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
             }, f"Unsupported dtype {dtype} for int32_data"
             array = np.array(self._proto.int32_data, dtype=_little_endian_dtype(np.int32))
             if dtype.bitwidth == 32:
-                return array
+                return array.reshape(shape)
             if dtype.bitwidth == 16:
                 # Reinterpret the int32 as float16 or bfloat16
-                return array.astype(np.uint16).view(dtype.numpy())
+                return array.astype(np.uint16).view(dtype.numpy()).reshape(shape)
             if dtype.bitwidth == 8:
-                return array.astype(np.uint8).view(dtype.numpy())
+                return array.astype(np.uint8).view(dtype.numpy()).reshape(shape)
             if dtype.bitwidth == 4:
                 return _type_casting.unpack_4bitx2(array.astype(np.uint8), shape).view(
                     dtype.numpy()
@@ -432,7 +432,9 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
             assert dtype in {
                 _enums.DataType.INT64,
             }, f"Unsupported dtype {dtype} for int64_data"
-            return np.array(self._proto.int64_data, dtype=_little_endian_dtype(np.int64))
+            return np.array(
+                self._proto.int64_data, dtype=_little_endian_dtype(np.int64)
+            ).reshape(shape)
         if self._proto.uint64_data:
             assert dtype in {
                 _enums.DataType.UINT64,
@@ -440,8 +442,8 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
             }, f"Unsupported dtype {dtype} for uint64_data"
             array = np.array(self._proto.uint64_data, dtype=_little_endian_dtype(np.uint64))
             if dtype == _enums.DataType.UINT32:
-                return array.astype(np.uint32)
-            return array
+                return array.astype(np.uint32).reshape(shape)
+            return array.reshape(shape)
         if self._proto.float_data:
             assert dtype in {
                 _enums.DataType.FLOAT,
@@ -449,8 +451,8 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
             }, f"Unsupported dtype {dtype} for float_data"
             array = np.array(self._proto.float_data, dtype=_little_endian_dtype(np.float32))
             if dtype == _enums.DataType.COMPLEX64:
-                return array.view(np.complex64)
-            return array
+                return array.view(np.complex64).reshape(shape)
+            return array.reshape(shape)
         if self._proto.double_data:
             assert dtype in {
                 _enums.DataType.DOUBLE,
@@ -458,8 +460,8 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
             }, f"Unsupported dtype {dtype} for double_data"
             array = np.array(self._proto.double_data, dtype=_little_endian_dtype(np.float64))
             if dtype == _enums.DataType.COMPLEX128:
-                return array.view(np.complex128)
-            return array
+                return array.view(np.complex128).reshape(shape)
+            return array.reshape(shape)
 
         # Empty tensor
         if not shape:
