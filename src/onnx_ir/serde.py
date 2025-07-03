@@ -74,7 +74,6 @@ from onnx_ir import _convenience, _core, _enums, _protocols, _type_casting
 
 if typing.TYPE_CHECKING:
     import google.protobuf.internal.containers as proto_containers
-    import numpy.typing as npt
 
 logger = logging.getLogger(__name__)
 
@@ -115,13 +114,6 @@ def _little_endian_dtype(dtype) -> np.dtype:
     endian platforms, we still need to interpret the raw_data in small endian.
     """
     return np.dtype(dtype).newbyteorder("<")
-
-
-def _unflatten_complex(
-    array: npt.NDArray[np.float32 | np.float64],
-) -> npt.NDArray[np.complex64 | np.complex128]:
-    """Convert the real representation of a complex dtype to the complex dtype."""
-    return array[::2] + 1j * array[1::2]
 
 
 @typing.overload
@@ -391,54 +383,88 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
                 "Cannot convert external tensor to numpy array. Use ir.ExternalTensor instead."
             )
 
+        shape = self._proto.dims
+
         if self._proto.HasField("raw_data"):
-            array = np.frombuffer(self._proto.raw_data, dtype=dtype.numpy().newbyteorder("<"))
-            # Cannot return now, because we may need to unpack 4bit tensors
-        elif dtype == _enums.DataType.STRING:
-            return np.array(self._proto.string_data).reshape(self._proto.dims)
-        elif self._proto.int32_data:
-            array = np.array(self._proto.int32_data, dtype=_little_endian_dtype(np.int32))
-            if dtype in {_enums.DataType.FLOAT16, _enums.DataType.BFLOAT16}:
-                # Reinterpret the int32 as float16 or bfloat16
-                array = array.astype(np.uint16).view(dtype.numpy())
-            elif dtype in {
+            if dtype.bitwidth == 4:
+                return _type_casting.unpack_4bitx2(
+                    np.frombuffer(self._proto.raw_data, dtype=np.uint8), shape
+                ).view(dtype.numpy())
+            return np.frombuffer(
+                self._proto.raw_data, dtype=dtype.numpy().newbyteorder("<")
+            ).reshape(shape)
+        if dtype == _enums.DataType.STRING:
+            return np.array(self._proto.string_data).reshape(shape)
+        if self._proto.int32_data:
+            assert dtype in {
+                _enums.DataType.BFLOAT16,
+                _enums.DataType.BOOL,
+                _enums.DataType.FLOAT16,
+                _enums.DataType.FLOAT4E2M1,
                 _enums.DataType.FLOAT8E4M3FN,
                 _enums.DataType.FLOAT8E4M3FNUZ,
                 _enums.DataType.FLOAT8E5M2,
                 _enums.DataType.FLOAT8E5M2FNUZ,
-            }:
-                array = array.astype(np.uint8).view(dtype.numpy())
-        elif self._proto.int64_data:
-            array = np.array(self._proto.int64_data, dtype=_little_endian_dtype(np.int64))
-        elif self._proto.uint64_data:
+                _enums.DataType.INT16,
+                _enums.DataType.INT32,
+                _enums.DataType.INT4,
+                _enums.DataType.INT8,
+                _enums.DataType.UINT16,
+                _enums.DataType.UINT4,
+                _enums.DataType.UINT8,
+            }, f"Unsupported dtype {dtype} for int32_data"
+            array = np.array(self._proto.int32_data, dtype=_little_endian_dtype(np.int32))
+            if dtype.bitwidth == 32:
+                return array.reshape(shape)
+            if dtype.bitwidth == 16:
+                # Reinterpret the int32 as float16 or bfloat16
+                return array.astype(np.uint16).view(dtype.numpy()).reshape(shape)
+            if dtype.bitwidth == 8:
+                return array.astype(np.uint8).view(dtype.numpy()).reshape(shape)
+            if dtype.bitwidth == 4:
+                return _type_casting.unpack_4bitx2(array.astype(np.uint8), shape).view(
+                    dtype.numpy()
+                )
+            raise ValueError(
+                f"Unsupported dtype {dtype} for int32_data with bitwidth {dtype.bitwidth}"
+            )
+        if self._proto.int64_data:
+            assert dtype in {
+                _enums.DataType.INT64,
+            }, f"Unsupported dtype {dtype} for int64_data"
+            return np.array(
+                self._proto.int64_data, dtype=_little_endian_dtype(np.int64)
+            ).reshape(shape)
+        if self._proto.uint64_data:
+            assert dtype in {
+                _enums.DataType.UINT64,
+                _enums.DataType.UINT32,
+            }, f"Unsupported dtype {dtype} for uint64_data"
             array = np.array(self._proto.uint64_data, dtype=_little_endian_dtype(np.uint64))
-        elif self._proto.float_data:
+            if dtype == _enums.DataType.UINT32:
+                return array.astype(np.uint32).reshape(shape)
+            return array.reshape(shape)
+        if self._proto.float_data:
+            assert dtype in {
+                _enums.DataType.FLOAT,
+                _enums.DataType.COMPLEX64,
+            }, f"Unsupported dtype {dtype} for float_data"
             array = np.array(self._proto.float_data, dtype=_little_endian_dtype(np.float32))
             if dtype == _enums.DataType.COMPLEX64:
-                array = _unflatten_complex(array)
-        elif self._proto.double_data:
+                return array.view(np.complex64).reshape(shape)
+            return array.reshape(shape)
+        if self._proto.double_data:
+            assert dtype in {
+                _enums.DataType.DOUBLE,
+                _enums.DataType.COMPLEX128,
+            }, f"Unsupported dtype {dtype} for double_data"
             array = np.array(self._proto.double_data, dtype=_little_endian_dtype(np.float64))
             if dtype == _enums.DataType.COMPLEX128:
-                array = _unflatten_complex(array)
-        else:
-            # Empty tensor
-            if not self._proto.dims:
-                # When dims not precent and there is no data, we return an empty array
-                return np.array([], dtype=dtype.numpy())
-            else:
-                # Otherwise we return a size 0 array with the correct shape
-                return np.zeros(self._proto.dims, dtype=dtype.numpy())
+                return array.view(np.complex128).reshape(shape)
+            return array.reshape(shape)
 
-        if dtype == _enums.DataType.INT4:
-            return _type_casting.unpack_int4(array.astype(np.uint8), self._proto.dims)
-        elif dtype == _enums.DataType.UINT4:
-            return _type_casting.unpack_uint4(array.astype(np.uint8), self._proto.dims)
-        elif dtype == _enums.DataType.FLOAT4E2M1:
-            return _type_casting.unpack_float4e2m1(array.astype(np.uint8), self._proto.dims)
-        else:
-            # Otherwise convert to the correct dtype and reshape
-            # Note we cannot use view() here because the storage dtype may not be the same size as the target
-            return array.astype(dtype.numpy()).reshape(self._proto.dims)
+        # Empty tensor. We return a size 0 array with the correct shape
+        return np.zeros(shape, dtype=dtype.numpy())
 
     def tobytes(self) -> bytes:
         """Return the tensor as a byte string conformed to the ONNX specification, in little endian.

@@ -657,15 +657,13 @@ class ExternalTensor(TensorBase, _protocols.TensorProtocol):  # pylint: disable=
             self._array = np.empty(self.shape.numpy(), dtype=self.dtype.numpy())
             return
         # Map the whole file into the memory
-        # TODO(justinchuby): Verify if this would exhaust the memory address space
         with open(self.path, "rb") as f:
             self.raw = mmap.mmap(
                 f.fileno(),
                 0,
                 access=mmap.ACCESS_READ,
             )
-        # Handle the byte order correctly by always using little endian
-        dt = np.dtype(self.dtype.numpy()).newbyteorder("<")
+
         if self.dtype in {
             _enums.DataType.INT4,
             _enums.DataType.UINT4,
@@ -675,16 +673,18 @@ class ExternalTensor(TensorBase, _protocols.TensorProtocol):  # pylint: disable=
             dt = np.dtype(np.uint8).newbyteorder("<")
             count = self.size // 2 + self.size % 2
         else:
+            # Handle the byte order correctly by always using little endian
+            dt = np.dtype(self.dtype.numpy()).newbyteorder("<")
             count = self.size
+
         self._array = np.frombuffer(self.raw, dtype=dt, offset=self.offset or 0, count=count)
         shape = self.shape.numpy()
-        if self.dtype == _enums.DataType.INT4:
-            # Unpack the int4 arrays
-            self._array = _type_casting.unpack_int4(self._array, shape)
-        elif self.dtype == _enums.DataType.UINT4:
-            self._array = _type_casting.unpack_uint4(self._array, shape)
-        elif self.dtype == _enums.DataType.FLOAT4E2M1:
-            self._array = _type_casting.unpack_float4e2m1(self._array, shape)
+
+        if self.dtype.bitwidth == 4:
+            # Unpack the 4bit arrays
+            self._array = _type_casting.unpack_4bitx2(self._array, shape).view(
+                self.dtype.numpy()
+            )
         else:
             self._array = self._array.reshape(shape)
 
@@ -1071,15 +1071,7 @@ class PackedTensor(TensorBase, _protocols.TensorProtocol, Generic[TArrayCompatib
         """
         array = self.numpy_packed()
         # ONNX IR returns the unpacked arrays
-        if self.dtype == _enums.DataType.INT4:
-            return _type_casting.unpack_int4(array, self.shape.numpy())
-        if self.dtype == _enums.DataType.UINT4:
-            return _type_casting.unpack_uint4(array, self.shape.numpy())
-        if self.dtype == _enums.DataType.FLOAT4E2M1:
-            return _type_casting.unpack_float4e2m1(array, self.shape.numpy())
-        raise TypeError(
-            f"PackedTensor only supports INT4, UINT4, FLOAT4E2M1, but got {self.dtype}"
-        )
+        return _type_casting.unpack_4bitx2(array, self.shape.numpy()).view(self.dtype.numpy())
 
     def numpy_packed(self) -> npt.NDArray[np.uint8]:
         """Return the tensor as a packed array."""

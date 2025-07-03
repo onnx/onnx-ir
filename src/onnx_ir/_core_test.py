@@ -2082,7 +2082,7 @@ class PackedTensorTest(unittest.TestCase):
         )
         np.testing.assert_array_equal(
             tensor.numpy(),
-            _type_casting._unpack_uint4_as_uint8(
+            _type_casting.unpack_4bitx2(
                 packed_data.numpy(force=True).view(np.uint8), dims=[2, 4]
             ).view(dtype.numpy()),
         )
