@@ -682,7 +682,9 @@ class ExternalTensor(TensorBase, _protocols.TensorProtocol):  # pylint: disable=
 
         if self.dtype.bitwidth == 4:
             # Unpack the 4bit arrays
-            self._array = _type_casting.unpack_4bitx2(self._array, shape).view(self.dtype.numpy())
+            self._array = _type_casting.unpack_4bitx2(self._array, shape).view(
+                self.dtype.numpy()
+            )
         else:
             self._array = self._array.reshape(shape)
 
