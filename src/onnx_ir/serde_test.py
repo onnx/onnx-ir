@@ -349,12 +349,27 @@ class TensorProtoTensorTest(unittest.TestCase):
     @parameterized.parameterized.expand(
         [
             ("FLOAT", ir.DataType.FLOAT),
+            ("UINT8", ir.DataType.UINT8),
+            ("INT8", ir.DataType.INT8),
+            ("UINT16", ir.DataType.UINT16),
+            ("INT16", ir.DataType.INT16),
+            ("INT32", ir.DataType.INT32),
+            ("INT64", ir.DataType.INT64),
             ("BOOL", ir.DataType.BOOL),
             ("FLOAT16", ir.DataType.FLOAT16),
             ("DOUBLE", ir.DataType.DOUBLE),
-            ("INT32", ir.DataType.INT32),
-            ("INT64", ir.DataType.INT64),
-            ("UINT8", ir.DataType.UINT8),
+            ("UINT32", ir.DataType.UINT32),
+            ("UINT64", ir.DataType.UINT64),
+            ("COMPLEX64", ir.DataType.COMPLEX64),
+            ("COMPLEX128", ir.DataType.COMPLEX128),
+            ("BFLOAT16", ir.DataType.BFLOAT16),
+            ("FLOAT8E4M3FN", ir.DataType.FLOAT8E4M3FN),
+            ("FLOAT8E4M3FNUZ", ir.DataType.FLOAT8E4M3FNUZ),
+            ("FLOAT8E5M2", ir.DataType.FLOAT8E5M2),
+            ("FLOAT8E5M2FNUZ", ir.DataType.FLOAT8E5M2FNUZ),
+            ("UINT4", ir.DataType.UINT4),
+            ("INT4", ir.DataType.INT4),
+            ("FLOAT4E2M1", ir.DataType.FLOAT4E2M1),
         ]
     )
     def test_round_trip_numpy_conversion_from_raw_data(self, _: str, onnx_dtype: ir.DataType):
@@ -363,14 +378,27 @@ class TensorProtoTensorTest(unittest.TestCase):
                 [-1000, -6, -1, -0.0, +0.0],
                 [0.1, 0.25, 1, float("inf"), -float("inf")],
                 [float("NaN"), -float("NaN"), 1000, 6.0, 0.001],
-            ], dtype=onnx_dtype.numpy())
+            ],
+        ).astype(onnx_dtype.numpy())
         ir_tensor = ir.Tensor(original_array, name="test_tensor")
         proto = serde.to_proto(ir_tensor)
         self.assertGreater(len(proto.raw_data), 0)
         # tensor_proto_tensor from raw_data
         tensor_proto_tensor = serde.from_proto(proto)
         roundtrip_array = tensor_proto_tensor.numpy()
-        np.testing.assert_array_equal(roundtrip_array, original_array, strict=True)
+        if onnx_dtype in {
+            ir.DataType.FLOAT8E5M2FNUZ,
+            ir.DataType.FLOAT8E5M2,
+            ir.DataType.FLOAT8E4M3FN,
+            ir.DataType.BFLOAT16,
+        }:
+            # There is a bug in ml_dtypes that causes equality checks to fail for these dtypes
+            # See
+            self.assertEqual(roundtrip_array.shape, original_array.shape)
+            self.assertEqual(roundtrip_array.dtype, original_array.dtype)
+            self.assertEqual(roundtrip_array.tobytes(), original_array.tobytes())
+        else:
+            np.testing.assert_equal(roundtrip_array, original_array, strict=True)
 
 
 class DeserializeGraphTest(unittest.TestCase):
