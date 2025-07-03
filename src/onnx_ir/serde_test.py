@@ -393,7 +393,7 @@ class TensorProtoTensorTest(unittest.TestCase):
             ir.DataType.BFLOAT16,
         }:
             # There is a bug in ml_dtypes that causes equality checks to fail for these dtypes
-            # See
+            # See https://github.com/jax-ml/ml_dtypes/issues/301
             self.assertEqual(roundtrip_array.shape, original_array.shape)
             self.assertEqual(roundtrip_array.dtype, original_array.dtype)
             self.assertEqual(roundtrip_array.tobytes(), original_array.tobytes())
