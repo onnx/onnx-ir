@@ -463,11 +463,7 @@ class TensorProtoTensor(_core.TensorBase):  # pylint: disable=too-many-ancestors
                 return array.view(np.complex128).reshape(shape)
             return array.reshape(shape)
 
-        # Empty tensor
-        if not shape:
-            # When dims not precent and there is no data, we return an empty array
-            return np.array([], dtype=dtype.numpy())
-        # Otherwise we return a size 0 array with the correct shape
+        # Empty tensor. We return a size 0 array with the correct shape
         return np.zeros(shape, dtype=dtype.numpy())
 
     def tobytes(self) -> bytes:
