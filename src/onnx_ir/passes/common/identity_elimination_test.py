@@ -280,6 +280,77 @@ class TestIdentityEliminationPass(unittest.TestCase):
         self.assertEqual(len(remaining_nodes), 1)
         self.assertEqual(remaining_nodes[0].op_type, "Add")
 
+    def test_empty_graph(self):
+        """Test pass on an empty graph."""
+        graph = ir.Graph(
+            inputs=[],
+            outputs=[],
+            nodes=[],
+            name="empty_graph"
+        )
+        
+        model = ir.Model(graph, ir_version=10)
+        
+        # Run the pass
+        pass_instance = identity_elimination.IdentityEliminationPass()
+        result = pass_instance(model)
+        
+        # Verify the pass did not modify the model
+        self.assertFalse(result.modified)
+        
+        # Verify structure is unchanged
+        remaining_nodes = list(result.model.graph)
+        self.assertEqual(len(remaining_nodes), 0)
+
+    def test_chain_of_identities(self):
+        """Test elimination of a chain of Identity nodes."""
+        input_value = ir.Input("input", shape=ir.Shape([2, 2]), type=ir.TensorType(ir.DataType.FLOAT))
+        
+        # Create a chain: input -> Identity1 -> Identity2 -> Identity3 -> output
+        identity1 = ir.Node("", "Identity", inputs=[input_value])
+        identity1.outputs[0].name = "id1_out"
+        identity1.outputs[0].shape = input_value.shape
+        identity1.outputs[0].type = input_value.type
+        
+        identity2 = ir.Node("", "Identity", inputs=[identity1.outputs[0]])
+        identity2.outputs[0].name = "id2_out"
+        identity2.outputs[0].shape = input_value.shape
+        identity2.outputs[0].type = input_value.type
+        
+        identity3 = ir.Node("", "Identity", inputs=[identity2.outputs[0]])
+        identity3.outputs[0].name = "final_output"
+        identity3.outputs[0].shape = input_value.shape
+        identity3.outputs[0].type = input_value.type
+        
+        graph = ir.Graph(
+            inputs=[input_value],
+            outputs=[identity3.outputs[0]],  # Only the last identity is graph output
+            nodes=[identity1, identity2, identity3],
+            name="test_graph"
+        )
+        
+        model = ir.Model(graph, ir_version=10)
+        
+        # Run the pass
+        pass_instance = identity_elimination.IdentityEliminationPass()
+        result = pass_instance(model)
+        
+        # Verify the pass was applied
+        self.assertTrue(result.modified)
+        
+        # Should only have one identity left (the last one can't be eliminated 
+        # because it's a graph output and input is graph input)
+        remaining_nodes = list(result.model.graph)
+        self.assertEqual(len(remaining_nodes), 1)
+        self.assertEqual(remaining_nodes[0].op_type, "Identity")
+        
+        # The remaining identity should directly use the graph input
+        remaining_identity = remaining_nodes[0]
+        self.assertIs(remaining_identity.inputs[0], input_value)
+        
+        # The output should have the final name
+        self.assertEqual(remaining_identity.outputs[0].name, "final_output")
+
 
 if __name__ == "__main__":
     unittest.main()
