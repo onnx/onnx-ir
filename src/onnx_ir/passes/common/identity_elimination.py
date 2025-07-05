@@ -67,9 +67,7 @@ class IdentityEliminationPass(ir.passes.InPlacePass):
 
         # Get the graph that contains this node
         graph_like = node.graph
-        if graph_like is None:
-            # Node is not in any graph, cannot eliminate
-            return False
+        assert graph_like is not None, "Node must be in a graph"
 
         output_is_graph_output = output_value.is_graph_output()
         input_is_graph_input = input_value.is_graph_input()
