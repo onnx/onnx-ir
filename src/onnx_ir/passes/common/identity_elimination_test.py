@@ -13,8 +13,8 @@ from onnx_ir.passes.common import identity_elimination
 class TestIdentityEliminationPass(unittest.TestCase):
     """Test cases for IdentityEliminationPass."""
 
-    def test_case_1_eliminate_identity_not_graph_output(self):
-        """Test Case 1: y = Identity(x) where y is not a graph output."""
+    def test_eliminate_identity_not_graph_output(self):
+        """Test: y = Identity(x) where y is not a graph output."""
         # Create a simple model: input -> Identity -> Add -> output
         input_value = ir.Input(
             "input", shape=ir.Shape([2, 2]), type=ir.TensorType(ir.DataType.FLOAT)
@@ -58,8 +58,8 @@ class TestIdentityEliminationPass(unittest.TestCase):
         self.assertIs(add_node_after.inputs[0], input_value)
         self.assertIs(add_node_after.inputs[1], input_value)
 
-    def test_case_2_eliminate_identity_with_output_renaming(self):
-        """Test Case 2: y = Identity(x) where y is graph output but x is not graph input."""
+    def test_eliminate_identity_with_output_renaming(self):
+        """Test: y = Identity(x) where y is graph output but x is not graph input."""
         # Create intermediate value (not a graph input)
         intermediate_value = ir.Value(
             "intermediate", shape=ir.Shape([2, 2]), type=ir.TensorType(ir.DataType.FLOAT)
@@ -107,8 +107,8 @@ class TestIdentityEliminationPass(unittest.TestCase):
         self.assertEqual(graph_output.name, original_output_name)
         self.assertIs(graph_output, intermediate_value)
 
-    def test_case_3_keep_identity_when_both_input_and_output_are_graph_boundaries(self):
-        """Test Case 3: y = Identity(x) where y is graph output AND x is graph input."""
+    def test_keep_identity_when_both_input_and_output_are_graph_boundaries(self):
+        """Test: y = Identity(x) where y is graph output AND x is graph input."""
         # Create graph input
         input_value = ir.Input(
             "graph_input", shape=ir.Shape([2, 2]), type=ir.TensorType(ir.DataType.FLOAT)

@@ -76,21 +76,14 @@ class IdentityEliminationPass(ir.passes.InPlacePass):
         if output_is_graph_output and input_is_graph_input:
             return False
 
-        # Case 1: Output is not a graph output - replace all uses and remove node
-        if not output_is_graph_output:
-            ir.convenience.replace_all_uses_with(output_value, input_value)
-            graph_like.remove(node, safe=True)
-            logger.debug("Eliminated identity node: %s", node)
-            return True
+        # Case 1 & 2 (merged): Eliminate the identity node
+        # Replace all uses of output with input
+        ir.convenience.replace_all_uses_with(output_value, input_value)
 
-        # Case 2: Output is graph output but input is not graph input
-        # Rename input to output name and update graph outputs
-        if output_is_graph_output and not input_is_graph_input:
+        # If output is a graph output, we need to rename input and update graph outputs
+        if output_is_graph_output:
             # Store the original output name
             original_output_name = output_value.name
-
-            # Replace all uses of output with input
-            ir.convenience.replace_all_uses_with(output_value, input_value)
 
             # Update the input value to have the output's name
             input_value.name = original_output_name
@@ -101,9 +94,7 @@ class IdentityEliminationPass(ir.passes.InPlacePass):
                     graph_like.outputs[idx] = input_value
                     break
 
-            # Remove the identity node
-            graph_like.remove(node, safe=True)
-            logger.debug("Eliminated identity node with output renaming: %s", node)
-            return True
-
-        return False
+        # Remove the identity node
+        graph_like.remove(node, safe=True)
+        logger.debug("Eliminated identity node: %s", node)
+        return True
