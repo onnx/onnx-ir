@@ -30,55 +30,28 @@ class IdentityEliminationPass(ir.passes.InPlacePass):
     def call(self, model: ir.Model) -> ir.passes.PassResult:
         """Main entry point for the identity elimination pass."""
         modified = False
-        modified |= self._eliminate_identities_in_graph(model.graph)
 
-        # Process subgraphs in functions
+        # Use RecursiveGraphIterator to process all nodes in the model graph and subgraphs
+        for node in ir.traversal.RecursiveGraphIterator(model.graph):
+            if node.op_type == "Identity" and node.domain == "":
+                if self._try_eliminate_identity_node(node):
+                    modified = True
+
+        # Process nodes in functions
         for function in model.functions.values():
-            modified |= self._eliminate_identities_in_function(function)
+            for node in ir.traversal.RecursiveGraphIterator(function):
+                if node.op_type == "Identity" and node.domain == "":
+                    if self._try_eliminate_identity_node(node):
+                        modified = True
 
         if modified:
             logger.info("Identity elimination pass modified the model")
 
         return ir.passes.PassResult(model, modified=modified)
 
-    def _eliminate_identities_in_graph(self, graph: ir.Graph) -> bool:
-        """Eliminate identity nodes in a graph."""
-        return self._eliminate_identities_in_graph_like(graph)
-
-    def _eliminate_identities_in_function(self, function: ir.Function) -> bool:
-        """Eliminate identity nodes in a function."""
-        return self._eliminate_identities_in_graph_like(function)
-
-    def _eliminate_identities_in_graph_like(self, graph_like: ir.Graph | ir.Function) -> bool:
-        """Eliminate identity nodes in a graph-like object (Graph or Function)."""
-        modified = False
-
-        # Collect identity nodes to process (to avoid modifying while iterating)
-        identity_nodes = []
-        for node in graph_like:
-            if node.op_type == "Identity":
-                identity_nodes.append(node)
-
-        for node in identity_nodes:
-            if self._try_eliminate_identity_node(node):
-                modified = True
-
-        # Process subgraphs in node attributes
-        for node in graph_like:
-            for attr in node.attributes.values():
-                if not isinstance(attr, ir.Attr):
-                    continue
-                if attr.type == ir.AttributeType.GRAPH:
-                    modified |= self._eliminate_identities_in_graph_like(attr.as_graph())
-                elif attr.type == ir.AttributeType.GRAPHS:
-                    for subgraph in attr.as_graphs():
-                        modified |= self._eliminate_identities_in_graph_like(subgraph)
-
-        return modified
-
     def _try_eliminate_identity_node(self, node: ir.Node) -> bool:
         """Try to eliminate a single identity node. Returns True if modified."""
-        if node.op_type != "Identity":
+        if node.op_type != "Identity" or node.domain != "":
             return False
 
         if len(node.inputs) != 1 or len(node.outputs) != 1:
